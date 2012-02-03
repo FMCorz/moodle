@@ -219,7 +219,7 @@ class qbehaviour_manualgraded_walkthrough_test extends qbehaviour_walkthrough_te
                         preg_quote('Actually, I am not sure any more.') . '/'));
 
         $qa = $this->quba->get_question_attempt($this->slot);
-        $this->assertEqual('Commented: Actually, I am not sure any more.',
+        $this->assertEqual(get_string('commented', 'question', 'Actually, I am not sure any more.'),
                 $qa->summarise_action($qa->get_last_step()));
     }
 

@@ -158,7 +158,7 @@ class qtype_numerical_question_test extends UnitTestCase {
     public function test_get_correct_response_units() {
         $question = test_question_maker::make_question('numerical', 'unit');
 
-        $this->assertEqual(array('answer' => '1.25', 'unit' => 'm'),
+        $this->assertEqual(array('answer' => format_float(1.25, 2), 'unit' => 'm'),
                 $question->get_correct_response());
     }
 
