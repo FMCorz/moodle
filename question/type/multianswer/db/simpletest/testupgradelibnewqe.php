@@ -206,8 +206,10 @@ class qtype_multianswer_attempt_upgrader_test extends question_attempt_upgrader_
             'minfraction' => 0,
             'flagged' => 0,
             'questionsummary' => 'An answer _____.',
-            'rightanswer' => 'part 1: frog',
-            'responsesummary' => 'part 1: frog',
+            'rightanswer' => get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 1, 'response' => 'frog')),
+            'responsesummary' => get_string('subqresponse', 'qtype_multianswer',
+                                               array('i' => 1, 'response' => 'frog')),
             'timemodified' => 1306425739,
             'steps' => array(
                 0 => (object) array(
@@ -398,8 +400,10 @@ class qtype_multianswer_attempt_upgrader_test extends question_attempt_upgrader_
             'minfraction' => 0,
             'flagged' => 0,
             'questionsummary' => 'An answer _____.',
-            'rightanswer' => 'part 1: frog',
-            'responsesummary' => 'part 1: ',
+            'rightanswer' => get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 1, 'response' => 'frog')),
+            'responsesummary' => get_string('subqresponse', 'qtype_multianswer',
+                                               array('i' => 1, 'response' => '')),
             'timemodified' => 1306425757,
             'steps' => array(
                 0 => (object) array(
@@ -605,8 +609,10 @@ class qtype_multianswer_attempt_upgrader_test extends question_attempt_upgrader_
             'minfraction' => 0,
             'flagged' => 0,
             'questionsummary' => 'An answer _____.',
-            'rightanswer' => 'part 1: frog',
-            'responsesummary' => 'part 1: frog',
+            'rightanswer' => get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 1, 'response' => 'frog')),
+            'responsesummary' => get_string('subqresponse', 'qtype_multianswer',
+                                               array('i' => 1, 'response' => 'frog')),
             'timemodified' => 1306425917,
             'steps' => array(
                 0 => (object) array(
@@ -1290,8 +1296,38 @@ Note that addresses like www.moodle.org and smileys :-) all work as normal:
 a) How good is this? {Yes; No}
 
 b) What grade would you give it? _____',
-            'rightanswer' => 'part 1: Correct answer; part 2: Correct answer; part 3: 23.8; part 4: 3. Correct answer; part 5: c. Correct answer; part 6: MOODLE; part 7: Yes; part 8: 3',
-            'responsesummary' => 'part 1: Correct answer; part 2: dsf; part 3: sadf; part 4: 2. Another wrong answer; part 5: c. Correct answer; part 6: MOODLE; part 7: Yes; part 8: 100%',
+            'rightanswer' => get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 1, 'response' => 'Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 2, 'response' => 'Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 3, 'response' => '23.8')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 4, 'response' => '3. Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 5, 'response' => 'c. Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 6, 'response' => 'MOODLE')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 7, 'response' => 'Yes')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 8, 'response' => '3')),
+            'responsesummary' => get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 1, 'response' => 'Correct answer')) . '; '
+                               . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 2, 'response' => 'dsf')) . '; '
+                               . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 3, 'response' => 'sadf')) . '; '
+                               . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 4, 'response' => '2. Another wrong answer')) . '; '
+                               . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 5, 'response' => 'c. Correct answer')) . '; '
+                               . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 6, 'response' => 'MOODLE')) . '; '
+                               . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 7, 'response' => 'Yes')) . '; '
+                               . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 8, 'response' => '100%')),
             'timemodified' => 1306425739,
             'steps' => array(
                 0 => (object) array(
@@ -1964,8 +2000,38 @@ Note that addresses like www.moodle.org and smileys :-) all work as normal:
 a) How good is this? {Yes; No}
 
 b) What grade would you give it? _____',
-            'rightanswer' => 'part 1: Correct answer; part 2: Correct answer; part 3: 23.8; part 4: 3. Correct answer; part 5: c. Correct answer; part 6: MOODLE; part 7: Yes; part 8: 3',
-            'responsesummary' => 'part 1: ; part 2: ; part 3: ; part 4: ; part 5: ; part 6: ; part 7: ; part 8: ',
+            'rightanswer' => get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 1, 'response' => 'Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 2, 'response' => 'Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 3, 'response' => '23.8')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 4, 'response' => '3. Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 5, 'response' => 'c. Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 6, 'response' => 'MOODLE')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 7, 'response' => 'Yes')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 8, 'response' => '3')),
+            'responsesummary' => get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 1, 'response' => '')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 2, 'response' => '')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 3, 'response' => '')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 4, 'response' => '')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 5, 'response' => '')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 6, 'response' => '')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 7, 'response' => '')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 8, 'response' => '')),
             'timemodified' => 1306425757,
             'steps' => array(
                 0 => (object) array(
@@ -2658,8 +2724,38 @@ Note that addresses like www.moodle.org and smileys :-) all work as normal:
 a) How good is this? {Yes; No}
 
 b) What grade would you give it? _____',
-            'rightanswer' => 'part 1: Correct answer; part 2: Correct answer; part 3: 23.8; part 4: 3. Correct answer; part 5: c. Correct answer; part 6: MOODLE; part 7: Yes; part 8: 3',
-            'responsesummary' => 'part 1: Correct answer; part 2: Correct answer; part 3: 23.8; part 4: 3. Correct answer; part 5: c. Correct answer; part 6: MOODLE; part 7: Yes; part 8: 3',
+            'rightanswer' => get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 1, 'response' => 'Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 2, 'response' => 'Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 3, 'response' => '23.8')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 4, 'response' => '3. Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 5, 'response' => 'c. Correct answer')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 6, 'response' => 'MOODLE')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 7, 'response' => 'Yes')) . '; '
+                           . get_string('subqresponse', 'qtype_multianswer',
+                                           array('i' => 8, 'response' => '3')),
+            'responsesummary' => get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 1, 'response' => 'Correct answer')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 2, 'response' => 'Correct answer')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 3, 'response' => '23.8')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 4, 'response' => '3. Correct answer')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 5, 'response' => 'c. Correct answer')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 6, 'response' => 'MOODLE')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 7, 'response' => 'Yes')) . '; '
+                              . get_string('subqresponse', 'qtype_multianswer',
+                                              array('i' => 8, 'response' => '3')),
             'timemodified' => 1306425886,
             'steps' => array(
                 0 => (object) array(

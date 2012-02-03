@@ -43,12 +43,13 @@ class gradeedittreelib_test extends UnitTestCase {
     }
 
     public function test_format_number() {
-        $numinput = array( 0,   1,   1.01, '1.010', 1.2345);
-        $numoutput = array(0.0, 1.0, 1.01,  1.01,   1.2345);
+        $numinput = array(  0,     1,     1.01,   '1.010', 1.2345);
+        $numoutput = array('0.0', '1.0', '1.01',  '1.01', '1.2345');
 
         for ($i=0; $i<sizeof($numinput); $i++) {
             $msg = 'format_number() testing '.$numinput[$i].' %s';
-            $this->assertEqual(grade_edit_tree::format_number($numinput[$i]),$numoutput[$i],$msg);
+            $expected = str_replace('.', get_string('decsep', 'langconfig'), $numoutput[$i]);
+            $this->assertEqual(grade_edit_tree::format_number($numinput[$i]), $expected, $msg);
         }
     }
 
