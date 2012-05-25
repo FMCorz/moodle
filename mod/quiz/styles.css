@@ -128,6 +128,7 @@ table.quizattemptsummary .noreviewmessage {color: gray;}
 #page-mod-quiz-summary .questionflag {width: 16px;height: 16px;vertical-align: middle;}
 #page-mod-quiz-summary #quiz-timer {text-align: center; margin-top: 1em;}
 #page-mod-quiz-summary .submitbtns {margin-top: 1.5em;}
+#page-mod-quiz-summary .quizsummaryofattempt .cell.c0 {font-weight: normal;}
 @media print {
     .quiz-secure-window * { display: none !important; }
 }
