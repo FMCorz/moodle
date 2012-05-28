@@ -23,6 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['actionbuttons'] = 'Action buttons';
 $string['addfields'] = 'Add {$a} fields to form';
 $string['advancedelement'] = 'Advanced element';
 $string['day'] = 'Day';
