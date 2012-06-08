@@ -1050,6 +1050,7 @@ class restore_section_structure_step extends restore_structure_step {
         global $CFG, $DB;
         $data = (object)$data;
         $oldid = $data->id; // We'll need this later
+        $oldsection = $data->number;
 
         $restorefiles = false;
 
