@@ -2311,6 +2311,11 @@ function send_stored_file($stored_file, $lifetime=86400 , $filter=0, $forcedownl
 
     // handle external resource
     if ($stored_file->is_external_file()) {
+        // Setting the filename here to prevent the name of the referenced file to be used
+        $filename = empty($filename) ? $stored_file->get_filename() : $filename;
+        if (!empty($filename)) {
+            $options['filename'] = $filename;
+        }
         $stored_file->send_file($lifetime, $filter, $forcedownload, $options);
         die;
     }
