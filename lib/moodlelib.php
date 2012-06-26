@@ -920,19 +920,20 @@ function clean_param($param, $type) {
         case PARAM_FILE:         // Strip all suspicious characters from filename
             $param = fix_utf8($param);
             $param = preg_replace('~[[:cntrl:]]|[&<>"`\|\':\\\\/]~u', '', $param);
-            $param = preg_replace('~\.\.+~', '', $param);
-            if ($param === '.') {
-                $param = '';
-            }
+            // MDL-32370 We should not delete '..' inside filename. 
+            // We should just trim spaces and dots at the end of filename
+            $param = rtrim($param, '. ');
             return $param;
 
         case PARAM_PATH:         // Strip all suspicious characters from file path
             $param = fix_utf8($param);
             $param = str_replace('\\', '/', $param);
             $param = preg_replace('~[[:cntrl:]]|[&<>"`\|\':]~u', '', $param);
-            $param = preg_replace('~\.\.+~', '', $param);
-            $param = preg_replace('~//+~', '/', $param);
-            return preg_replace('~/(\./)+~', '/', $param);
+            // MDL-28276  We should not delete '..' inside path. 
+            // We should just trim spaces and dots at the end of every path part
+            $param = rtrim($param, '. '); // Trimming dots and spaces at the end of path
+            $param = preg_replace('~[ \.]+/~', '/', $param); // Trimming dots and spaces at the end of any path part (before every '/')
+            return preg_replace('~//+~', '/', $param);
 
         case PARAM_HOST:         // allow FQDN or IPv4 dotted quad
             $param = preg_replace('/[^\.\d\w-]/','', $param ); // only allowed chars

@@ -550,7 +550,11 @@ function file_correct_filepath($str) { //TODO: what is this? (skodak)
     if ($str == '/' or empty($str)) {
         return '/';
     } else {
-        return '/'.trim($str, './@#$ ').'/';
+        // MDL-28276  We should not delete '..' inside path. 
+        // We should just trim spaces and dots at the end of every path part
+        $str = rtrim($str, '. '); // Trimming dots and spaces at the end of path
+        $str = preg_replace('~[ \.]+/~', '', $str); // Trimming dots and spaces at the end of any path part (before every '/')
+        return '/'.trim($str, '/').'/';
     }
 }
 
