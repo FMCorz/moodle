@@ -243,7 +243,7 @@ class repository_type {
             //in this case we need to create an instance
             if (empty($instanceoptionnames)) {
                 $instanceoptions = array();
-                if (empty($this->_options['pluginname'])) {
+                if (!isset($this->_options['pluginname']) || trim($this->_options['pluginname']) === '') {
                     // when moodle trying to install some repo plugin automatically
                     // this option will be empty, get it from language string when display
                     $instanceoptions['name'] = '';
@@ -294,6 +294,7 @@ class repository_type {
             $params['type'] = $this->_typename;
             $instances = repository::get_instances($params);
             $instance = array_pop($instances);
+            $options['pluginname'] = trim($options['pluginname']);
             if ($instance) {
                 $DB->set_field('repository_instances', 'name', $options['pluginname'], array('id'=>$instance->id));
             }
@@ -1656,8 +1657,8 @@ abstract class repository {
      */
     public function get_name() {
         global $DB;
-        if ( $name = $this->instance->name ) {
-            return $name;
+        if (isset($this->instance->name) && trim($this->instance->name) !== '') {
+            return $this->instance->name;
         } else {
             return get_string('pluginname', 'repository_' . $this->options['type']);
         }
@@ -1810,11 +1811,10 @@ abstract class repository {
      */
     public function set_option($options = array()) {
         global $DB;
-
-        if (!empty($options['name'])) {
+        if (isset($options['name'])) {
             $r = new stdClass();
             $r->id   = $this->id;
-            $r->name = $options['name'];
+            $r->name = trim($options['name']);
             $DB->update_record('repository_instances', $r);
             unset($options['name']);
         }
@@ -2437,11 +2437,11 @@ final class repository_instance_form extends moodleform {
             if (!$this->instance->readonly) {
                 // and set the data if we have some.
                 foreach ($this->instance->get_instance_option_names() as $config) {
-                    if (!empty($this->instance->options[$config])) {
+                    if (isset($this->instance->options[$config])) {
                         $data[$config] = $this->instance->options[$config];
-                     } else {
+                    } else {
                         $data[$config] = '';
-                     }
+                    }
                 }
             }
             $this->set_data($data);
@@ -2557,7 +2557,7 @@ final class repository_type_form extends moodleform {
 
             $instanceoptions = $this->instance->get_options();
             foreach ($option_names as $config) {
-                if (!empty($instanceoptions[$config])) {
+                if (isset($instanceoptions[$config])) {
                     $data[$config] = $instanceoptions[$config];
                 } else {
                     $data[$config] = '';
