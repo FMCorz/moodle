@@ -59,6 +59,8 @@ class oauth_helper {
     protected $access_token_api;
     /** @var curl */
     protected $http;
+    /** @var debug */
+    protected $debug = false;
 
     /**
      * Contructor for oauth_helper.
@@ -105,7 +107,7 @@ class oauth_helper {
         if (!empty($args['access_token_secret'])) {
             $this->access_token_secret = $args['access_token_secret'];
         }
-        $this->http = new curl(array('debug'=>false));
+        $this->http = new curl(array('debug' => $this->debug));
     }
 
     /**
@@ -277,6 +279,8 @@ class oauth_helper {
         $oauth_params = $this->prepare_oauth_parameters($url, array('oauth_token'=>$token), $method);
         $this->setup_oauth_http_header($oauth_params);
         $content = call_user_func_array(array($this->http, strtolower($method)), array($url, $params));
+        // Resets the curl object to allow more than one request
+        $this->http = new curl(array('debug' => $this->debug));
         return $content;
     }
 

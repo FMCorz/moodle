@@ -373,14 +373,18 @@ class repository_dropbox extends repository {
      */
     public function get_file_by_reference($reference) {
         $reference  = unserialize($reference->reference);
+
+        $this->dropbox->set_access_token($this->access_key, $this->access_secret);
+        $fileinfo = $this->dropbox->get_file_info($reference->path);
+        $reference->revision = $fileinfo->rev;
+
         $cachedfilepath = cache_file::get($reference, array('ttl' => $this->cachedfilettl));
+        // Cache the file.
         if ($cachedfilepath === false) {
-            // Cache the file.
-            $this->set_access_key($reference->access_key);
-            $this->set_access_secret($reference->access_secret);
             $path = $this->get_file($reference->path);
             $cachedfilepath = cache_file::create_from_file($reference, $path['path']);
         }
+        // Serve the cached file
         if ($cachedfilepath && is_readable($cachedfilepath)) {
             return (object)array('filepath' => $cachedfilepath);
         } else {

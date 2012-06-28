@@ -72,6 +72,16 @@ class dropbox extends oauth_helper {
     }
 
     /**
+     * Gets file info
+     */
+    public function get_file_info($filepath, $token = '', $secret = '') {
+        $url = $this->dropbox_api.'/metadata/'.$this->mode.$filepath;
+        $content = $this->get($url, array());
+        $data = json_decode($content);
+        return $data;
+    }
+
+    /**
      * Get file url
      *
      * @param string $filepath file path
