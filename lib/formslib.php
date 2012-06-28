@@ -81,6 +81,32 @@ function form_init_date_js() {
         $function = 'M.form.dateselector.init_date_selectors';
         $config = array(array('firstdayofweek'=>get_string('firstdayofweek', 'langconfig')));
         $PAGE->requires->yui_module($module, $function, $config);
+
+        // Get the months from the system locale
+        $months = new stdClass();
+        $months->jan = strftime('%B', mktime(0, 0, 0, 1));
+        $months->feb = strftime('%B', mktime(0, 0, 0, 2));
+        $months->mar = strftime('%B', mktime(0, 0, 0, 3));
+        $months->apr = strftime('%B', mktime(0, 0, 0, 4));
+        $months->may = strftime('%B', mktime(0, 0, 0, 5));
+        $months->jun = strftime('%B', mktime(0, 0, 0, 6));
+        $months->jul = strftime('%B', mktime(0, 0, 0, 7));
+        $months->aug = strftime('%B', mktime(0, 0, 0, 8));
+        $months->sep = strftime('%B', mktime(0, 0, 0, 9));
+        $months->oct = strftime('%B', mktime(0, 0, 0, 10));
+        $months->nov = strftime('%B', mktime(0, 0, 0, 11));
+        $months->dec = strftime('%B', mktime(0, 0, 0, 12));
+        $PAGE->requires->string_for_js('ghostsmonths', 'calendar', $months);
+        $days = new stdClass();
+        $days->sun = substr(strftime('%a', mktime(0, 0, 0, 6, 3, 2012)), 0, 2);
+        $days->mon = substr(strftime('%a', mktime(0, 0, 0, 6, 4, 2012)), 0, 2);
+        $days->tue = substr(strftime('%a', mktime(0, 0, 0, 6, 5, 2012)), 0, 2);
+        $days->wed = substr(strftime('%a', mktime(0, 0, 0, 6, 6, 2012)), 0, 2);
+        $days->thu = substr(strftime('%a', mktime(0, 0, 0, 6, 7, 2012)), 0, 2);
+        $days->fri = substr(strftime('%a', mktime(0, 0, 0, 6, 8, 2012)), 0, 2);
+        $days->sat = substr(strftime('%a', mktime(0, 0, 0, 6, 9, 2012)), 0, 2);
+        $PAGE->requires->string_for_js('ghostsdays', 'calendar', $days);
+
         $done = true;
     }
 }
