@@ -114,7 +114,7 @@ if (($action == 'edit') || ($action == 'new')) {
         if ($action == 'edit') {
             $settings = array();
             foreach($configs as $config) {
-                if (!empty($fromform->$config)) {
+                if (isset($fromform->$config)) {
                     $settings[$config] = $fromform->$config;
                 } else {
                     // if the config name is not appear in $fromform
