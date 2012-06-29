@@ -1376,7 +1376,16 @@ function get_print_section_cm_text(cm_info $cm, $course) {
 
 /**
  * Prints a section full of activity modules
+ *
+ * @param stdClass $course
+ * @param stdClass $section
+ * @param array $mods
+ * @param array $modnamesused
+ * @param bool $absolute
+ * @param string $width
+ * @param bool $hidecompletion
  * @param int $sectionreturn The section to return to
+ * @return void
  */
 function print_section($course, $section, $mods, $modnamesused, $absolute=false, $width="100%", $hidecompletion=false, $sectionreturn=0) {
     global $CFG, $USER, $DB, $PAGE, $OUTPUT;
@@ -1757,7 +1766,14 @@ function print_section($course, $section, $mods, $modnamesused, $absolute=false,
 
 /**
  * Prints the menus to add activities and resources.
+ *
+ * @param stdClass $course
+ * @param stdClass $section
+ * @param array $modnames
+ * @param bool $vertical
+ * @param bool $return
  * @param int $sectionreturn The section to link back to
+ * @return void|string depending on $return
  */
 function print_section_add_menus($course, $section, $modnames, $vertical=false, $return=false, $sectionreturn=0) {
     global $CFG, $OUTPUT;
