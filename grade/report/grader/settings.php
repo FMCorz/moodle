@@ -35,6 +35,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('grade_report_studentsperpage', get_string('studentsperpage', 'grades'),
                                             get_string('studentsperpage_help', 'grades'), 100));
 
+    $settings->add(new admin_setting_configtext('grade_report_reprintheaders', get_string('reprintheaders', 'grades'),
+                                            get_string('reprintheaders_help', 'grades'), 0));
+
     $settings->add(new admin_setting_configcheckbox('grade_report_quickgrading', get_string('quickgrading', 'grades'),
                                                 get_string('quickgrading_help', 'grades'), 1));
 

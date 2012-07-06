@@ -673,7 +673,15 @@ class grade_report_grader extends grade_report {
         $rowclasses = array('even', 'odd');
 
         $suspendedstring = null;
+        $usercount = 0;
+        $reprintheaders = $this->get_pref('reprintheaders');
         foreach ($this->users as $userid => $user) {
+
+            if ($usercount > 0 && $reprintheaders > 0 && $usercount % $reprintheaders == 0) {
+                $rows[] = $headerrow;
+            }
+            $usercount++;
+
             $userrow = new html_table_row();
             $userrow->id = 'fixed_user_'.$userid;
             $userrow->attributes['class'] = 'r'.$this->rowcount++.' '.$rowclasses[$this->rowcount % 2];
@@ -880,7 +888,14 @@ class grade_report_grader extends grade_report {
 
         $rowclasses = array('even', 'odd');
 
+        $usercount = 0;
+        $reprintheaders = $this->get_pref('reprintheaders');
         foreach ($this->users as $userid => $user) {
+
+            if ($usercount > 0 && $reprintheaders > 0 && $usercount % $reprintheaders == 0) {
+                $rows[] = $headingrow;
+            }
+            $usercount++;
 
             if ($this->canviewhidden) {
                 $altered = array();
@@ -891,7 +906,6 @@ class grade_report_grader extends grade_report {
                 $unknown = $hidingaffected['unknown'];
                 unset($hidingaffected);
             }
-
 
             $itemrow = new html_table_row();
             $itemrow->id = 'user_'.$userid;
@@ -1147,9 +1161,9 @@ class grade_report_grader extends grade_report {
 
             // Extract rows from each side (left and right) and collate them into one row each
             foreach ($leftrows as $key => $row) {
-                $row->cells = array_merge($row->cells, $rightrows[$key]->cells);
-                $fulltable->data[] = $row;
+                $fulltable->data[] = array_merge($row->cells, $rightrows[$key]->cells);
             }
+
             $html .= html_writer::table($fulltable);
         }
         return $OUTPUT->container($html, 'gradeparent');
