@@ -902,7 +902,9 @@ abstract class restore_dbops {
                 $backuppath = $basepath . backup_file_manager::get_backup_content_file_location($file->contenthash);
 
                 if (!file_exists($backuppath)) {
-                    throw new restore_dbops_exception('file_not_found_in_pool', $file);
+                    // throw new restore_dbops_exception('file_not_found_in_pool', $file);
+                    debugging(sprintf('Could not find file %s%s in pool', $file->filepath, $file->filename));
+                    continue;
                 }
 
                 // create the file in the filepool if it does not exist yet
