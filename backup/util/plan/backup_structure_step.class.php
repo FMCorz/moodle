@@ -94,11 +94,16 @@ abstract class backup_structure_step extends backup_step {
         // Process structure definition
         $structure->process($pr);
 
+        // Get the results from the nested elements
+        $results = $structure->get_results();
+
         // Close everything
         $xw->stop();
 
         // Destroy the structure. It helps PHP 5.2 memory a lot!
         $structure->destroy();
+
+        return $results;
     }
 
     /**

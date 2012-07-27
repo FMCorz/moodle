@@ -91,11 +91,7 @@ class backup_file_manager {
 
         // And copy the file (if doesn't exist already)
         if (!file_exists($targetfilepath)) {
-            try {
-                $file->copy_content_to($targetfilepath);
-            } catch (file_exception $e) {
-                debugging(sprintf('Could not copy file %d %s', $file->get_id(), $file->get_filename()));
-            }
+            $file->copy_content_to($targetfilepath);
         }
     }
 }

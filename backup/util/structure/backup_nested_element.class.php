@@ -37,6 +37,7 @@ class backup_nested_element extends base_nested_element implements processable {
     protected $aliases;   // Define DB->final element aliases
     protected $fileannotations;   // array of file areas to be searched by file annotations
     protected $counter;   // Number of instances of this element that have been processed
+    protected $results;  // Logs the results we encounter during the process
 
     /**
      * Constructor - instantiates one backup_nested_element, specifying its basic info.
@@ -55,8 +56,15 @@ class backup_nested_element extends base_nested_element implements processable {
         $this->aliases   = array();
         $this->fileannotations = array();
         $this->counter   = 0;
+        $this->results  = array();
     }
 
+    /**
+     * Process the nested element
+     *
+     * @param object $processor the processor
+     * @return associative array of results
+     */
     public function process($processor) {
         if (!$processor instanceof base_processor) { // No correct processor, throw exception
             throw new base_element_struct_exception('incorrect_processor');
@@ -82,7 +90,8 @@ class backup_nested_element extends base_nested_element implements processable {
 
             // Delegate the process of each final_element
             foreach ($this->get_final_elements() as $final_element) {
-                $final_element->process($processor);
+                $result = $final_element->process($processor);
+                $this->add_result($result);
             }
 
             // Delegate the process to the optigroup
@@ -92,7 +101,8 @@ class backup_nested_element extends base_nested_element implements processable {
 
             // Delegate the process to each child nested_element
             foreach ($this->get_children() as $child) {
-                $child->process($processor);
+                $result = $child->process($processor);
+                $this->add_result($result);
             }
 
             // Perform post-process tasks for the nested element
@@ -111,6 +121,29 @@ class backup_nested_element extends base_nested_element implements processable {
         }
         // Close the iterator (DB recordset / array iterator)
         $iterator->close();
+
+        return $this->get_results();
+    }
+
+    /**
+     * Saves the results to an array
+     *
+     * @param array $result associative array
+     * @return void
+     */
+    public function add_result($result) {
+        if (is_array($result)) {
+            $this->results = array_merge($this->results, $result);
+        }
+    }
+
+    /**
+     * Returns the results
+     *
+     * @return associative array of results
+     */
+    public function get_results() {
+        return $this->results;
     }
 
     public function set_source_array($arr) {
