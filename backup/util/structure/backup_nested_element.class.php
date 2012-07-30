@@ -38,6 +38,7 @@ class backup_nested_element extends base_nested_element implements processable {
     protected $fileannotations;   // array of file areas to be searched by file annotations
     protected $counter;   // Number of instances of this element that have been processed
     protected $results;  // Logs the results we encounter during the process
+    protected $logs;     // Some log messages that could be retrieved later
 
     /**
      * Constructor - instantiates one backup_nested_element, specifying its basic info.
@@ -57,13 +58,14 @@ class backup_nested_element extends base_nested_element implements processable {
         $this->fileannotations = array();
         $this->counter   = 0;
         $this->results  = array();
+        $this->logs     = array();
     }
 
     /**
      * Process the nested element
      *
      * @param object $processor the processor
-     * @return associative array of results
+     * @return void
      */
     public function process($processor) {
         if (!$processor instanceof base_processor) { // No correct processor, throw exception
@@ -90,8 +92,8 @@ class backup_nested_element extends base_nested_element implements processable {
 
             // Delegate the process of each final_element
             foreach ($this->get_final_elements() as $final_element) {
-                $result = $final_element->process($processor);
-                $this->add_result($result);
+                $final_element->process($processor);
+                $this->after_processing_element($final_element);
             }
 
             // Delegate the process to the optigroup
@@ -101,8 +103,8 @@ class backup_nested_element extends base_nested_element implements processable {
 
             // Delegate the process to each child nested_element
             foreach ($this->get_children() as $child) {
-                $result = $child->process($processor);
-                $this->add_result($result);
+                $child->process($processor);
+                $this->after_processing_element($child);
             }
 
             // Perform post-process tasks for the nested element
@@ -121,8 +123,27 @@ class backup_nested_element extends base_nested_element implements processable {
         }
         // Close the iterator (DB recordset / array iterator)
         $iterator->close();
+    }
 
-        return $this->get_results();
+    /**
+     * Saves a log message to an array
+     *
+     * @see backup_helper::log()
+     * @param string $message to add to the logs
+     * @param int $level level of importance {@see backup::LOG_DEBUG} and other constants
+     * @param mixed $a to be included in $message
+     * @param int $depth of the message
+     * @param display $bool supporting translation via get_string() if true
+     * @return void
+     */
+    public function add_log($message, $level, $a = null, $depth = null, $display = false) {
+        $log = new stdClass();
+        $log->message = $message;
+        $log->level = $level;
+        $log->a = $a;
+        $log->depth = $depth;
+        $log->display = $display;
+        $this->logs[] = $log;
     }
 
     /**
@@ -135,6 +156,30 @@ class backup_nested_element extends base_nested_element implements processable {
         if (is_array($result)) {
             $this->results = array_merge($this->results, $result);
         }
+    }
+
+    /**
+     * Things to do after processing an element of this element
+     *
+     * @param object $element
+     * @return void
+     */
+    public function after_processing_element($element) {
+        if (is_object($element) && method_exists($element, 'get_results')) {
+            $this->results = array_merge($this->results, $element->get_results());
+        }
+        if (is_object($element) && method_exists($element, 'get_logs')) {
+            $this->logs = array_merge($this->logs, $element->get_logs());
+        }
+    }
+
+    /**
+     * Returns the logs
+     *
+     * @return array of log objects
+     */
+    public function get_logs() {
+        return $this->logs;
     }
 
     /**

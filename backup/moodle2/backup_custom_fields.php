@@ -107,6 +107,7 @@ class file_nested_element extends backup_nested_element {
             backup_file_manager::copy_file_moodle2backup($this->backupid, $values);
         } catch (file_exception $e) {
             $this->add_result(array('missing_files_in_pool' => true));
+            $this->add_log('missing file in pool: ' . $e->errorcode . ' ' . $e->debuginfo, backup::LOG_WARNING);
         }
     }
 }
