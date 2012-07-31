@@ -96,7 +96,7 @@ class file_nested_element extends backup_nested_element {
         if (is_null($this->backupid)) {
             $this->backupid = $processor->get_var(backup::VAR_BACKUPID);
         }
-        return parent::process($processor);
+        parent::process($processor);
     }
 
     public function fill_values($values) {
