@@ -38,3 +38,5 @@ $release  = '2.4dev (Build: 20120802)'; // Human-friendly version name
 
 $branch   = '24';                       // this version's branch
 $maturity = MATURITY_ALPHA;             // this version's maturity level
+
+// Fred tests something
