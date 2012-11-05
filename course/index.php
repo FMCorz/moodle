@@ -232,6 +232,8 @@ if ((!empty($moveup) or !empty($movedown)) and confirm_sesskey()) {
     if ($swapcategory and $movecategory) {
         $DB->set_field('course_categories', 'sortorder', $swapcategory->sortorder, array('id'=>$movecategory->id));
         $DB->set_field('course_categories', 'sortorder', $movecategory->sortorder, array('id'=>$swapcategory->id));
+        add_to_log(SITEID, "category", "update order", "editcategory.php?id=$movecategory->id", "$movecategory->name");
+        add_to_log(SITEID, "category", "update order", "editcategory.php?id=$swapcategory->id", "$swapcategory->name");
     }
 
     // finally reorder courses
