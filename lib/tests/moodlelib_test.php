@@ -909,7 +909,18 @@ class moodlelib_testcase extends advanced_testcase {
         $this->assertEquals(clean_param('correctfile.txt', PARAM_FILE), 'correctfile.txt');
         $this->assertEquals(clean_param('b\'a<d`\\/fi:l>e.t"x|t', PARAM_FILE), 'badfile.txt');
         $this->assertEquals(clean_param('../parentdirfile.txt', PARAM_FILE), 'parentdirfile.txt');
-        //The following behaviours have been maintained although they seem a little odd
+        $this->assertEquals(clean_param('../../grandparentdirfile.txt', PARAM_FILE), 'grandparentdirfile.txt');
+        $this->assertEquals(clean_param('..\winparentdirfile.txt', PARAM_FILE), 'winparentdirfile.txt');
+        $this->assertEquals(clean_param('../../wingrandparentdirfile.txt', PARAM_FILE), 'wingrandparentdirfile.txt');
+        $this->assertEquals(clean_param('myfile.a.b.txt', PARAM_FILE), 'myfile.a.b.txt');
+        $this->assertEquals(clean_param('myfile..a..b.txt', PARAM_FILE), 'myfile.a.b.txt');
+        $this->assertEquals(clean_param('myfile.a..b...txt', PARAM_FILE), 'myfile.a.b.txt');
+        $this->assertEquals(clean_param('myfile.a.txt', PARAM_FILE), 'myfile.a.txt');
+        $this->assertEquals(clean_param('myfile...txt', PARAM_FILE), 'myfile.txt');
+        $this->assertEquals(clean_param('...jpg', PARAM_FILE), '.jpg');
+        $this->assertEquals(clean_param('.a.b.', PARAM_FILE), '.a.b.');
+        $this->assertEquals(clean_param('...', PARAM_FILE), '');
+        // The following behaviours have been maintained although they seem a little odd.
         $this->assertEquals(clean_param('funny:thing', PARAM_FILE), 'funnything');
         $this->assertEquals(clean_param('./currentdirfile.txt', PARAM_FILE), '.currentdirfile.txt');
         $this->assertEquals(clean_param('c:\temp\windowsfile.txt', PARAM_FILE), 'ctempwindowsfile.txt');

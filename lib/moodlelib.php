@@ -913,8 +913,12 @@ function clean_param($param, $type) {
 
         case PARAM_FILE:         // Strip all suspicious characters from filename
             $param = fix_utf8($param);
+            // Removing possible parent paths (../ or ..\).
+            $param = preg_replace('~\.\.(/|\\\\)~', '', $param);
+            // Removing any special character.
             $param = preg_replace('~[[:cntrl:]]|[&<>"`\|\':\\\\/]~u', '', $param);
-            $param = preg_replace('~\.\.+~', '', $param);
+            // Replacing multiple dots with only one.
+            $param = preg_replace('~\.\.+~', '.', $param);
             if ($param === '.') {
                 $param = '';
             }
