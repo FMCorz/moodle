@@ -919,11 +919,10 @@ function clean_param($param, $type) {
 
         case PARAM_FILE:         // Strip all suspicious characters from filename
             $param = fix_utf8($param);
+            // Removing any special character.
             $param = preg_replace('~[[:cntrl:]]|[&<>"`\|\':\\\\/]~u', '', $param);
-            $param = preg_replace('~\.\.+~', '', $param);
-            if ($param === '.') {
-                $param = '';
-            }
+            // Removing spaces and dots at the end of the file name (makes it Windows compatible).
+            $param = rtrim($param, '. ');
             return $param;
 
         case PARAM_PATH:         // Strip all suspicious characters from file path
