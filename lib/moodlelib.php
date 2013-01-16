@@ -920,20 +920,32 @@ function clean_param($param, $type) {
         case PARAM_FILE:         // Strip all suspicious characters from filename
             $param = fix_utf8($param);
             $param = preg_replace('~[[:cntrl:]]|[&<>"`\|\':\\\\/]~u', '', $param);
-            // MDL-32370 We should not delete '..' inside filename. 
-            // We should just trim spaces and dots at the end of filename
-            $param = rtrim($param, '. ');
+            if ($param === '.' || $param === '..') {
+                $param = '';
+            }
             return $param;
 
         case PARAM_PATH:         // Strip all suspicious characters from file path
             $param = fix_utf8($param);
             $param = str_replace('\\', '/', $param);
-            $param = preg_replace('~[[:cntrl:]]|[&<>"`\|\':]~u', '', $param);
-            // MDL-28276  We should not delete '..' inside path. 
-            // We should just trim spaces and dots at the end of every path part
-            $param = rtrim($param, '. '); // Trimming dots and spaces at the end of path
-            $param = preg_replace('~[ \.]+/~', '/', $param); // Trimming dots and spaces at the end of any path part (before every '/')
-            return preg_replace('~//+~', '/', $param);
+
+            // Explode the path and clean each element using the PARAM_FILE rules.
+            $breadcrumb = explode('/', $param);
+            foreach ($breadcrumb as $key => $crumb) {
+                if ($crumb === '.' && $key === 0) {
+                    // Special condition to allow for relative current path such as ./currentdirfile.txt
+                } else {
+                    $crumb = clean_param($crumb, PARAM_FILE);
+                }
+                $breadcrumb[$key] = $crumb;
+            }
+            $param = implode('/', $breadcrumb);
+
+            // Remove multiple current path (./././) and multiple slashes (///).
+            $param = preg_replace('~//+~', '/', $param);
+            $param = preg_replace('~/(\./)+~', '/', $param);
+
+            return $param;
 
         case PARAM_HOST:         // allow FQDN or IPv4 dotted quad
             $param = preg_replace('/[^\.\d\w-]/','', $param ); // only allowed chars
