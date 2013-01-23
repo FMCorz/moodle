@@ -58,4 +58,81 @@ class repositorylib_testcase extends advanced_testcase {
         $info = $repository->get_meta();
         $this->assertEquals($repositorypluginname, $info->type);
     }
+
+    public function test_get_unused_filename() {
+        global $USER;
+
+        $this->resetAfterTest(true);
+
+        $this->setAdminUser();
+        $fs = get_file_storage();
+
+        $draftitemid = null;
+        $context = context_user::instance($USER->id);
+        file_prepare_draft_area($draftitemid, $context->id, 'phpunit', 'test_get_unused_filename', 1);
+
+        $dummy = array(
+            'contextid' => $context->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $draftitemid,
+            'filepath' => '/',
+            'filename' => ''
+        );
+
+        // Create some files.
+        $existingfiles = array(
+            'test',
+            'test.txt',
+            'test (1).txt',
+            'test1.txt',
+            'test1 (1).txt',
+            'test1 (2).txt',
+            'test1 (3).txt',
+            'test2 (555).txt',
+            'test3 (1000).txt',
+        );
+        foreach ($existingfiles as $filename) {
+            $dummy['filename'] = $filename;
+            $file = $fs->create_file_from_string($dummy, 'blah! ' . $filename);
+            $this->assertTrue(repository::draftfile_exists($draftitemid, '/', $filename));
+        }
+
+        // Create plenty of files.
+        for ($i = 1; $i <= 150; $i++) {
+            $filename = 'pic (' . $i . ')';
+            $dummy['filename'] = $filename . '.jpg';
+            $file = $fs->create_file_from_string($dummy, 'foo! ' . $filename);
+            $this->assertTrue(repository::draftfile_exists($draftitemid, '/', $dummy['filename']));
+            $filename = 'pic (1) (' . $i . ')';
+            $dummy['filename'] = $filename . '.jpg';
+            $file = $fs->create_file_from_string($dummy, 'bar! ' . $filename);
+            $this->assertTrue(repository::draftfile_exists($draftitemid, '/', $dummy['filename']));
+        }
+        $dummy['filename'] = 'pic (1) (40) (1).jpg';
+        $file = $fs->create_file_from_string($dummy, 'lal! ' . $filename);
+        $this->assertTrue(repository::draftfile_exists($draftitemid, '/', $dummy['filename']));
+        $dummy['filename'] = 'pic (4) (50).jpg';
+        $file = $fs->create_file_from_string($dummy, 'lol! ' . $filename);
+        $this->assertTrue(repository::draftfile_exists($draftitemid, '/', $dummy['filename']));
+
+        // Actual testing.
+        $this->assertEquals('free.txt', repository::get_unused_filename($draftitemid, '/', 'free.txt'));
+        $this->assertEquals('test (1)', repository::get_unused_filename($draftitemid, '/', 'test'));
+        $this->assertEquals('test (2).txt', repository::get_unused_filename($draftitemid, '/', 'test.txt'));
+        $this->assertEquals('test1 (4).txt', repository::get_unused_filename($draftitemid, '/', 'test1.txt'));
+        $this->assertEquals('test1 (8).txt', repository::get_unused_filename($draftitemid, '/', 'test1 (8).txt'));
+        $this->assertEquals('test1 ().txt', repository::get_unused_filename($draftitemid, '/', 'test1 ().txt'));
+        $this->assertEquals('test2 (556).txt', repository::get_unused_filename($draftitemid, '/', 'test2 (555).txt'));
+        $this->assertEquals('test3 (1001).txt', repository::get_unused_filename($draftitemid, '/', 'test3 (1000).txt'));
+        $this->assertEquals('test4 (1).txt', repository::get_unused_filename($draftitemid, '/', 'test4 (1).txt'));
+        $this->assertEquals('pic (1) (1) (1).jpg', repository::get_unused_filename($draftitemid, '/', 'pic (1).jpg'));
+        $this->assertEquals('pic (1) (1) (1).jpg', repository::get_unused_filename($draftitemid, '/', 'pic (1) (1).jpg'));
+        $this->assertEquals('pic (33) (1).jpg', repository::get_unused_filename($draftitemid, '/', 'pic (33).jpg'));
+        $this->assertEquals('pic (1) (33) (1).jpg', repository::get_unused_filename($draftitemid, '/', 'pic (1) (33).jpg'));
+        $this->assertEquals('pic (1) (151).jpg', repository::get_unused_filename($draftitemid, '/', 'pic (1) (150).jpg'));
+        $this->assertEquals('pic (1) (40) (2).jpg', repository::get_unused_filename($draftitemid, '/', 'pic (1) (40).jpg'));
+        $this->assertEquals('pic (4) (51).jpg', repository::get_unused_filename($draftitemid, '/', 'pic (4) (50).jpg'));
+    }
+
 }

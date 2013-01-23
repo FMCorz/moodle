@@ -769,31 +769,63 @@ abstract class repository {
     }
 
     /**
-     * Get unused filename by appending suffix
+     * Get an unused filename.
+     *
+     * Will check if the file ends with ([0-9]) and increase the number.
+     * If we're looping too long to find an unused file name, we append (1)
+     * to the current file name and start again.
      *
      * @static
-     * @param int $itemid
-     * @param string $filepath
-     * @param string $filename
-     * @return string
+     * @param int $itemid draft item ID.
+     * @param string $filepath path to the file.
+     * @param string $filename name of the file.
+     * @return string an unused file name.
      */
     public static function get_unused_filename($itemid, $filepath, $filename) {
-        global $USER;
-        $fs = get_file_storage();
+        $loops = 0;
+        $original = pathinfo($filename);
+        $base = $original['filename'];
+
         while (repository::draftfile_exists($itemid, $filepath, $filename)) {
-            $filename = repository::append_suffix($filename);
+            $loops++;
+            $matches = array();
+            $pathinfo = pathinfo($filename);
+            $basename = $pathinfo['filename'];
+
+            if ($loops >= 100) {
+                // Looping is costly as it queries the database each time to check if the file already exists.
+                // Here, we are forcing file names to append (1) if we have looped too many times. This reduces
+                // the chances of freeze if files from (1) to (100000) exist.
+                $loops = 1;
+                $number = 1;
+                $basename = $base;
+                $base .= ' (1)';    // Update $base to reflect the soon to be created $basename .= (1).
+            } else if (preg_match('~^(.+) \(([0-9]+)\)$~', $basename, $matches)) {
+                $basename = $matches[1];
+                $number = ($matches[2] + 1);
+            } else {
+                $number = 1;
+            }
+
+            $filename = $basename . ' (' . $number . ')';
+            if (!empty($pathinfo['extension'])) {
+                $filename .= '.' . $pathinfo['extension'];
+            }
         }
         return $filename;
     }
 
     /**
-     * Append a suffix to filename
+     * Append a suffix to filename.
      *
      * @static
      * @param string $filename
      * @return string
+     * @deprecated since 2.5
      */
     public static function append_suffix($filename) {
+        debugging('The function repository::append_suffix() has been deprecated. Use repository::get_unused_filename() instead.',
+            DEBUG_DEVELOPER);
         $pathinfo = pathinfo($filename);
         if (empty($pathinfo['extension'])) {
             return $filename . RENAME_SUFFIX;
