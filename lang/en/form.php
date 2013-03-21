@@ -25,6 +25,7 @@
 
 $string['addfields'] = 'Add {$a} fields to form';
 $string['advancedelement'] = 'Advanced element';
+$string['appearance'] = 'Appearance';
 $string['close'] = 'Close';
 $string['day'] = 'Day';
 $string['display'] = 'Display';
