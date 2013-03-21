@@ -46,11 +46,9 @@ class mod_url_mod_form extends moodleform_mod {
         }
         $mform->addRule('name', null, 'required', null, 'client');
         $this->add_intro_editor($config->requiremodintro);
-
-        //-------------------------------------------------------
-        $mform->addElement('header', 'content', get_string('contentheader', 'url'));
         $mform->addElement('url', 'externalurl', get_string('externalurl', 'url'), array('size'=>'60'), array('usefilepicker'=>true));
         $mform->addRule('externalurl', null, 'required', null, 'client');
+
         //-------------------------------------------------------
         $mform->addElement('header', 'optionssection', get_string('optionsheader', 'url'));
 
@@ -110,7 +108,6 @@ class mod_url_mod_form extends moodleform_mod {
         //-------------------------------------------------------
         $mform->addElement('header', 'parameterssection', get_string('parametersheader', 'url'));
         $mform->addElement('static', 'parametersinfo', '', get_string('parametersheader_help', 'url'));
-        $mform->setAdvanced('parametersinfo');
 
         if (empty($this->current->parameters)) {
             $parcount = 5;
@@ -129,7 +126,6 @@ class mod_url_mod_form extends moodleform_mod {
                 $mform->createElement('selectgroups', $variable, '', $options),
             );
             $mform->addGroup($group, $pargroup, get_string('parameterinfo', 'url'), ' ', false);
-            $mform->setAdvanced($pargroup);
         }
 
         //-------------------------------------------------------
