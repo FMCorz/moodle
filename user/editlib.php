@@ -146,7 +146,7 @@ function useredit_shared_definition(&$mform, $editoroptions = null, $filemanager
     $mform->addRule('lastname', $strrequired, 'required', null, 'client');
     $mform->setType('lastname', PARAM_NOTAGS);
 
-    // Do not show email field if change confirmation is pending
+    // Do not show email field if change confirmation is pending.
     if (!empty($CFG->emailchangeconfirmation) and !empty($user->preference_newemail)) {
         $notice = get_string('emailchangepending', 'auth', $user);
         $notice .= '<br /><a href="edit.php?cancelemailchange=1&amp;id='.$user->id.'">'
@@ -157,6 +157,94 @@ function useredit_shared_definition(&$mform, $editoroptions = null, $filemanager
         $mform->addRule('email', $strrequired, 'required', null, 'client');
         $mform->setType('email', PARAM_EMAIL);
     }
+
+    $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="21"');
+    $mform->setType('city', PARAM_TEXT);
+    $mform->addRule('city', $strrequired, 'required', null, 'client');
+    if (!empty($CFG->defaultcity)) {
+        $mform->setDefault('city', $CFG->defaultcity);
+    }
+
+    $choices = get_string_manager()->get_list_of_countries();
+    $choices= array(''=>get_string('selectacountry').'...') + $choices;
+    $mform->addElement('select', 'country', get_string('selectacountry'), $choices);
+    $mform->addRule('country', $strrequired, 'required', null, 'client');
+    if (!empty($CFG->country)) {
+        $mform->setDefault('country', $CFG->country);
+    }
+
+    // User picture.
+    if (empty($USER->newadminuser)) {
+        $mform->addElement('header', 'moodle_picture', get_string('pictureofuser'));
+        if (!empty($CFG->enablegravatar)) {
+            $mform->addElement('html', html_writer::tag('p', get_string('gravatarenabled')));
+        }
+
+        $mform->addElement('static', 'currentpicture', get_string('currentpicture'));
+
+        $mform->addElement('checkbox', 'deletepicture', get_string('delete'));
+        $mform->setDefault('deletepicture', 0);
+
+        $mform->addElement('filemanager', 'imagefile', get_string('newpicture'), '', $filemanageroptions);
+        $mform->addHelpButton('imagefile', 'newpicture');
+
+        $mform->addElement('text', 'imagealt', get_string('imagealt'), 'maxlength="100" size="30"');
+        $mform->setType('imagealt', PARAM_TEXT);
+    }
+
+    // User information.
+    $mform->addElement('header', 'moodle_optional', get_string('userinformation'));
+
+    $mform->addElement('editor', 'description_editor', get_string('userdescription'), null, $editoroptions);
+    $mform->setType('description_editor', PARAM_CLEANHTML);
+    $mform->addHelpButton('description_editor', 'userdescription');
+
+    if (!empty($CFG->usetags) and empty($USER->newadminuser)) {
+        // $mform->addElement('header', 'moodle_interests', get_string('interests'));
+        $mform->addElement('tags', 'interests', get_string('interestslist'), array('display' => 'noofficial'));
+        $mform->addHelpButton('interests', 'interestslist');
+    }
+
+    $mform->addElement('text', 'url', get_string('webpage'), 'maxlength="255" size="50"');
+    $mform->setType('url', PARAM_URL);
+
+    $mform->addElement('text', 'institution', get_string('institution'), 'maxlength="40" size="25"');
+    $mform->setType('institution', PARAM_TEXT);
+
+    $mform->addElement('text', 'department', get_string('department'), 'maxlength="30" size="25"');
+    $mform->setType('department', PARAM_TEXT);
+
+    $mform->addElement('text', 'idnumber', get_string('idnumber'), 'maxlength="255" size="25"');
+    $mform->setType('idnumber', PARAM_NOTAGS);
+
+    // Contact information.
+    $mform->addElement('header', 'imhdr', get_string('contactinformation'));
+
+    $mform->addElement('text', 'phone1', get_string('phone'), 'maxlength="20" size="25"');
+    $mform->setType('phone1', PARAM_NOTAGS);
+
+    $mform->addElement('text', 'phone2', get_string('phone2'), 'maxlength="20" size="25"');
+    $mform->setType('phone2', PARAM_NOTAGS);
+
+    $mform->addElement('text', 'address', get_string('address'), 'maxlength="70" size="25"');
+    $mform->setType('address', PARAM_TEXT);
+
+    $mform->addElement('text', 'icq', get_string('icqnumber'), 'maxlength="15" size="25"');
+    $mform->setType('icq', PARAM_NOTAGS);
+
+    $mform->addElement('text', 'skype', get_string('skypeid'), 'maxlength="50" size="25"');
+    $mform->setType('skype', PARAM_NOTAGS);
+
+    $mform->addElement('text', 'aim', get_string('aimid'), 'maxlength="50" size="25"');
+    $mform->setType('aim', PARAM_NOTAGS);
+
+    $mform->addElement('text', 'yahoo', get_string('yahooid'), 'maxlength="50" size="25"');
+    $mform->setType('yahoo', PARAM_NOTAGS);
+
+    $mform->addElement('text', 'msn', get_string('msnid'), 'maxlength="50" size="25"');
+    $mform->setType('msn', PARAM_NOTAGS);
+
+    $mform->addElement('header', 'preferenceshdr', get_string('preferences'));
 
     $choices = array();
     $choices['0'] = get_string('emaildisplayno');
@@ -217,21 +305,6 @@ function useredit_shared_definition(&$mform, $editoroptions = null, $filemanager
         $mform->setType('htmleditor', PARAM_INT);
     }
 
-    $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="21"');
-    $mform->setType('city', PARAM_TEXT);
-    $mform->addRule('city', $strrequired, 'required', null, 'client');
-    if (!empty($CFG->defaultcity)) {
-        $mform->setDefault('city', $CFG->defaultcity);
-    }
-
-    $choices = get_string_manager()->get_list_of_countries();
-    $choices= array(''=>get_string('selectacountry').'...') + $choices;
-    $mform->addElement('select', 'country', get_string('selectacountry'), $choices);
-    $mform->addRule('country', $strrequired, 'required', null, 'client');
-    if (!empty($CFG->country)) {
-        $mform->setDefault('country', $CFG->country);
-    }
-
     $choices = get_list_of_timezones();
     $choices['99'] = get_string('serverlocaltime');
     if ($CFG->forcetimezone != 99) {
@@ -255,77 +328,4 @@ function useredit_shared_definition(&$mform, $editoroptions = null, $filemanager
         }
         $mform->addElement('select', 'theme', get_string('preferredtheme'), $choices);
     }
-
-    $mform->addElement('editor', 'description_editor', get_string('userdescription'), null, $editoroptions);
-    $mform->setType('description_editor', PARAM_CLEANHTML);
-    $mform->addHelpButton('description_editor', 'userdescription');
-
-    if (empty($USER->newadminuser)) {
-        $mform->addElement('header', 'moodle_picture', get_string('pictureofuser'));
-
-        if (!empty($CFG->enablegravatar)) {
-            $mform->addElement('html', html_writer::tag('p', get_string('gravatarenabled')));
-        }
-
-        $mform->addElement('static', 'currentpicture', get_string('currentpicture'));
-
-        $mform->addElement('checkbox', 'deletepicture', get_string('delete'));
-        $mform->setDefault('deletepicture', 0);
-
-        $mform->addElement('filemanager', 'imagefile', get_string('newpicture'), '', $filemanageroptions);
-        $mform->addHelpButton('imagefile', 'newpicture');
-
-        $mform->addElement('text', 'imagealt', get_string('imagealt'), 'maxlength="100" size="30"');
-        $mform->setType('imagealt', PARAM_TEXT);
-
-    }
-
-    if (!empty($CFG->usetags) and empty($USER->newadminuser)) {
-        $mform->addElement('header', 'moodle_interests', get_string('interests'));
-        $mform->addElement('tags', 'interests', get_string('interestslist'), array('display' => 'noofficial'));
-        $mform->addHelpButton('interests', 'interestslist');
-    }
-
-    /// Moodle optional fields
-    $mform->addElement('header', 'moodle_optional', get_string('optional', 'form'));
-
-    $mform->addElement('text', 'url', get_string('webpage'), 'maxlength="255" size="50"');
-    $mform->setType('url', PARAM_URL);
-
-    $mform->addElement('text', 'icq', get_string('icqnumber'), 'maxlength="15" size="25"');
-    $mform->setType('icq', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'skype', get_string('skypeid'), 'maxlength="50" size="25"');
-    $mform->setType('skype', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'aim', get_string('aimid'), 'maxlength="50" size="25"');
-    $mform->setType('aim', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'yahoo', get_string('yahooid'), 'maxlength="50" size="25"');
-    $mform->setType('yahoo', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'msn', get_string('msnid'), 'maxlength="50" size="25"');
-    $mform->setType('msn', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'idnumber', get_string('idnumber'), 'maxlength="255" size="25"');
-    $mform->setType('idnumber', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'institution', get_string('institution'), 'maxlength="40" size="25"');
-    $mform->setType('institution', PARAM_TEXT);
-
-    $mform->addElement('text', 'department', get_string('department'), 'maxlength="30" size="25"');
-    $mform->setType('department', PARAM_TEXT);
-
-    $mform->addElement('text', 'phone1', get_string('phone'), 'maxlength="20" size="25"');
-    $mform->setType('phone1', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'phone2', get_string('phone2'), 'maxlength="20" size="25"');
-    $mform->setType('phone2', PARAM_NOTAGS);
-
-    $mform->addElement('text', 'address', get_string('address'), 'maxlength="70" size="25"');
-    $mform->setType('address', PARAM_TEXT);
-
-
 }
-
-
