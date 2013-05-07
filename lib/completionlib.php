@@ -1046,6 +1046,19 @@ class completion_info {
     }
 
     /**
+     * Return whether or not the course has activities with completion enabled.
+     *
+     * @return boolean true when there is at least one activity with completion enabled.
+     * @since  2.6
+     */
+    public function has_activities() {
+        global $DB;
+        $sql = 'SELECT id FROM {course_modules} WHERE course = :course AND completion <> :completion';
+        $params = array('course' => $this->course->id, 'completion' => COMPLETION_TRACKING_NONE);
+        return $DB->record_exists_sql($sql, $params);
+    }
+
+    /**
      * Obtains a list of activities for which completion is enabled on the
      * course. The list is ordered by the section order of those activities.
      *
