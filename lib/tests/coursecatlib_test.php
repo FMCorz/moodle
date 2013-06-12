@@ -532,4 +532,67 @@ class coursecatlib_testcase extends advanced_testcase {
 
         $CFG->coursecontact = $oldcoursecontact;
     }
+
+    function test_get_by_idnumber() {
+        $catb1 = $this->getDataGenerator()->create_category(array('idnumber' => 'b1'));
+        $catc2 = $this->getDataGenerator()->create_category(array('idnumber' => 'c2', 'parent' => $catb1->id));
+        $catd3 = $this->getDataGenerator()->create_category(array('idnumber' => 'd3', 'visible' => false));
+
+        $expected = coursecat::get_by_idnumber('b1', IGNORE_MISSING)->id;
+        $this->assertEquals($expected, $catb1->id);
+        $expected = coursecat::get_by_idnumber('c2')->id;
+        $this->assertEquals($expected, $catc2->id);
+        $expected = coursecat::get_by_idnumber('d3', MUST_EXIST, true)->id;
+        $this->assertEquals($expected, $catd3->id);
+        $expected = coursecat::get_by_idnumber('d3', IGNORE_MISSING);
+        $this->assertEquals($expected, null);
+        $expected = coursecat::get_by_idnumber('xx', IGNORE_MISSING);
+        $this->assertEquals($expected, null);
+    }
+
+    function test_get_by_path() {
+        $cat1 = $this->getDataGenerator()->create_category(array('name' => 'Cat 1'));
+        $cat1_1 = $this->getDataGenerator()->create_category(array('name' => 'Cat 1.1', 'parent' => $cat1->id));
+        $cat1_1_1 = $this->getDataGenerator()->create_category(array('name' => 'Cat 1.1.1', 'parent' => $cat1_1->id));
+        $cat1_1_2 = $this->getDataGenerator()->create_category(array('name' => 'Cat 1.1.2', 'parent' => $cat1_1->id));
+        $cat1_2 = $this->getDataGenerator()->create_category(array('name' => 'Cat 1.2', 'parent' => $cat1->id));
+
+        $cat2 = $this->getDataGenerator()->create_category(array('name' => 'Cat 2'));
+        $cat2_1 = $this->getDataGenerator()->create_category(array('name' => 'Cat 2.1', 'parent' => $cat2->id, 'visible' => false));
+        $cat2_1_1 = $this->getDataGenerator()->create_category(array('name' => 'Cat 2.1.1', 'parent' => $cat2_1->id));
+        $cat2_1_2 = $this->getDataGenerator()->create_category(array('name' => 'Cat 2.1.2', 'parent' => $cat2_1->id));
+        $cat2_2 = $this->getDataGenerator()->create_category(array('name' => 'Cat 2.2', 'parent' => $cat2->id));
+
+        $path = array('Cat 1');
+        $expected = coursecat::get_by_path($path)->id;
+        $this->assertEquals($expected, $cat1->id);
+
+        $path = array('Cat 1', 'Cat 1.1', 'Cat 1.1.2');
+        $expected = coursecat::get_by_path($path)->id;
+        $this->assertEquals($expected, $cat1_1_2->id);
+
+        $path = array('Cat 1', 'Cat 1.2');
+        $expected = coursecat::get_by_path($path)->id;
+        $this->assertEquals($expected, $cat1_2->id);
+
+        $path = array('Cat 2');
+        $expected = coursecat::get_by_path($path)->id;
+        $this->assertEquals($expected, $cat2->id);
+
+        $path = array('Cat 2', 'Cat 2.1');
+        $expected = coursecat::get_by_path($path, IGNORE_MISSING);
+        $this->assertEquals($expected, null);
+
+        $path = array('Cat 2', 'Cat 2.1', 'Cat 2.1.1');
+        $expected = coursecat::get_by_path($path, IGNORE_MISSING);
+        $this->assertEquals($expected, null);
+
+        $path = array('Cat 2', 'Cat 2.1', 'Cat 2.1.2');
+        $expected = coursecat::get_by_path($path, IGNORE_MISSING, true)->id;
+        $this->assertEquals($expected, $cat2_1_2->id);
+
+        $path = array('No cat 3', 'Cat 1.2');
+        $expected = coursecat::get_by_path($path, IGNORE_MISSING);
+        $this->assertEquals($expected, null);
+    }
 }
