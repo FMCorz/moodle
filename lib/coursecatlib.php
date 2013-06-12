@@ -247,6 +247,80 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
     }
 
     /**
+     * Retrieve a category by ID number.
+     *
+     * @param int $idnumber ID number
+     * @param int $strictness whether to throw an exception (MUST_EXIST) or
+     *     return null (IGNORE_MISSING) in case the category is not found or
+     *     not visible to current user
+     * @param bool $alwaysreturnhidden set to true if you want an object to be
+     *     returned even if this category is not visible to the current user
+     *     (category is hidden and user does not have
+     *     'moodle/category:viewhiddencategories' capability). Use with care!
+     * @return null|coursecat
+     */
+    public static function get_by_idnumber($idnumber, $strictness = MUST_EXIST, $alwaysreturnhidden = false) {
+        $coursecatrecordcache = cache::make('core', 'coursecatrecords');
+        $cachekey = 'idnum_' . $idnumber;
+        $coursecat = $coursecatrecordcache->get($cachekey);
+        if ($coursecat === false) {
+            if ($records = self::get_records('cc.idnumber = :idnumber', array('idnumber' => $idnumber))) {
+                $record = reset($records);
+                $coursecat = new coursecat($record);
+                // Store in cache.
+                $coursecatrecordcache->set($cachekey, $coursecat);
+            }
+        }
+        if ($coursecat && ($alwaysreturnhidden || $coursecat->is_uservisible())) {
+            return $coursecat;
+        } else {
+            if ($strictness == MUST_EXIST) {
+                throw new moodle_exception('unknowcategory');
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolves a category following a path.
+     *
+     * While using this, please keep in mind that each path node should contain the
+     * full name of the category including multilang filters if necessary.
+     *
+     * @param array $path ordered array leading to the category: array(0 => Miscellaneous, 1 => Subcat).
+     * @param int $strictness whether to throw an exception (MUST_EXIST) or
+     *     return null (IGNORE_MISSING) in case the category is not found or
+     *     not visible to current user
+     * @param bool $alwaysreturnhidden set to true if you want an object to be
+     *     returned even if this category is not visible to the current user
+     *     (category is hidden and user does not have
+     *     'moodle/category:viewhiddencategories' capability). Use with care!
+     * @return null|coursecat
+     */
+    public static function get_by_path(array $path, $strictness = MUST_EXIST, $alwaysreturnhidden = false) {
+        $coursecat = false;
+        $parent = 0;
+        while ($name = array_shift($path)) {
+            if ($records = self::get_records('cc.name = :name', array('name' => $name, 'parent' => $parent))) {
+                $record = reset($records);
+                $coursecat = new coursecat($record);
+                $parent = $coursecat->parent;
+            } else {
+                $coursecat = false;
+                break;
+            }
+        }
+        if ($coursecat && ($alwaysreturnhidden || $coursecat->is_uservisible())) {
+            return $coursecat;
+        } else {
+            if ($strictness == MUST_EXIST) {
+                throw new moodle_exception('unknowcategory');
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the first found category
      *
      * Note that if there are no categories visible to the current user on the first level,
