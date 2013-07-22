@@ -16,6 +16,9 @@ a.logo {
     float: right;
 }
 
+.breadcrumb .dropdown-toggle { display: inline-block; height: 16px; width: 16px; }
+
 /* Custom CSS Settings
 -------------------------*/
 [[setting:customcss]]
+
