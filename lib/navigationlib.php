@@ -3992,6 +3992,7 @@ class settings_navigation extends navigation_node {
             return true;
         }
 
+        $useraccount = $usersetting->add('My account', null, '#', self::TYPE_SETTING);
         $userauthplugin = false;
         if (!empty($user->auth)) {
             $userauthplugin = get_auth_plugin($user->auth);
@@ -4001,14 +4002,14 @@ class settings_navigation extends navigation_node {
         if (isloggedin() && !isguestuser($user) && !is_mnet_remote_user($user)) {
             if (($currentuser || is_siteadmin($USER) || !is_siteadmin($user)) && has_capability('moodle/user:update', $systemcontext)) {
                 $url = new moodle_url('/user/editadvanced.php', array('id'=>$user->id, 'course'=>$course->id));
-                $usersetting->add(get_string('editmyprofile'), $url, self::TYPE_SETTING);
+                $useraccount->add(get_string('editmyprofile'), $url, self::TYPE_SETTING);
             } else if ((has_capability('moodle/user:editprofile', $usercontext) && !is_siteadmin($user)) || ($currentuser && has_capability('moodle/user:editownprofile', $systemcontext))) {
                 if ($userauthplugin && $userauthplugin->can_edit_profile()) {
                     $url = $userauthplugin->edit_profile_url();
                     if (empty($url)) {
                         $url = new moodle_url('/user/edit.php', array('id'=>$user->id, 'course'=>$course->id));
                     }
-                    $usersetting->add(get_string('editmyprofile'), $url, self::TYPE_SETTING);
+                    $useraccount->add(get_string('editmyprofile'), $url, self::TYPE_SETTING);
                 }
             }
         }
@@ -4019,7 +4020,7 @@ class settings_navigation extends navigation_node {
             if (empty($passwordchangeurl)) {
                 $passwordchangeurl = new moodle_url('/login/change_password.php', array('id'=>$course->id));
             }
-            $usersetting->add(get_string("changepassword"), $passwordchangeurl, self::TYPE_SETTING);
+            $useraccount->add(get_string("changepassword"), $passwordchangeurl, self::TYPE_SETTING);
         }
 
         // View the roles settings
@@ -4070,13 +4071,13 @@ class settings_navigation extends navigation_node {
         // Security keys
         if ($currentuser && $enablemanagetokens) {
             $url = new moodle_url('/user/managetoken.php', array('sesskey'=>sesskey()));
-            $usersetting->add(get_string('securitykeys', 'webservice'), $url, self::TYPE_SETTING);
+            $useraccount->add(get_string('securitykeys', 'webservice'), $url, self::TYPE_SETTING);
         }
 
         // Messaging
         if (($currentuser && has_capability('moodle/user:editownmessageprofile', $systemcontext)) || (!isguestuser($user) && has_capability('moodle/user:editmessageprofile', $usercontext) && !is_primary_admin($user->id))) {
             $url = new moodle_url('/message/edit.php', array('id'=>$user->id));
-            $usersetting->add(get_string('messaging', 'message'), $url, self::TYPE_SETTING);
+            $useraccount->add(get_string('messaging', 'message'), $url, self::TYPE_SETTING);
         }
 
         // Blogs
