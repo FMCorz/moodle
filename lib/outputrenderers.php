@@ -2742,9 +2742,11 @@ EOD;
             if ($title !== '') {
                 $attributes['title'] = $title;
             }
+            $attributes['class'] = '';
             if ($item->hidden) {
                 $attributes['class'] = 'dimmed_text';
             }
+            $attributes['class'] .= implode(' ', $item->classes);
             $content = html_writer::link($item->action, $content, $attributes);
 
         } else if (is_string($item->action) || empty($item->action)) {

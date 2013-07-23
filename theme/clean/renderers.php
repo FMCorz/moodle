@@ -48,12 +48,13 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                 $neighbours = $parentcat->get_children();
                 $content = array();
                 foreach ($neighbours as $neighbour) {
+                    $current = '';
                     if ($neighbour->id == $this->page->course->category) {
-                        continue;
+                        $current = 'current';
                     }
-                    $content[] = "<a href='$CFG->wwwroot/course/index.php?categoryid={$neighbour->id}'>{$neighbour->name}</a>";
+                    $content[] = "<a class='$current' href='$CFG->wwwroot/course/index.php?categoryid={$neighbour->id}'>{$neighbour->name}</a>";
                 }
-                $dropdown = "<a class='dropdown-toggle' href='#' data-toggle='dropdown'><b class='caret'></b></a><ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
+                $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
             } else if ($item->type === navigation_node::TYPE_COURSE) {
                 // $item->add_class('dropdown');
                 $parentcat = coursecat::get($this->page->course->category);
@@ -62,22 +63,23 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                 $courses = enrol_get_my_courses('id');
                 $neighbours = $parentcat->get_courses();
                 foreach ($neighbours as $neighbour) {
-                    // print_object($neighbour);
+                    $current = '';
                     if ($neighbour->id === $this->page->course->id) {
-                        continue;
+                        $current = 'current';
                     } else if (!isset($courses[$neighbour->id]) && !is_siteadmin()) {
                         continue;
                     }
-                    $content[] = "<a href='$CFG->wwwroot/course/view.php?id={$neighbour->id}'>{$neighbour->fullname}</a>";
+                    $content[] = "<a class='$current' href='$CFG->wwwroot/course/view.php?id={$neighbour->id}'>{$neighbour->fullname}</a>";
                 }
-                $dropdown = "<a class='dropdown-toggle' href='#' data-toggle='dropdown'><b class='caret'></b></a><ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
+                $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
             } else if ($item->type === navigation_node::TYPE_SECTION) {
                 $parentnode = $item->parent;
                 $neighbours = $parentnode->children->type(navigation_node::TYPE_SECTION);
                 $content = array();
                 foreach ($neighbours as $neighbour) {
-                    if ($neighbour->text === $item->text) {
-                        continue;
+                    $current = '';
+                    if ($neighbour->text == $item->text) {
+                        $neighbour->add_class('current');
                     }
                     if ($neighbour->action == null) {
                         $neighbour->action = new moodle_url('/course/view.php', array('id'=>$this->page->course->id));
@@ -85,22 +87,32 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                     $neighbour->icon = null;
                     $content[] = $this->render($neighbour);
                 }
-                $dropdown = "<a class='dropdown-toggle' href='#' data-toggle='dropdown'><b class='caret'></b></a><ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
+                $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
             } else if ($item->type === navigation_node::TYPE_ACTIVITY || $item->type === navigation_node::TYPE_RESOURCE) {
                 $cm = $this->page->cm;
                 $course = $cm->get_modinfo();
                 $section = $course->get_section_info($cm->sectionnum);
                 $content = array();
                 foreach ($course->get_cms() as $ccm) {
+                    $current = '';
                     if ($section->section != $ccm->sectionnum) {
                         continue;
+                    } else if (!$ccm->has_view()) {
+                        continue;
+                    } else if ($ccm->id == $cm->id) {
+                        $current = 'current';
                     }
-                    $content[] = html_writer::link($ccm->get_url(), $ccm->get_formatted_name());
+                    $content[] = html_writer::link($ccm->get_url(), html_writer::empty_tag('img', array('src' => $ccm->get_icon_url())) .
+                        ' ' . $ccm->get_formatted_name(), array('class' => $current));
                 }
-                $dropdown = "<a class='dropdown-toggle' href='#' data-toggle='dropdown'><b class='caret'></b></a><ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
+                $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
             }
-            $renderered = $this->render($item);
-            $renderered .= $dropdown;
+            if (!empty($dropdown)) {
+                $renderered = html_writer::link($item->action, $item->get_content() . '<b class="caret"></b>', array('class' => 'dropdown-toggle', 'data-toggle' => 'dropdown'));
+                $renderered .= $dropdown;
+            } else {
+                $renderered = html_writer::link($item->action, $item->get_content());
+            }
             $breadcrumbs[] = $renderered;
 
         }
