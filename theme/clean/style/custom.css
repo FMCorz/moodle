@@ -18,6 +18,13 @@ a.logo {
 
 .breadcrumb .dropdown-toggle { display: inline-block; height: 16px; width: 16px; }
 
+.logininfo > ul { list-style: none; }
+.logininfo > ul > li { float: left; padding-left: 1em; }
+.logininfo > ul > li > a {
+    padding: 10px 5px;
+    display: block;
+}
+.logininfo .smallicon { height: 16px; width: 16px; }
 /* Custom CSS Settings
 -------------------------*/
 [[setting:customcss]]
