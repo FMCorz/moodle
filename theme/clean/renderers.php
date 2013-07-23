@@ -106,15 +106,35 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                         ' ' . $ccm->get_formatted_name(), array('class' => $current));
                 }
                 $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
+            } else if ($item->type === navigation_node::TYPE_SETTING && !empty($item->action)) {
+                $parentnode = $item->parent;
+                $neighbours = $parentnode->children->type(navigation_node::TYPE_SETTING);
+                $content = array();
+                foreach ($neighbours as $neighbour) {
+                    $current = '';
+                    if ($neighbour->text == $item->text) {
+                        $neighbour->add_class('current');
+                    }
+                    // if ($neighbour->action == null) {
+                    //     $neighbour->action = new moodle_url('/course/view.php', array('id'=>$this->page->course->id));
+                    // }
+                    $neighbour->icon = null;
+                    $content[] = $this->render($neighbour);
+                }
+                $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
             }
+
+            $renderered = $item->get_content();
+            if (!empty($item->action)) {
+                $renderered = html_writer::link($item->action, $item->get_content());
+            }
+
             if (!empty($dropdown)) {
                 // $renderered = html_writer::link($item->action, $item->get_content() . '<b class="caret"></b>', array('class' => 'dropdown-toggle', 'data-toggle' => 'dropdown'));
-                $renderered = html_writer::link($item->action, $item->get_content());
                 $renderered .= ' ' . html_writer::link('#', '<b class="caret"></b>', array('class' => 'dropdown-toggle', 'data-toggle' => 'dropdown'));
                 $renderered .= $dropdown;
-            } else {
-                $renderered = html_writer::link($item->action, $item->get_content());
             }
+
             $breadcrumbs[] = $renderered;
 
         }
