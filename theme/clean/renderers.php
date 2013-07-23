@@ -108,7 +108,9 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                 $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
             }
             if (!empty($dropdown)) {
-                $renderered = html_writer::link($item->action, $item->get_content() . '<b class="caret"></b>', array('class' => 'dropdown-toggle', 'data-toggle' => 'dropdown'));
+                // $renderered = html_writer::link($item->action, $item->get_content() . '<b class="caret"></b>', array('class' => 'dropdown-toggle', 'data-toggle' => 'dropdown'));
+                $renderered = html_writer::link($item->action, $item->get_content());
+                $renderered .= ' ' . html_writer::link('#', '<b class="caret"></b>', array('class' => 'dropdown-toggle', 'data-toggle' => 'dropdown'));
                 $renderered .= $dropdown;
             } else {
                 $renderered = html_writer::link($item->action, $item->get_content());
@@ -297,6 +299,20 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                 <?php endif ?>
             <?php else: ?>
                 <ul>
+                    <?php if ($this->page->course->id != SITEID): ?>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="position: relative;"><?php echo $this->pix_icon('i/course', '', '', array('style' => 'padding-right: 5px')); ?><?php echo $this->page->course->shortname; ?><b class="caret"></b></a>
+                            <ul class="dropdown-menu pull-right">
+                                <li><?php echo html_writer::link(new moodle_url('/course/view.php', array('id' => $this->page->course->id)), 'Course home'); ?>
+                                <li class="divider"></li>
+                                <li><?php echo html_writer::link(new moodle_url('/user/index.php', array('id' => $this->page->course->id)), $this->pix_icon('i/users', '') . ' Participants'); ?>
+                                <li><?php echo html_writer::link(new moodle_url('/badges/view.php', array('type' => 2, 'id' => $this->page->course->id)), $this->pix_icon('i/badge', '') . ' Course badges'); ?>
+                                <li><?php echo html_writer::link(new moodle_url('/grade/report/user/index.php', array('id' => $this->page->course->id, 'userid' => $USER->id)), $this->pix_icon('i/grades', '') . ' Course grades'); ?>
+                                <li class="divider"></li>
+                                <li><?php echo html_writer::link(new moodle_url('/course/preferences.php', array('id' => $this->page->course->id)), $this->pix_icon('i/settings', '') . ' Preferences'); ?>
+                            </ul>
+                        </li>
+                    <?php endif ?>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="position: relative;"><?php echo $this->pix_icon('t/message', '', '', array('style' => 'padding-right: 5px')); ?><b class="caret"></b></a>
                         <ul class="dropdown-menu pull-right">
@@ -310,8 +326,8 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                         <ul class="dropdown-menu pull-right">
                             <li><?php echo html_writer::link($data->link, $data->fullname); ?></li>
                             <li class="divider"></li>
-                            <li><?php echo html_writer::link(new moodle_url('/grade/report/overview/index.php', array('id' => 1, 'userid' => $USER->id)), $this->pix_icon('i/grades', '') . ' Grades'); ?></li>
-                            <li><?php echo html_writer::link(new moodle_url('/badges/mybadges.php'), $this->pix_icon('i/badge', '') . ' Badges'); ?></li>
+                            <li><?php echo html_writer::link(new moodle_url('/grade/report/overview/index.php', array('id' => 1, 'userid' => $USER->id)), $this->pix_icon('i/grades', '') . ' My grades'); ?></li>
+                            <li><?php echo html_writer::link(new moodle_url('/badges/mybadges.php'), $this->pix_icon('i/badge', '') . ' My badges'); ?></li>
                             <li><?php echo html_writer::link(new moodle_url('/user/files.php'), $this->pix_icon('i/files', '') . ' Private files'); ?></li>
                             <li><?php echo html_writer::link(new moodle_url('/user/preferences.php'), $this->pix_icon('i/settings', '') . ' Preferences'); ?></li>
                             <?php if ($data->showlogout): ?>
