@@ -40,7 +40,7 @@ require_login($course);
 
 $context = context_course::instance($course->id);
 $systemcontext = context_system::instance();
-require_capability('gradereport/overview:view', $context);
+// require_capability('gradereport/overview:view', $context);
 
 if (empty($userid)) {
     require_capability('moodle/grade:viewall', $systemcontext);
@@ -66,6 +66,8 @@ if (has_capability('moodle/grade:viewall', $systemcontext)) {
 
 } else if (has_capability('moodle/grade:viewall', context_user::instance($userid)) and $course->showgrades) {
     // ok - can view grades of this user- parent most probably
+    $access = true;
+} else if ($course->id == SITEID) {
     $access = true;
 }
 

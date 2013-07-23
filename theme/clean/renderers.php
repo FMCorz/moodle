@@ -289,8 +289,8 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="position: relative;"><?php echo $this->pix_icon('t/message', '', '', array('style' => 'padding-right: 5px')); ?><b class="caret"></b></a>
                         <ul class="dropdown-menu pull-right">
                             <li><?php echo html_writer::link(new moodle_url('/message/index.php'), $this->pix_icon('t/message', '') . ' Messages'); ?></li>
-                            <li><?php echo html_writer::link(new moodle_url('/blog/index.php', array('userid' => $USER->id)), 'My blog'); ?></li>
-                            <li><?php echo html_writer::link(new moodle_url('/forum/user.php', array('id' => $USER->id)), 'My forum posts'); ?></li>
+                            <li><?php echo html_writer::link(new moodle_url('/blog/index.php', array('userid' => $USER->id)), 'Blog'); ?></li>
+                            <li><?php echo html_writer::link(new moodle_url('/mod/forum/user.php', array('id' => $USER->id)), 'Forum posts'); ?></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -298,10 +298,10 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                         <ul class="dropdown-menu pull-right">
                             <li><?php echo html_writer::link($data->link, $data->fullname); ?></li>
                             <li class="divider"></li>
-                            <li><?php echo html_writer::link(new moodle_url('/user/files.php'), $this->pix_icon('i/files', '') . ' Private files'); ?></li>
+                            <li><?php echo html_writer::link(new moodle_url('/grade/report/overview/index.php', array('id' => 1, 'userid' => $USER->id)), $this->pix_icon('i/grades', '') . ' Grades'); ?></li>
                             <li><?php echo html_writer::link(new moodle_url('/badges/mybadges.php'), $this->pix_icon('i/badge', '') . ' Badges'); ?></li>
+                            <li><?php echo html_writer::link(new moodle_url('/user/files.php'), $this->pix_icon('i/files', '') . ' Private files'); ?></li>
                             <li><?php echo html_writer::link(new moodle_url('/user/preferences.php'), $this->pix_icon('i/settings', '') . ' Preferences'); ?></li>
-                            <li><a href=""></a></li>
                             <?php if ($data->showlogout): ?>
                                 <li class="divider"></li>
                                 <li><?php echo html_writer::link($data->logouturl, $data->logouttext); ?></li>
