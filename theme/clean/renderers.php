@@ -42,7 +42,22 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
             // print_object($item);
             $item->hideicon = true;
             $dropdown = '';
-            if ($item->type === navigation_node::TYPE_CATEGORY) {
+            if ($item->type === navigation_node::TYPE_ROOTNODE) {
+                $parentcat = $item->parent;
+                $neighbours = $parentcat->get_rootnodes();
+                $content = array();
+                foreach ($neighbours as $neighbour) {
+                    $current = '';
+                    $neighbour->icon = null;
+                    if (empty($neighbour->action)) {
+                        continue;
+                    } else if ($neighbour->text == $item->text) {
+                        $neighbour->add_class('current');
+                    }
+                    $content[] = $this->render($neighbour);
+                }
+                $dropdown = "<ul class='dropdown-menu'><li>" . implode("</li><li>", $content) . "</li></ul>";
+            } else if ($item->type === navigation_node::TYPE_CATEGORY) {
                 $parentcat = coursecat::get($this->page->course->category)->parent;
                 $parentcat = coursecat::get($parentcat);
                 $neighbours = $parentcat->get_children();
@@ -98,6 +113,8 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                     if ($section->section != $ccm->sectionnum) {
                         continue;
                     } else if (!$ccm->has_view()) {
+                        continue;
+                    } else if (!$ccm->uservisible) {
                         continue;
                     } else if ($ccm->id == $cm->id) {
                         $current = 'current';
@@ -326,10 +343,14 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                                 <li><?php echo html_writer::link(new moodle_url('/course/view.php', array('id' => $this->page->course->id)), 'Course home'); ?>
                                 <li class="divider"></li>
                                 <li><?php echo html_writer::link(new moodle_url('/user/index.php', array('id' => $this->page->course->id)), $this->pix_icon('i/users', '') . ' Participants'); ?>
-                                <li><?php echo html_writer::link(new moodle_url('/badges/view.php', array('type' => 2, 'id' => $this->page->course->id)), $this->pix_icon('i/badge', '') . ' Course badges'); ?>
+                                <!-- <li><?php echo html_writer::link(new moodle_url('/badges/view.php', array('type' => 2, 'id' => $this->page->course->id)), $this->pix_icon('i/badge', '') . ' Course badges'); ?> -->
                                 <li><?php echo html_writer::link(new moodle_url('/grade/report/user/index.php', array('id' => $this->page->course->id, 'userid' => $USER->id)), $this->pix_icon('i/grades', '') . ' Course grades'); ?>
-                                <li class="divider"></li>
-                                <li><?php echo html_writer::link(new moodle_url('/course/preferences.php', array('id' => $this->page->course->id)), $this->pix_icon('i/settings', '') . ' Preferences'); ?>
+                                <?php if ($this->page->settingsnav->get('courseadmin')
+                                        && $this->page->settingsnav->get('courseadmin')->children
+                                        && $this->page->settingsnav->get('courseadmin')->children->count() > 0): ?>
+                                    <li class="divider"></li>
+                                    <li><?php echo html_writer::link(new moodle_url('/course/preferences.php', array('id' => $this->page->course->id)), $this->pix_icon('i/settings', '') . ' Preferences'); ?>
+                                <?php endif ?>
                             </ul>
                         </li>
                     <?php endif ?>

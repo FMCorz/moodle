@@ -1025,6 +1025,10 @@ class global_navigation extends navigation_node {
         $this->cache = new navigation_cache(NAVIGATION_CACHE_NAME);
     }
 
+    public function get_rootnodes() {
+        return $this->rootnodes;
+    }
+
     /**
      * Mutator to set userid to allow parent to see child's profile
      * page navigation. See MDL-25805 for initial issue. Linked to it
@@ -3560,6 +3564,7 @@ class settings_navigation extends navigation_node {
             $url = new moodle_url('/filter/manage.php', array('contextid'=>$coursecontext->id));
             $prefnode->add(get_string('filters', 'admin'), $url, self::TYPE_SETTING, null, null, new pix_icon('i/filter', ''));
         }
+        $prefnode->trim_if_empty();
 
         // View course reports.
         if (has_capability('moodle/site:viewreports', $coursecontext)) { // Basic capability for listing of reports.
@@ -3601,17 +3606,17 @@ class settings_navigation extends navigation_node {
             }
         }
 
-        $gradenode = $coursenode->add(get_string('grades'), null, self::TYPE_SETTING, null);
-        if ($reportavailable) {
-            $url = new moodle_url('/grade/report/index.php', array('id'=>$course->id));
-            $gradenode->add(get_string('grades'), $url, self::TYPE_SETTING, null, 'grades', new pix_icon('i/grades', ''));
-        }
+        // $gradenode = $coursenode->add(get_string('grades'), null, self::TYPE_SETTING, null);
+        // if ($reportavailable) {
+        //     $url = new moodle_url('/grade/report/index.php', array('id'=>$course->id));
+        //     $gradenode->add(get_string('grades'), $url, self::TYPE_SETTING, null, 'grades', new pix_icon('i/grades', ''));
+        // }
 
-        //  Add outcome if permitted
-        if (!empty($CFG->enableoutcomes) && has_capability('moodle/course:update', $coursecontext)) {
-            $url = new moodle_url('/grade/edit/outcome/course.php', array('id'=>$course->id));
-            $gradenode->add(get_string('outcomes', 'grades'), $url, self::TYPE_SETTING, null, 'outcomes', new pix_icon('i/outcomes', ''));
-        }
+        // //  Add outcome if permitted
+        // if (!empty($CFG->enableoutcomes) && has_capability('moodle/course:update', $coursecontext)) {
+        //     $url = new moodle_url('/grade/edit/outcome/course.php', array('id'=>$course->id));
+        //     $gradenode->add(get_string('outcomes', 'grades'), $url, self::TYPE_SETTING, null, 'outcomes', new pix_icon('i/outcomes', ''));
+        // }
 
         //Add badges navigation
         require_once($CFG->libdir .'/badgeslib.php');
@@ -3649,6 +3654,8 @@ class settings_navigation extends navigation_node {
             $backupnode->add(get_string('reset'), $url, self::TYPE_SETTING, null, null, new pix_icon('i/return', ''));
         }
 
+        $backupnode->trim_if_empty();
+
         // Questions
         require_once($CFG->libdir . '/questionlib.php');
         question_extend_settings_navigation($coursenode, $coursecontext)->trim_if_empty();
@@ -3676,8 +3683,9 @@ class settings_navigation extends navigation_node {
             // hidden in new courses and courses where legacy files were turned off
             $url = new moodle_url('/files/index.php', array('contextid'=>$coursecontext->id));
             $filesnode->add(get_string('courselegacyfiles'), $url, self::TYPE_SETTING, null, 'coursefiles', new pix_icon('i/folder', ''));
-
         }
+
+        $filesnode->trim_if_empty();
 
         // Switch roles
         $roles = array();
