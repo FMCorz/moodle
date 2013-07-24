@@ -33,7 +33,24 @@ a.logo {
 
 .breadcrumb li .current { font-weight: bold;}
 
-#page header > h1 { display: inline-block; }
+h1 {
+    font-size: 32px;
+}
+h2 {
+    font-size: 28px;
+}
+h3 {
+    font-size: 24px;
+}
+h4 {
+    font-size: 20px;
+}
+h5 {
+    font-size: 16px;
+}
+h6 {
+    font-size: 12px;
+}
 
 /* Custom CSS Settings
 -------------------------*/

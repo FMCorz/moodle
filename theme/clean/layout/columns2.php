@@ -54,18 +54,18 @@ echo $OUTPUT->doctype() ?>
 <div id="page" class="container-fluid">
 
     <header id="page-header" class="clearfix">
+        <?php echo $html->heading; ?>
         <div id="page-navbar" class="clearfix">
             <div class="breadcrumb-nav"><?php echo $OUTPUT->navbar(); ?></div>
             <nav class="breadcrumb-button"><?php echo $OUTPUT->page_heading_button(); ?></nav>
         </div>
-        <?php echo $html->heading; ?>
         <div id="course-header">
             <?php echo $OUTPUT->course_header(); ?>
         </div>
     </header>
 
     <div id="page-content" class="row-fluid">
-        <section id="region-main" class="span9<?php if ($left) { echo ' pull-right'; } ?>">
+        <section id="region-main" class="span9<?php if (!$left) { echo ' pull-right'; } ?>">
             <?php
             echo $OUTPUT->course_content_header();
             echo $OUTPUT->main_content();
@@ -74,10 +74,10 @@ echo $OUTPUT->doctype() ?>
         </section>
         <?php
         $classextra = '';
-        if ($left) {
+        if (!$left) {
             $classextra = ' desktop-first-column';
         }
-        echo $OUTPUT->blocks('side-pre', 'span3'.$classextra);
+        echo $OUTPUT->blocks('side-post', 'span3'.$classextra);
         ?>
     </div>
 

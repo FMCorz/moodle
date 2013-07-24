@@ -124,7 +124,7 @@ function theme_clean_set_customcss($css, $customcss) {
  *      - footnote HTML to use as a footnote. By default ''.
  */
 function theme_clean_get_html_for_settings(renderer_base $output, moodle_page $page) {
-    global $CFG;
+    global $CFG, $PAGE;
     $return = new stdClass;
 
     $return->navbarclass = '';
@@ -135,7 +135,7 @@ function theme_clean_get_html_for_settings(renderer_base $output, moodle_page $p
     if (!empty($page->theme->settings->logo)) {
         $return->heading = html_writer::link($CFG->wwwroot, '', array('title' => get_string('home'), 'class' => 'logo'));
     } else {
-        $return->heading = $output->page_heading();
+        $return->heading = $output->heading($PAGE->course->fullname, 1);
     }
 
     $return->footnote = '';
