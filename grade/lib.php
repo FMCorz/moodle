@@ -795,7 +795,7 @@ function print_grade_page_head($courseid, $active_type, $active_plugin=null,
 
     if ($shownavigation) {
         if ($CFG->grade_navmethod == GRADE_NAVMETHOD_COMBO || $CFG->grade_navmethod == GRADE_NAVMETHOD_DROPDOWN) {
-            $returnval .= print_grade_plugin_selector($plugin_info, $active_type, $active_plugin, $return);
+            // $returnval .= print_grade_plugin_selector($plugin_info, $active_type, $active_plugin, $return);
         }
 
         if ($return) {
