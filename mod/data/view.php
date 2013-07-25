@@ -317,7 +317,7 @@
     }
 
     $PAGE->set_title($title);
-    $PAGE->set_heading($course->fullname);
+    // $PAGE->set_heading($course->fullname);
 
     echo $OUTPUT->header();
 
@@ -341,7 +341,7 @@
         }
     }
 
-    echo $OUTPUT->heading(format_string($data->name));
+    // echo $OUTPUT->heading(format_string($data->name));
 
     // Do we need to show a link to the RSS feed for the records?
     //this links has been Settings (database activity administration) block
