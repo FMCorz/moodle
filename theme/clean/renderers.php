@@ -1,6 +1,6 @@
 <?php
 // require_once($CFG->dirroot . '/course/renderer.php');
-// class theme_ultranav_core_course_renderer extends core_course_renderer {
+// class theme_clean_core_course_renderer extends core_course_renderer {
 //     protected function coursecat_coursebox(coursecat_helper $chelper, $course, $additionalclasses = '') {
 //         return 'Coucou Babae, je suis un renderer!';
 //     }
@@ -9,7 +9,7 @@
 require_once($CFG->dirroot . '/blocks/navigation/renderer.php');
 require_once($CFG->libdir . '/coursecatlib.php');
 
-class theme_ultranav_block_navigation_renderer extends block_navigation_renderer {
+class theme_clean_block_navigation_renderer extends block_navigation_renderer {
 
     protected function navigation_node($items, $attrs=array(), $expansionlimit=null, array $options = array(), $depth=1) {
         // $items = (array) clone((object) $items);
@@ -72,7 +72,7 @@ class theme_clean_mod_lesson_renderer extends mod_lesson_renderer {
 }
 
 require_once($CFG->dirroot . '/mod/assign/renderer.php');
-class theme_ultranav_mod_assign_renderer extends mod_assign_renderer {
+class theme_clean_mod_assign_renderer extends mod_assign_renderer {
     /**
      * Render the header.
      *
@@ -106,7 +106,7 @@ class theme_ultranav_mod_assign_renderer extends mod_assign_renderer {
     }
 }
 
-class theme_ultranav_core_renderer extends theme_bootstrapbase_core_renderer {
+class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
 
     public function main_content() {
         $html = '<div role="main">';
