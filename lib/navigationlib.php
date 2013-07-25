@@ -3743,7 +3743,7 @@ class settings_navigation extends navigation_node {
             require_once($file);
         }
 
-        $modulenode = $this->add(get_string('pluginadministration', $this->page->activityname));
+        $modulenode = $this->add(get_string('pluginadministration', $this->page->activityname), '', navigation_node::TYPE_SETTING, '', 'modulesettingskey');
         $modulenode->force_open();
 
         // Settings for the module

@@ -111,6 +111,28 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
     public function main_content() {
         $html = '<div role="main">';
         if ($this->page->cm) {
+            $nav = $this->page->settingsnav;
+            // Using course admin because a student doesn't have access to it.
+            if ($this->page->settingsnav->get('courseadmin')
+                    && $this->page->settingsnav->get('courseadmin')->children
+                    && $this->page->settingsnav->get('courseadmin')->children->count() > 0) {
+                $parent = $nav->get('modulesettingskey');
+                ob_start();
+                ?>
+                <div class="well dropdown well-small" style="float: left; margin-right: 10px; ">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <?php echo $this->pix_icon('i/settings', ''); ?>
+                    <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <?php foreach ($parent->children as $node): ?>
+                            <?php $node->icon = null; ?>
+                            <li><?php echo html_writer::link($node->action, $node->get_content()); ?></li>
+                        <?php endforeach ?>
+                    </ul>
+                </div>
+                <?php
+                $html .= ob_get_clean();
+            }
             $html .= $this->heading($this->page->cm->name, 2);
         }
         $html .= $this->unique_main_content_token;
@@ -244,6 +266,11 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
             $breadcrumbs[] = $renderered;
 
         }
+
+        if (empty($breadcrumbs)) {
+            $breadcrumbs[] = html_writer::link(new moodle_url('/'), 'Home');
+        }
+
         $divider = '<span class="divider">/</span>';
         $list_items = '<li class="dropdown">'.join(" $divider</li><li class='dropdown'>", $breadcrumbs).'</li>';
         $title = '<span class="accesshide">'.get_string('pagepath').'</span>';
