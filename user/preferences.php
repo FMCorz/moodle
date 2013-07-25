@@ -6,6 +6,7 @@ require_login();
 $PAGE->set_context(context_user::instance($USER->id));
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title('Preferences');
+$PAGE->set_url(new moodle_url('/user/preferences.php'));
 
 echo $OUTPUT->header();
 

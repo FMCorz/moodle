@@ -7,6 +7,7 @@ require_login($courseid);
 
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title('Preferences');
+$PAGE->set_url(new moodle_url('/course/preferences.php', array('id' => $courseid)));
 
 echo $OUTPUT->header();
 
