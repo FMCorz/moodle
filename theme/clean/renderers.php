@@ -396,7 +396,17 @@ class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
                                 <li class="divider"></li>
                                 <li><?php echo html_writer::link(new moodle_url('/user/index.php', array('id' => $this->page->course->id)), $this->pix_icon('i/users', '') . ' Participants'); ?>
                                 <!-- <li><?php echo html_writer::link(new moodle_url('/badges/view.php', array('type' => 2, 'id' => $this->page->course->id)), $this->pix_icon('i/badge', '') . ' Course badges'); ?> -->
-                                <li><?php echo html_writer::link(new moodle_url('/grade/report/user/index.php', array('id' => $this->page->course->id, 'userid' => $USER->id)), $this->pix_icon('i/grades', '') . ' Course grades'); ?>
+
+                                <?php if (has_capability('moodle/grade:viewall', $this->page->context)): ?>
+                                    <li><?php echo html_writer::link(new moodle_url('/grade/report/index.php', array('id' => $this->page->course->id)), $this->pix_icon('i/grades', '') . ' Grades'); ?>
+                                <?php else: ?>
+                                    <li><?php echo html_writer::link(new moodle_url('/grade/report/user/index.php', array('id' => $this->page->course->id, 'userid' => $USER->id)), $this->pix_icon('i/grades', '') . ' Grades'); ?>
+                                <?php endif ?>
+
+                                <?php if (has_capability('moodle/site:viewreports', $this->page->context)): ?>
+                                    <li><?php echo html_writer::link(new moodle_url('/report/outline/index.php', array('id' => $this->page->course->id)), $this->pix_icon('i/report', '') . ' Reports'); ?>
+                                <?php endif ?>
+
                                 <?php if ($this->page->settingsnav->get('courseadmin')
                                         && $this->page->settingsnav->get('courseadmin')->children
                                         && $this->page->settingsnav->get('courseadmin')->children->count() > 0): ?>

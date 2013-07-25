@@ -3593,30 +3593,31 @@ class settings_navigation extends navigation_node {
         if (has_capability('moodle/grade:viewall', $coursecontext)) {
             $reportavailable = true;
         } else if (!empty($course->showgrades)) {
-            $reports = core_component::get_plugin_list('gradereport');
-            if (is_array($reports) && count($reports)>0) {     // Get all installed reports
-                arsort($reports); // user is last, we want to test it first
-                foreach ($reports as $plugin => $plugindir) {
-                    if (has_capability('gradereport/'.$plugin.':view', $coursecontext)) {
-                        //stop when the first visible plugin is found
-                        $reportavailable = true;
-                        break;
-                    }
-                }
-            }
+            // $reports = core_component::get_plugin_list('gradereport');
+            // if (is_array($reports) && count($reports)>0) {     // Get all installed reports
+            //     arsort($reports); // user is last, we want to test it first
+            //     foreach ($reports as $plugin => $plugindir) {
+            //         if (has_capability('gradereport/'.$plugin.':view', $coursecontext)) {
+            //             //stop when the first visible plugin is found
+            //             $reportavailable = true;
+            //             break;
+            //         }
+            //     }
+            // }
         }
 
-        // $gradenode = $coursenode->add(get_string('grades'), null, self::TYPE_SETTING, null);
-        // if ($reportavailable) {
-        //     $url = new moodle_url('/grade/report/index.php', array('id'=>$course->id));
-        //     $gradenode->add(get_string('grades'), $url, self::TYPE_SETTING, null, 'grades', new pix_icon('i/grades', ''));
-        // }
+        $gradenode = $coursenode->add(get_string('grades'), null, self::TYPE_SETTING, null);
+        if ($reportavailable) {
+            $url = new moodle_url('/grade/report/index.php', array('id'=>$course->id));
+            $gradenode->add(get_string('grades'), $url, self::TYPE_SETTING, null, 'grades', new pix_icon('i/grades', ''));
+        }
 
-        // //  Add outcome if permitted
-        // if (!empty($CFG->enableoutcomes) && has_capability('moodle/course:update', $coursecontext)) {
-        //     $url = new moodle_url('/grade/edit/outcome/course.php', array('id'=>$course->id));
-        //     $gradenode->add(get_string('outcomes', 'grades'), $url, self::TYPE_SETTING, null, 'outcomes', new pix_icon('i/outcomes', ''));
-        // }
+        //  Add outcome if permitted
+        if (!empty($CFG->enableoutcomes) && has_capability('moodle/course:update', $coursecontext)) {
+            $url = new moodle_url('/grade/edit/outcome/course.php', array('id'=>$course->id));
+            $gradenode->add(get_string('outcomes', 'grades'), $url, self::TYPE_SETTING, null, 'outcomes', new pix_icon('i/outcomes', ''));
+        }
+        $gradenode->trim_if_empty();
 
         //Add badges navigation
         require_once($CFG->libdir .'/badgeslib.php');
