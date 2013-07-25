@@ -1,6 +1,6 @@
 <?php
 // require_once($CFG->dirroot . '/course/renderer.php');
-// class theme_clean_core_course_renderer extends core_course_renderer {
+// class theme_ultranav_core_course_renderer extends core_course_renderer {
 //     protected function coursecat_coursebox(coursecat_helper $chelper, $course, $additionalclasses = '') {
 //         return 'Coucou Babae, je suis un renderer!';
 //     }
@@ -9,7 +9,7 @@
 require_once($CFG->dirroot . '/blocks/navigation/renderer.php');
 require_once($CFG->libdir . '/coursecatlib.php');
 
-class theme_clean_block_navigation_renderer extends block_navigation_renderer {
+class theme_ultranav_block_navigation_renderer extends block_navigation_renderer {
 
     protected function navigation_node($items, $attrs=array(), $expansionlimit=null, array $options = array(), $depth=1) {
         // $items = (array) clone((object) $items);
@@ -29,13 +29,50 @@ class theme_clean_block_navigation_renderer extends block_navigation_renderer {
 
 require_once($CFG->dirroot . '/mod/lesson/renderer.php');
 class theme_clean_mod_lesson_renderer extends mod_lesson_renderer {
-    public function header() {
-        return '';
+
+    public function header($lesson, $cm, $currenttab = '', $extraeditbuttons = false, $lessonpageid = null, $extrapagetitle = null) {
+        global $CFG;
+
+        $activityname = format_string($lesson->name, true, $lesson->course);
+        if (empty($extrapagetitle)) {
+            $title = $this->page->course->shortname.": ".$activityname;
+        } else {
+            $title = $this->page->course->shortname.": ".$activityname.": ".$extrapagetitle;
+        }
+
+        // Build the buttons
+        $context = context_module::instance($cm->id);
+
+    /// Header setup
+        $this->page->set_title($title);
+        $this->page->set_heading($this->page->course->fullname);
+        lesson_add_header_buttons($cm, $context, $extraeditbuttons, $lessonpageid);
+        $output = $this->output->header();
+
+        if (has_capability('mod/lesson:manage', $context)) {
+            // $output .= $this->output->heading_with_help($activityname, 'overview', 'lesson');
+
+            if (!empty($currenttab)) {
+                ob_start();
+                include($CFG->dirroot.'/mod/lesson/tabs.php');
+                $output .= ob_get_contents();
+                ob_end_clean();
+            }
+        } else {
+            // $output .= $this->output->heading($activityname);
+        }
+
+        foreach ($lesson->messages as $message) {
+            $output .= $this->output->notification($message[0], $message[1], $message[2]);
+        }
+
+        return $output;
     }
+
 }
 
 require_once($CFG->dirroot . '/mod/assign/renderer.php');
-class theme_clean_mod_assign_renderer extends mod_assign_renderer {
+class theme_ultranav_mod_assign_renderer extends mod_assign_renderer {
     /**
      * Render the header.
      *
@@ -69,7 +106,7 @@ class theme_clean_mod_assign_renderer extends mod_assign_renderer {
     }
 }
 
-class theme_clean_core_renderer extends theme_bootstrapbase_core_renderer {
+class theme_ultranav_core_renderer extends theme_bootstrapbase_core_renderer {
 
     public function main_content() {
         $html = '<div role="main">';
