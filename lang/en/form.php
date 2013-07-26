@@ -50,6 +50,7 @@ $string['month'] = 'Month';
 $string['mustbeoverriden'] = 'Abstract form_definition() method in class {$a} must be overridden, please fix the code.';
 $string['nomethodforaddinghelpbutton'] = 'There is no method for adding a help button to form element {$a->name} (class {$a->classname})';
 $string['nonexistentformelements'] = 'Trying to add help buttons to non-existent form elements : {$a}';
+$string['nopermissiontoedit'] = 'You do not have permission to edit this field';
 $string['optional'] = 'Optional';
 $string['othersettings'] = 'Other settings';
 $string['requiredelement'] = 'Required field';

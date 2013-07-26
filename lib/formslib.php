@@ -1369,6 +1369,9 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
     /** @var array Array whose keys are element names. If the key exists this is a advanced element */
     var $_advancedElements = array();
 
+    /** @var array Array whose keys are element names. If the key exists the element has been locked by capability */
+    var $_capabilityLockedElements = array();
+
     /**
      * Array whose keys are element names and values are the desired collapsible state.
      * True for collapsed, False for expanded. If not present, set to default in
@@ -1461,6 +1464,38 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
             $this->_advancedElements[$elementName]='';
         } elseif (isset($this->_advancedElements[$elementName])) {
             unset($this->_advancedElements[$elementName]);
+        }
+    }
+
+    /**
+     * Freeze a field when the user doesn't have the capability.
+     *
+     * Do not use this to hide a field.
+     *
+     * @param string $elname element name.
+     * @param string $cap capability name.
+     * @param context $context content the capability is required in.
+     */
+    public function setCapabilityLock($elname, $cap, $context) {
+        if (!has_capability($cap, $context)) {
+            $this->hardFreeze($elname);
+            $this->_capabilityLockedElements[$elname] = true;
+        }
+    }
+
+    /**
+     * Freeze a field when the user doesn't have any of the capabilities.
+     *
+     * Do not use this to hide a field.
+     *
+     * @param string $elname element name.
+     * @param string $cap capability name.
+     * @param context $context content the capability is required in.
+     */
+    public function setAnyCapabilityLock($elname, array $caps, $context) {
+        if (!has_any_capability($caps, $context)) {
+            $this->hardFreeze($elname);
+            $this->_capabilityLockedElements[$elname] = true;
         }
     }
 
@@ -1588,6 +1623,9 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
     * @param HTML_QuickForm_Renderer $renderer An HTML_QuickForm_Renderer object
     */
     function accept(&$renderer) {
+        if (method_exists($renderer, 'setCapabilityLockedElements')) {
+            $renderer->_capabilityLockedElements = $this->_capabilityLockedElements;
+        }
         if (method_exists($renderer, 'setAdvancedElements')){
             //Check for visible fieldsets where all elements are advanced
             //and mark these headers as advanced as well.
@@ -2564,19 +2602,24 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
     var $_collapseButtons = '';
 
     /**
+     * @var array Contains the elements locked by capability.
+     */
+    var $_capabilityLockedElements = array();
+
+    /**
      * Constructor
      */
     function MoodleQuickForm_Renderer(){
         // switch next two lines for ol li containers for form items.
         //        $this->_elementTemplates=array('default'=>"\n\t\t".'<li class="fitem"><label>{label}{help}<!-- BEGIN required -->{req}<!-- END required --></label><div class="qfelement<!-- BEGIN error --> error<!-- END error --> {type}"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></li>');
         $this->_elementTemplates = array(
-        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}" {aria-live}><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
+        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced} <!-- BEGIN capabilitylocked --> capability-locked<!-- END capabilitylocked --><!-- BEGIN required --> required<!-- END required --> fitem_{type}" {aria-live}><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}<!-- BEGIN capabilitylocked --><div class="info">{capabilitylocked}</div><!-- END capabilitylocked --></div></div>',
 
         'actionbuttons'=>"\n\t\t".'<div id="{id}" class="fitem fitem_actionbuttons fitem_{type}"><div class="felement {type}">{element}</div></div>',
 
         'fieldset'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}"><div class="fitemtitle"><div class="fgrouplabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div></div><fieldset class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</fieldset></div>',
 
-        'static'=>"\n\t\t".'<div class="fitem {advanced}"><div class="fitemtitle"><div class="fstaticlabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}&nbsp;</div></div>',
+        'static'=>"\n\t\t".'<div class="fitem {advanced} <!-- BEGIN capabilitylocked --> capability-locked<!-- END capabilitylocked -->"><div class="fitemtitle"><div class="fstaticlabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}&nbsp;<!-- BEGIN capabilitylocked --><div class="info">{capabilitylocked}</div><!-- END capabilitylocked --></div></div>',
 
         'warning'=>"\n\t\t".'<div class="fitem {advanced}">{element}</div>',
 
@@ -2601,6 +2644,16 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
      */
     function setCollapsibleElements($elements) {
         $this->_collapsibleElements = $elements;
+    }
+
+
+    /**
+     * Setting capability locked elements
+     *
+     * @param array $elements
+     */
+    function setCapabilityLockedElements($elements) {
+        $this->_capabilityLockedElements = $elements;
     }
 
     /**
@@ -2715,6 +2768,13 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         }else{
             $html = $this->_elementTemplates['default'];
         }
+
+        if (isset($this->_capabilityLockedElements[$element->getName()])){
+            $html = str_replace(' {capabilitylocked}', ' capability-locked', $html);
+        } else {
+            $html = str_replace(' {capabilitylocked}', '', $html);
+        }
+
         if (isset($this->_advancedElements[$element->getName()])){
             $html = str_replace(' {advanced}', ' advanced', $html);
             $html = str_replace(' {aria-live}', ' aria-live="polite"', $html);
@@ -2823,6 +2883,31 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
      */
     function getStopFieldsetElements(){
         return $this->_stopFieldsetElements;
+    }
+
+   /**
+    * Helper method for renderElement
+    *
+    * @param    string      Element name
+    * @param    mixed       Element label (if using an array of labels, you should set the appropriate template)
+    * @param    bool        Whether an element is required
+    * @param    string      Error message associated with the element
+    * @access   private
+    * @see      renderElement()
+    * @return   string      Html for element
+    */
+    function _prepareTemplate($name, $label, $required, $error) {
+        global $OUTPUT;
+        $html = parent::_prepareTemplate($name, $label, $required, $error);
+        if (isset($this->_capabilityLockedElements[$name])) {
+            $html = str_replace('{capabilitylocked}', $OUTPUT->pix_icon('i/permissionlock', '') .
+                get_string('nopermissiontoedit', 'form'), $html);
+            $html = str_replace('<!-- BEGIN capabilitylocked -->', '', $html);
+            $html = str_replace('<!-- END capabilitylocked -->', '', $html);
+        } else {
+            $html = preg_replace("/([ \t\n\r]*)?<!-- BEGIN capabilitylocked -->(\s|\S)*<!-- END capabilitylocked -->([ \t\n\r]*)?/iU", '', $html);
+        }
+        return $html;
     }
 }
 
