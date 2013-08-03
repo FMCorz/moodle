@@ -10,6 +10,8 @@ a few minutes:
 2) Create a single database for Moodle to store all
    it's tables in (or choose an existing database).
 
+2b) Pull request test
+
 3) Visit your Moodle site with a browser, you should
    be taken to the install.php script, which will lead
    you through creating a config.php file and then
