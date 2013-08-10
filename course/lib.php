@@ -26,8 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir.'/filelib.php');
-
 define('COURSE_MAX_LOGS_PER_PAGE', 1000);       // records
 define('COURSE_MAX_RECENT_PERIOD', 172800);     // Two days, in seconds
 
@@ -1508,6 +1506,7 @@ function course_delete_module($cmid) {
     }
 
     // Remove all module files in case modules forget to do that.
+    require_once($CFG->libdir.'/filelib.php');
     $fs = get_file_storage();
     $fs->delete_area_files($modcontext->id);
 
@@ -2255,6 +2254,7 @@ function create_course($data, $editoroptions = NULL) {
 
     $newcourseid = $DB->insert_record('course', $data);
     $context = context_course::instance($newcourseid, MUST_EXIST);
+    require_once($CFG->libdir.'/filelib.php');
 
     if ($editoroptions) {
         // Save the files used in the summary editor and store
@@ -2316,6 +2316,7 @@ function update_course($data, $editoroptions = NULL) {
 
     $oldcourse = \core_course\format_base::instance($data->id)->get_course();
     $context   = context_course::instance($oldcourse->id);
+    require_once($CFG->libdir.'/filelib.php');
 
     if ($editoroptions) {
         $data = file_postupdate_standard_editor($data, 'summary', $editoroptions, $context, 'course', 'summary', 0);
@@ -2512,6 +2513,7 @@ class course_request {
         if ($data === null) {
             $data = new stdClass;
         }
+        require_once($CFG->libdir.'/filelib.php');
         $data = file_prepare_standard_editor($data, 'summary', self::summary_editor_options());
         return $data;
     }
