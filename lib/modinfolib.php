@@ -1442,7 +1442,7 @@ function rebuild_course_cache($courseid=0, $clearonly=false) {
 
     if (class_exists('format_base')) {
         // if file containing class is not loaded, there is no cache there anyway
-        format_base::reset_course_cache($courseid);
+        \core_course\format_base::reset_course_cache($courseid);
     }
 
     if ($clearonly) {

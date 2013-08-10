@@ -3594,7 +3594,7 @@ class admin_setting_sitesetselect extends admin_setting_configselect {
         if ($SITE->id == $COURSE->id) {
             $COURSE = $SITE;
         }
-        format_base::reset_course_cache($SITE->id);
+        \core_course\format_base::reset_course_cache($SITE->id);
 
         return '';
 
@@ -3793,7 +3793,7 @@ class admin_setting_sitesetcheckbox extends admin_setting_configcheckbox {
         if ($SITE->id == $COURSE->id) {
             $COURSE = $SITE;
         }
-        format_base::reset_course_cache($SITE->id);
+        \core_course\format_base::reset_course_cache($SITE->id);
 
         return '';
     }
@@ -3861,7 +3861,7 @@ class admin_setting_sitesettext extends admin_setting_configtext {
         if ($SITE->id == $COURSE->id) {
             $COURSE = $SITE;
         }
-        format_base::reset_course_cache($SITE->id);
+        \core_course\format_base::reset_course_cache($SITE->id);
 
         return '';
     }
@@ -3912,7 +3912,7 @@ class admin_setting_special_frontpagedesc extends admin_setting {
         if ($SITE->id == $COURSE->id) {
             $COURSE = $SITE;
         }
-        format_base::reset_course_cache($SITE->id);
+        \core_course\format_base::reset_course_cache($SITE->id);
 
         return '';
     }
