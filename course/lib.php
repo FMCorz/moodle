@@ -26,7 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir.'/completionlib.php');
 require_once($CFG->libdir.'/filelib.php');
 
 define('COURSE_MAX_LOGS_PER_PAGE', 1000);       // records
@@ -921,6 +920,7 @@ function get_array_of_activities($courseid) {
                    $mod[$seq]->showavailability = $rawmods[$seq]->showavailability;
                    $mod[$seq]->showdescription  = $rawmods[$seq]->showdescription;
                    if (!empty($CFG->enableavailability)) {
+                       require_once($CFG->libdir.'/completionlib.php');
                        condition_info::fill_availability_conditions($rawmods[$seq]);
                        $mod[$seq]->conditionscompletion = $rawmods[$seq]->conditionscompletion;
                        $mod[$seq]->conditionsgrade  = $rawmods[$seq]->conditionsgrade;
@@ -1530,6 +1530,7 @@ function course_delete_module($cmid) {
     // Delete completion and availability data; it is better to do this even if the
     // features are not turned on, in case they were turned on previously (these will be
     // very quick on an empty table).
+    require_once($CFG->libdir.'/completionlib.php');
     $DB->delete_records('course_modules_completion', array('coursemoduleid' => $cm->id));
     $DB->delete_records('course_modules_availability', array('coursemoduleid'=> $cm->id));
     $DB->delete_records('course_modules_avail_fields', array('coursemoduleid' => $cm->id));
