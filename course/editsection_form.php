@@ -42,7 +42,7 @@ class editsection_form extends moodleform {
         $mform->setType('id', PARAM_INT);
 
         // additional fields that course format has defined
-        $courseformat = course_get_format($course);
+        $courseformat = \core_course\format_base::instance($course);
         $formatoptions = $courseformat->section_format_options(true);
         if (!empty($formatoptions)) {
             $elements = $courseformat->create_edit_form_elements($mform, true);
@@ -326,7 +326,7 @@ class editsection_form extends moodleform {
             $data = file_postupdate_standard_editor($data, 'summary', $editoroptions,
                     $editoroptions['context'], 'course', 'section', $data->id);
             $course = $this->_customdata['course'];
-            foreach (course_get_format($course)->section_format_options() as $option => $unused) {
+            foreach (\core_course\format_base::instance($course)->section_format_options() as $option => $unused) {
                 // fix issue with unset checkboxes not being returned at all
                 if (!isset($data->$option)) {
                     $data->$option = null;

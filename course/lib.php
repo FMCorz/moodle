@@ -28,7 +28,6 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/completionlib.php');
 require_once($CFG->libdir.'/filelib.php');
-require_once($CFG->dirroot.'/course/format/lib.php');
 
 define('COURSE_MAX_LOGS_PER_PAGE', 1000);       // records
 define('COURSE_MAX_RECENT_PERIOD', 172800);     // Two days, in seconds
@@ -1604,7 +1603,7 @@ function move_section_to($course, $section, $destination) {
     }
 
     // compartibility with course formats using field 'numsections'
-    $courseformatoptions = course_get_format($course)->get_format_options();
+    $courseformatoptions = \core_course\format_base::instance($course)->get_format_options();
     if ((array_key_exists('numsections', $courseformatoptions) &&
             ($destination > $courseformatoptions['numsections'])) || ($destination < 1)) {
         return false;
@@ -2064,7 +2063,7 @@ function move_courses($courseids, $categoryid) {
  * @return string Display name that the course format prefers, e.g. "Week 2"
  */
 function get_section_name($courseorid, $section) {
-    return course_get_format($courseorid)->get_section_name($section);
+    return \core_course\format_base::instance($courseorid)->get_section_name($section);
 }
 
 /**
@@ -2076,7 +2075,7 @@ function get_section_name($courseorid, $section) {
 function course_format_uses_sections($format) {
     $course = new stdClass();
     $course->format = $format;
-    return course_get_format($course)->uses_sections();
+    return \core_course\format_base::instance($course)->uses_sections();
 }
 
 /**
@@ -2092,7 +2091,7 @@ function course_format_uses_sections($format) {
 function course_format_ajax_support($format) {
     $course = new stdClass();
     $course->format = $format;
-    return course_get_format($course)->supports_ajax();
+    return \core_course\format_base::instance($course)->supports_ajax();
 }
 
 /**
@@ -2268,9 +2267,9 @@ function create_course($data, $editoroptions = NULL) {
     }
 
     // update course format options
-    course_get_format($newcourseid)->update_course_format_options($data);
+    \core_course\format_base::instance($newcourseid)->update_course_format_options($data);
 
-    $course = course_get_format($newcourseid)->get_course();
+    $course = \core_course\format_base::instance($newcourseid)->get_course();
 
     // Setup the blocks
     blocks_add_default_course_blocks($course);
@@ -2314,7 +2313,7 @@ function update_course($data, $editoroptions = NULL) {
 
     $data->timemodified = time();
 
-    $oldcourse = course_get_format($data->id)->get_course();
+    $oldcourse = \core_course\format_base::instance($data->id)->get_course();
     $context   = context_course::instance($oldcourse->id);
 
     if ($editoroptions) {
@@ -2355,7 +2354,7 @@ function update_course($data, $editoroptions = NULL) {
     rebuild_course_cache($data->id);
 
     // update course format options with full course data
-    course_get_format($data->id)->update_course_format_options($data, $oldcourse);
+    \core_course\format_base::instance($data->id)->update_course_format_options($data, $oldcourse);
 
     $course = $DB->get_record('course', array('id'=>$data->id));
 
@@ -3027,7 +3026,7 @@ function get_sorted_course_formats($enabledonly = false) {
  * @return moodle_url The url of course
  */
 function course_get_url($courseorid, $section = null, $options = array()) {
-    return course_get_format($courseorid)->get_view_url($section, $options);
+    return \core_course\format_base::instance($courseorid)->get_view_url($section, $options);
 }
 
 /**

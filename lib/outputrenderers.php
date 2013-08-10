@@ -919,7 +919,7 @@ class core_renderer extends renderer_base {
         }
         require_once($CFG->dirroot.'/course/lib.php');
         $functioncalled = true;
-        $courseformat = course_get_format($this->page->course);
+        $courseformat = \core_course\format_base::instance($this->page->course);
         if (($obj = $courseformat->course_content_header()) !== null) {
             return html_writer::div($courseformat->get_renderer($this->page)->render($obj), 'course-content-header');
         }
@@ -946,7 +946,7 @@ class core_renderer extends renderer_base {
         }
         $functioncalled = true;
         require_once($CFG->dirroot.'/course/lib.php');
-        $courseformat = course_get_format($this->page->course);
+        $courseformat = \core_course\format_base::instance($this->page->course);
         if (($obj = $courseformat->course_content_footer()) !== null) {
             return html_writer::div($courseformat->get_renderer($this->page)->render($obj), 'course-content-footer');
         }
@@ -966,7 +966,7 @@ class core_renderer extends renderer_base {
             return '';
         }
         require_once($CFG->dirroot.'/course/lib.php');
-        $courseformat = course_get_format($this->page->course);
+        $courseformat = \core_course\format_base::instance($this->page->course);
         if (($obj = $courseformat->course_header()) !== null) {
             return $courseformat->get_renderer($this->page)->render($obj);
         }
@@ -986,7 +986,7 @@ class core_renderer extends renderer_base {
             return '';
         }
         require_once($CFG->dirroot.'/course/lib.php');
-        $courseformat = course_get_format($this->page->course);
+        $courseformat = \core_course\format_base::instance($this->page->course);
         if (($obj = $courseformat->course_footer()) !== null) {
             return $courseformat->get_renderer($this->page)->render($obj);
         }

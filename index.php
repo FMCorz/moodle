@@ -101,7 +101,7 @@
     echo $OUTPUT->header();
 
 /// Print Section or custom info
-    $siteformatoptions = course_get_format($SITE)->get_format_options();
+    $siteformatoptions = \core_course\format_base::instance($SITE)->get_format_options();
     $modinfo = get_fast_modinfo($SITE);
     $modnames = get_module_types_names();
     $modnamesplural = get_module_types_names(true);

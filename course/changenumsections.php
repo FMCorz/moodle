@@ -31,7 +31,7 @@ require_once($CFG->dirroot.'/course/lib.php');
 $courseid = required_param('courseid', PARAM_INT);
 $increase = optional_param('increase', true, PARAM_BOOL);
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-$courseformatoptions = course_get_format($course)->get_format_options();
+$courseformatoptions = \core_course\format_base::instance($course)->get_format_options();
 
 $PAGE->set_url('/course/changenumsections.php', array('courseid' => $courseid));
 
@@ -52,7 +52,7 @@ if (isset($courseformatoptions['numsections'])) {
     // Don't go less than 0, intentionally redirect silently (for the case of
     // double clicks).
     if ($courseformatoptions['numsections'] >= 0) {
-        course_get_format($course)->update_course_format_options(
+        \core_course\format_base::instance($course)->update_course_format_options(
                 array('numsections' => $courseformatoptions['numsections']));
     }
 }

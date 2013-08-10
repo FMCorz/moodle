@@ -3565,7 +3565,7 @@ class admin_setting_sitesetselect extends admin_setting_configselect {
      * @return string The site name of the selected site
      */
     public function get_setting() {
-        $site = course_get_format(get_site())->get_course();
+        $site = \core_course\format_base::instance(get_site())->get_course();
         return $site->{$this->name};
     }
 
@@ -3586,7 +3586,7 @@ class admin_setting_sitesetselect extends admin_setting_configselect {
         $record->$temp        = $data;
         $record->timemodified = time();
 
-        course_get_format($SITE)->update_course_format_options($record);
+        \core_course\format_base::instance($SITE)->update_course_format_options($record);
         $DB->update_record('course', $record);
 
         // Reset caches.
@@ -3768,7 +3768,7 @@ class admin_setting_sitesetcheckbox extends admin_setting_configcheckbox {
      * @return string
      */
     public function get_setting() {
-        $site = course_get_format(get_site())->get_course();
+        $site = \core_course\format_base::instance(get_site())->get_course();
         return $site->{$this->name};
     }
 
@@ -3785,7 +3785,7 @@ class admin_setting_sitesetcheckbox extends admin_setting_configcheckbox {
         $record->{$this->name} = ($data == '1' ? 1 : 0);
         $record->timemodified  = time();
 
-        course_get_format($SITE)->update_course_format_options($record);
+        \core_course\format_base::instance($SITE)->update_course_format_options($record);
         $DB->update_record('course', $record);
 
         // Reset caches.
@@ -3812,7 +3812,7 @@ class admin_setting_sitesettext extends admin_setting_configtext {
      * @return mixed string or null
      */
     public function get_setting() {
-        $site = course_get_format(get_site())->get_course();
+        $site = \core_course\format_base::instance(get_site())->get_course();
         return $site->{$this->name} != '' ? $site->{$this->name} : NULL;
     }
 
@@ -3853,7 +3853,7 @@ class admin_setting_sitesettext extends admin_setting_configtext {
         $record->{$this->name} = $data;
         $record->timemodified  = time();
 
-        course_get_format($SITE)->update_course_format_options($record);
+        \core_course\format_base::instance($SITE)->update_course_format_options($record);
         $DB->update_record('course', $record);
 
         // Reset caches.
@@ -3887,7 +3887,7 @@ class admin_setting_special_frontpagedesc extends admin_setting {
      * @return string The current setting
      */
     public function get_setting() {
-        $site = course_get_format(get_site())->get_course();
+        $site = \core_course\format_base::instance(get_site())->get_course();
         return $site->{$this->name};
     }
 
@@ -3904,7 +3904,7 @@ class admin_setting_special_frontpagedesc extends admin_setting {
         $record->{$this->name} = $data;
         $record->timemodified  = time();
 
-        course_get_format($SITE)->update_course_format_options($record);
+        \core_course\format_base::instance($SITE)->update_course_format_options($record);
         $DB->update_record('course', $record);
 
         // Reset caches.

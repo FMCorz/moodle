@@ -364,13 +364,13 @@ class course_modinfo extends stdClass {
                 'availablefrom, availableuntil, showavailability, groupingid');
         $compressedsections = array();
 
-        $formatoptionsdef = course_get_format($courseid)->section_format_options();
+        $formatoptionsdef = \core_course\format_base::instance($courseid)->section_format_options();
         // Remove unnecessary data and add availability
         foreach ($sections as $number => $section) {
             // Add cached options from course format to $section object
             foreach ($formatoptionsdef as $key => $option) {
                 if (!empty($option['cache'])) {
-                    $formatoptions = course_get_format($courseid)->get_format_options($section);
+                    $formatoptions = \core_course\format_base::instance($courseid)->get_format_options($section);
                     if (!array_key_exists('cachedefault', $option) || $option['cachedefault'] !== $formatoptions[$key]) {
                         $section->$key = $formatoptions[$key];
                     }
@@ -1745,7 +1745,7 @@ class section_info implements IteratorAggregate {
         }
 
         // cached course format data
-        $formatoptionsdef = course_get_format($courseid)->section_format_options();
+        $formatoptionsdef = \core_course\format_base::instance($courseid)->section_format_options();
         foreach ($formatoptionsdef as $field => $option) {
             if (!empty($option['cache'])) {
                 if (isset($data->{$field})) {
@@ -1798,7 +1798,7 @@ class section_info implements IteratorAggregate {
         if (property_exists($this, '_'.$name)) {
             return isset($this->{'_'.$name});
         }
-        $defaultformatoptions = course_get_format($this->_course)->section_format_options();
+        $defaultformatoptions = \core_course\format_base::instance($this->_course)->section_format_options();
         if (array_key_exists($name, $defaultformatoptions)) {
             $value = $this->__get($name);
             return isset($value);
@@ -1816,7 +1816,7 @@ class section_info implements IteratorAggregate {
         if (property_exists($this, '_'.$name)) {
             return empty($this->{'_'.$name});
         }
-        $defaultformatoptions = course_get_format($this->_course)->section_format_options();
+        $defaultformatoptions = \core_course\format_base::instance($this->_course)->section_format_options();
         if (array_key_exists($name, $defaultformatoptions)) {
             $value = $this->__get($name);
             return empty($value);
@@ -1838,10 +1838,10 @@ class section_info implements IteratorAggregate {
         if (array_key_exists($name, $this->cachedformatoptions)) {
             return $this->cachedformatoptions[$name];
         }
-        $defaultformatoptions = course_get_format($this->_course)->section_format_options();
+        $defaultformatoptions = \core_course\format_base::instance($this->_course)->section_format_options();
         // precheck if the option is defined in format to avoid unnecessary DB queries in get_format_options()
         if (array_key_exists($name, $defaultformatoptions)) {
-            $formatoptions = course_get_format($this->_course)->get_format_options($this);
+            $formatoptions = \core_course\format_base::instance($this->_course)->get_format_options($this);
             return $formatoptions[$name];
         }
         debugging('Invalid section_info property accessed! '.$name);
@@ -1861,7 +1861,7 @@ class section_info implements IteratorAggregate {
                 $ret[substr($key, 1)] = $this->$key;
             }
         }
-        $ret = array_merge($ret, course_get_format($this->_course)->get_format_options($this));
+        $ret = array_merge($ret, \core_course\format_base::instance($this->_course)->get_format_options($this));
         return new ArrayIterator($ret);
     }
 

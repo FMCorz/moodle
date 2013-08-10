@@ -91,7 +91,7 @@ switch($requestmethod) {
                         require_capability('moodle/course:movesections', $coursecontext);
                         move_section_to($course, $id, $value);
                         // See if format wants to do something about it
-                        $response = course_get_format($course)->ajax_section_move();
+                        $response = \core_course\format_base::instance($course)->ajax_section_move();
                         if ($response !== null) {
                             echo json_encode($response);
                         }

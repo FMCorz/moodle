@@ -941,7 +941,7 @@ class enrol_ldap_plugin extends enrol_plugin {
         $template = false;
         if ($this->get_config('template')) {
             if ($template = $DB->get_record('course', array('shortname'=>$this->get_config('template')))) {
-                $template = fullclone(course_get_format($template)->get_course());
+                $template = fullclone(\core_course\format_base::instance($template)->get_course());
                 unset($template->id); // So we are clear to reinsert the record
                 unset($template->fullname);
                 unset($template->shortname);

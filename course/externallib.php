@@ -302,7 +302,7 @@ class core_course_external extends external_api {
 
             // now security checks
             $context = context_course::instance($course->id, IGNORE_MISSING);
-            $courseformatoptions = course_get_format($course)->get_format_options();
+            $courseformatoptions = \core_course\format_base::instance($course)->get_format_options();
             try {
                 self::validate_context($context);
             } catch (Exception $e) {
@@ -702,7 +702,7 @@ class core_course_external extends external_api {
                 $context = context_course::instance($course['id'], MUST_EXIST);
                 self::validate_context($context);
 
-                $oldcourse = course_get_format($course['id'])->get_course();
+                $oldcourse = \core_course\format_base::instance($course['id'])->get_course();
 
                 require_capability('moodle/course:update', $context);
 

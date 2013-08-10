@@ -80,7 +80,7 @@ class block_section_links extends block_base {
         }
 
         $course = $this->page->course;
-        $courseformat = course_get_format($course);
+        $courseformat = \core_course\format_base::instance($course);
         $courseformatoptions = $courseformat->get_format_options();
         $context = context_course::instance($course->id);
 

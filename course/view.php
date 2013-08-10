@@ -117,7 +117,7 @@
     add_to_log($course->id, 'course', $loglabel, "view.php?". $logparam, $infoid);
 
     // Fix course format if it is no longer installed
-    $course->format = course_get_format($course)->get_format();
+    $course->format = \core_course\format_base::instance($course)->get_format();
 
     $PAGE->set_pagelayout('course');
     $PAGE->set_pagetype('course-view-' . $course->format);

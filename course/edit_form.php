@@ -153,7 +153,7 @@ class course_edit_form extends moodleform {
             $formcourseformats[$courseformat] = get_string('pluginname', "format_$courseformat");
         }
         if (isset($course->format)) {
-            $course->format = course_get_format($course)->get_format(); // replace with default if not found
+            $course->format = \core_course\format_base::instance($course)->get_format(); // replace with default if not found
             if (!in_array($course->format, $courseformats)) {
                 // this format is disabled. Still display it in the dropdown
                 $formcourseformats[$course->format] = get_string('withdisablednote', 'moodle',
@@ -317,7 +317,7 @@ class course_edit_form extends moodleform {
         // add course format options
         $formatvalue = $mform->getElementValue('format');
         if (is_array($formatvalue) && !empty($formatvalue)) {
-            $courseformat = course_get_format((object)array('format' => $formatvalue[0]));
+            $courseformat = \core_course\format_base::instance((object)array('format' => $formatvalue[0]));
 
             $elements = $courseformat->create_edit_form_elements($mform);
             for ($i = 0; $i < count($elements); $i++) {
@@ -347,7 +347,7 @@ class course_edit_form extends moodleform {
 
         $errors = array_merge($errors, enrol_course_edit_validation($data, $this->context));
 
-        $courseformat = course_get_format((object)array('format' => $data['format']));
+        $courseformat = \core_course\format_base::instance((object)array('format' => $data['format']));
         $formaterrors = $courseformat->edit_form_validation($data, $files, $errors);
         if (!empty($formaterrors) && is_array($formaterrors)) {
             $errors = array_merge($errors, $formaterrors);

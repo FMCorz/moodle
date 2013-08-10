@@ -1785,7 +1785,7 @@ class global_navigation extends navigation_node {
         if ($sectionnum !== null) {
             $this->includesectionnum = $sectionnum;
         }
-        course_get_format($course)->extend_course_navigation($this, $coursenode, $sectionnum, $cm);
+        \core_course\format_base::instance($course)->extend_course_navigation($this, $coursenode, $sectionnum, $cm);
         if (isset($cm->id)) {
             $activity = $coursenode->find($cm->id, self::TYPE_ACTIVITY);
             if (empty($activity)) {
@@ -1810,7 +1810,7 @@ class global_navigation extends navigation_node {
         $sections = $modinfo->get_section_info_all();
 
         // For course formats using 'numsections' trim the sections list
-        $courseformatoptions = course_get_format($course)->get_format_options();
+        $courseformatoptions = \core_course\format_base::instance($course)->get_format_options();
         if (isset($courseformatoptions['numsections'])) {
             $sections = array_slice($sections, 0, $courseformatoptions['numsections']+1, true);
         }

@@ -122,7 +122,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
 
         if ($section->section != 0) {
             // Only in the non-general sections.
-            if (course_get_format($course)->is_section_current($section)) {
+            if (\core_course\format_base::instance($course)->is_section_current($section)) {
                 $o = get_accesshide(get_string('currentsection', 'format_'.$course->format));
             }
         }
@@ -151,7 +151,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
             // Only in the non-general sections.
             if (!$section->visible) {
                 $sectionstyle = ' hidden';
-            } else if (course_get_format($course)->is_section_current($section)) {
+            } else if (\core_course\format_base::instance($course)->is_section_current($section)) {
                 $sectionstyle = ' current';
             }
         }
@@ -297,7 +297,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         if (!$section->visible) {
             $classattr .= ' hidden';
             $linkclasses .= ' dimmed_text';
-        } else if (course_get_format($course)->is_section_current($section)) {
+        } else if (\core_course\format_base::instance($course)->is_section_current($section)) {
             $classattr .= ' current';
         }
 
@@ -481,7 +481,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
      */
     protected function get_nav_links($course, $sections, $sectionno) {
         // FIXME: This is really evil and should by using the navigation API.
-        $course = course_get_format($course)->get_course();
+        $course = \core_course\format_base::instance($course)->get_course();
         $canviewhidden = has_capability('moodle/course:viewhiddensections', context_course::instance($course->id))
             or !$course->hiddensections;
 
@@ -609,7 +609,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         global $PAGE;
 
         $modinfo = get_fast_modinfo($course);
-        $course = course_get_format($course)->get_course();
+        $course = \core_course\format_base::instance($course)->get_course();
 
         // Can we view the section in question?
         if (!($sectioninfo = $modinfo->get_section_info($displaysection))) {
@@ -701,7 +701,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
         global $PAGE;
 
         $modinfo = get_fast_modinfo($course);
-        $course = course_get_format($course)->get_course();
+        $course = \core_course\format_base::instance($course)->get_course();
 
         $context = context_course::instance($course->id);
         // Title with completion help icon.
@@ -830,7 +830,7 @@ abstract class format_section_renderer_base extends plugin_renderer_base {
      */
     protected final function is_section_current($section, $course) {
         debugging('Function format_section_renderer_base::is_section_current() is deprecated. '.
-                'Use course_get_format($course)->is_section_current($section) instead', DEBUG_DEVELOPER);
-        return course_get_format($course)->is_section_current($section);
+                'Use \core_course\format_base::instance($course)->is_section_current($section) instead', DEBUG_DEVELOPER);
+        return \core_course\format_base::instance($course)->is_section_current($section);
     }
 }

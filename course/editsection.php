@@ -44,7 +44,7 @@ require_capability('moodle/course:update', $context);
 $sectioninfo = get_fast_modinfo($course)->get_section_info($sectionnum);
 
 $editoroptions = array('context'=>$context ,'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes'=>$CFG->maxbytes, 'trusttext'=>false, 'noclean'=>true);
-$mform = course_get_format($course->id)->editsection_form($PAGE->url,
+$mform = \core_course\format_base::instance($course->id)->editsection_form($PAGE->url,
         array('cs' => $sectioninfo, 'editoroptions' => $editoroptions));
 // set current value, make an editable copy of section_info object
 // this will retrieve all format-specific options as well
@@ -67,7 +67,7 @@ if ($mform->is_cancelled()){
         condition_info_section::update_section_from_form($sectioninfo, $data);
         rebuild_course_cache($course->id, true);
     }
-    course_get_format($course->id)->update_section_format_options($data);
+    \core_course\format_base::instance($course->id)->update_section_format_options($data);
 
     add_to_log($course->id, "course", "editsection", "editsection.php?id=$id", "$sectionnum");
     $PAGE->navigation->clear_cache();

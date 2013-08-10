@@ -385,7 +385,7 @@ class core_course_externallib_testcase extends externallib_advanced_testcase {
 
         // Check that the courses were correctly created.
         foreach ($createdcourses as $createdcourse) {
-            $courseinfo = course_get_format($createdcourse['id'])->get_course();
+            $courseinfo = \core_course\format_base::instance($createdcourse['id'])->get_course();
 
             if ($createdcourse['shortname'] == $course2['shortname']) {
                 $this->assertEquals($courseinfo->fullname, $course2['fullname']);
@@ -739,7 +739,7 @@ class core_course_externallib_testcase extends externallib_advanced_testcase {
 
         // Check that the courses were correctly created.
         foreach ($courses as $course) {
-            $courseinfo = course_get_format($course['id'])->get_course();
+            $courseinfo = \core_course\format_base::instance($course['id'])->get_course();
             if ($course['id'] == $course2['id']) {
                 $this->assertEquals($course2['fullname'], $courseinfo->fullname);
                 $this->assertEquals($course2['shortname'], $courseinfo->shortname);

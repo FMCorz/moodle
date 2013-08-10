@@ -53,7 +53,7 @@ class format_singleactivity_renderer extends plugin_renderer_base {
             }
         } else {
             $output .= $courserenderer->course_section_cm_list($course, 0, 0);
-            if (empty($modinfo->sections[0]) && course_get_format($course)->activity_has_subtypes()) {
+            if (empty($modinfo->sections[0]) && \core_course\format_base::instance($course)->activity_has_subtypes()) {
                 // Course format was unable to automatically redirect to add module page.
                 $output .= $courserenderer->course_section_add_cm_control($course, 0, 0);
             }

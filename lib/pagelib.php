@@ -891,7 +891,7 @@ class moodle_page {
         // Notify course format that this page is set for the course.
         if ($this->_course->id != $SITE->id) {
             require_once($CFG->dirroot.'/course/lib.php');
-            $courseformat = course_get_format($this->_course);
+            $courseformat = \core_course\format_base::instance($this->_course);
             $this->add_body_class('format-'. $courseformat->get_format());
             $courseformat->page_set_course($this);
         } else {
@@ -979,7 +979,7 @@ class moodle_page {
         // Notify course format that this page is set for the course module.
         if ($this->_course->id != $SITE->id) {
             require_once($CFG->dirroot.'/course/lib.php');
-            course_get_format($this->_course)->page_set_cm($this);
+            \core_course\format_base::instance($this->_course)->page_set_cm($this);
         }
     }
 
