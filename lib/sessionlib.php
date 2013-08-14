@@ -132,6 +132,72 @@ abstract class session_stub extends \core\session\driver {
 class legacy_file_session extends \core\session\driver_legacyfile {
 }
 
+/**
+ * Memcached session handler
+ *
+ * @package    core
+ * @subpackage session
+ * @copyright  Copyright (c) 2013 Moodlerooms Inc. (http://www.moodlerooms.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author     Mark Nielsen
+ */
+class memcached_session extends session_stub {
+    protected function init_session_storage() {
+        global $CFG;
+
+        if (empty($CFG->session_save_path_memcached)) {
+            throw new coding_exception('The $CFG->session_save_path_memcached is empty and must be configured for Memcached sessions');
+        }
+        ini_set('session.save_handler', 'memcached');
+        ini_set('session.save_path', $CFG->session_save_path_memcached);
+        ini_set('session.gc_maxlifetime', $CFG->sessiontimeout);
+    }
+
+    public function session_exists($sid) {
+        // Note: $sid is session_id().
+        $memcached = new Memcached();
+        $memcached->addServers($this->connection_string_to_servers());
+        $value = $memcached->get(ini_get('memcached.sess_prefix').$sid);
+        $memcached->quit();
+
+        if ($value !== false) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Convert a connection string to an array of servers
+     *
+     * EG: Converts: "abc:123, xyz:789" to
+     *
+     *  array(
+     *      array('abc', '123'),
+     *      array('xyz', '789'),
+     *  )
+     *
+     * @return array
+     */
+    protected function connection_string_to_servers() {
+        global $CFG;
+
+        $servers = array();
+        $parts   = explode(',', $CFG->session_save_path_memcached);
+        foreach ($parts as $part) {
+            $part = trim($part);
+            $pos  = strrpos($part, ':');
+            if ($pos !== false) {
+                $host = substr($part, 0, $pos);
+                $port = substr($part, ($pos + 1));
+            } else {
+                $host = $part;
+                $port = 11211;
+            }
+            $servers[] = array($host, $port);
+        }
+        return $servers;
+    }
+}
 
 /**
  * Recommended moodle session storage.
