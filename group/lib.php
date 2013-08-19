@@ -305,9 +305,8 @@ function groups_create_grouping($data, $editoroptions=null) {
         $data->descriptionformat = $data->description_editor['format'];
     }
 
+    $context = context_course::instance($data->courseid);
     $id = $DB->insert_record('groupings', $data);
-
-    //trigger groups events
     $data->id = $id;
 
     if ($editoroptions !== null) {
@@ -321,7 +320,14 @@ function groups_create_grouping($data, $editoroptions=null) {
     // Invalidate the grouping cache for the course
     cache_helper::invalidate_by_definition('core', 'groupdata', array(), array($data->courseid));
 
-    events_trigger('groups_grouping_created', $data);
+    // Trigger group event.
+    $params = array(
+        'context' => $context,
+        'objectid' => $id
+    );
+    $event = \core\event\grouping_created::create($params);
+    $event->set_legacy_eventdata($data);
+    $event->trigger();
 
     return $id;
 }

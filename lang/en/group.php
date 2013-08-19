@@ -70,6 +70,7 @@ $string['evenallocation'] = 'Note: To keep group allocation even, the actual num
 $string['event_group_created'] = 'Group created';
 $string['event_group_member_added'] = 'Group member added';
 $string['event_group_member_removed'] = 'Group member removed';
+$string['event_grouping_created'] = 'Grouping created';
 $string['existingmembers'] = 'Existing members: {$a}';
 $string['filtergroups'] = 'Filter groups by:';
 $string['group'] = 'Group';
