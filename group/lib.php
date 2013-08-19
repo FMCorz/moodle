@@ -436,8 +436,14 @@ function groups_update_grouping($data, $editoroptions=null) {
     // Invalidate the group data.
     cache_helper::invalidate_by_definition('core', 'groupdata', array(), array($data->courseid));
 
-    //trigger groups events
-    events_trigger('groups_grouping_updated', $data);
+    // Trigger group event.
+    $params = array(
+        'context' => context_course::instance($data->courseid),
+        'objectid' => $data->id
+    );
+    $event = \core\event\grouping_updated::create($params);
+    $event->set_legacy_eventdata($data);
+    $event->trigger();
 
     return true;
 }

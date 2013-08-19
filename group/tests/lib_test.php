@@ -155,4 +155,31 @@ class core_group_lib_testcase extends advanced_testcase {
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
     }
+
+    public function test_grouping_updated_event() {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $group = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+
+        $sink = $this->redirectEvents();
+        $data = new stdClass();
+        $data->id = $group->id;
+        $data->courseid = $course->id;
+        $data->name = 'Backend team';
+        groups_update_grouping($data);
+        $events = $sink->get_events();
+        $this->assertCount(1, $events);
+        $event = reset($events);
+
+        $this->assertInstanceOf('\core\event\grouping_updated', $event);
+
+        // 'Repairing' the object for comparison.
+        $data->id = (int) $group->id;
+        $data->timemodified = time();
+        $this->assertEventLegacyData($data, $event);
+
+        $this->assertEquals(context_course::instance($course->id), $event->get_context());
+        $this->assertEquals($group->id, $event->objectid);
+    }
 }
