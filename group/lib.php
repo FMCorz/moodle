@@ -201,14 +201,18 @@ function groups_remove_member($grouporid, $userorid) {
 
     $DB->delete_records('groups_members', array('groupid'=>$groupid, 'userid'=>$userid));
 
-    //update group info
+    // Update group info.
     $DB->set_field('groups', 'timemodified', time(), array('id'=>$groupid));
 
-    //trigger groups events
-    $eventdata = new stdClass();
-    $eventdata->groupid = $groupid;
-    $eventdata->userid  = $userid;
-    events_trigger('groups_member_removed', $eventdata);
+    // Trigger group event.
+    $params = array(
+        'context' => context_course::instance($group->courseid),
+        'objectid' => $groupid,
+        'relateduserid' => $userid
+    );
+    $event = \core\event\group_member_removed::create($params);
+    $event->add_record_snapshot('groups', $group);
+    $event->trigger();
 
     return true;
 }

@@ -68,6 +68,7 @@ $string['errorselectone'] = 'Please select a single group before choosing this o
 $string['errorselectsome'] = 'Please select one or more groups before choosing this option';
 $string['evenallocation'] = 'Note: To keep group allocation even, the actual number of members per group differs from the number you specified.';
 $string['event_group_member_added'] = 'Group member added';
+$string['event_group_member_removed'] = 'Group member removed';
 $string['existingmembers'] = 'Existing members: {$a}';
 $string['filtergroups'] = 'Filter groups by:';
 $string['group'] = 'Group';

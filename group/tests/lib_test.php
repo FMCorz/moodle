@@ -62,4 +62,30 @@ class core_group_lib_testcase extends advanced_testcase {
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
     }
+
+    public function test_member_removed_event() {
+        $this->resetAfterTest();
+
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $group = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $this->getDataGenerator()->enrol_user($user->id, $course->id);
+        $this->getDataGenerator()->create_group_member(array('userid' => $user->id, 'groupid' => $group->id));
+
+        $sink = $this->redirectEvents();
+        groups_remove_member($group->id, $user->id);
+        $events = $sink->get_events();
+        $this->assertCount(1, $events);
+        $event = reset($events);
+
+        $expected = new stdClass();
+        $expected->groupid = $group->id;
+        $expected->userid  = $user->id;
+        $this->assertEventLegacyData($expected, $event);
+        $this->assertInstanceOf('\core\event\group_member_removed', $event);
+        $this->assertEquals($user->id, $event->relateduserid);
+        $this->assertEquals(context_course::instance($course->id), $event->get_context());
+        $this->assertEquals($group->id, $event->objectid);
+    }
 }
