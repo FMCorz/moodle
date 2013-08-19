@@ -399,9 +399,14 @@ function groups_update_group($data, $editform = false, $editoroptions = false) {
         groups_update_group_icon($group, $data, $editform);
     }
 
-    //trigger groups events
-    events_trigger('groups_group_updated', $group);
-
+    // Trigger group event.
+    $params = array(
+        'context' => $context,
+        'objectid' => $group->id
+    );
+    $event = \core\event\group_updated::create($params);
+    $event->add_record_snapshot('groups', $group);
+    $event->trigger();
 
     return true;
 }

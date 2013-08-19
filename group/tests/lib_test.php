@@ -133,4 +133,26 @@ class core_group_lib_testcase extends advanced_testcase {
         $this->assertEquals($group->id, $event->objectid);
     }
 
+    public function test_group_updated_event() {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $group = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+
+        $sink = $this->redirectEvents();
+        $data = new stdClass();
+        $data->id = $group->id;
+        $data->courseid = $course->id;
+        $data->name = 'Backend team';
+        groups_update_group($data);
+        $events = $sink->get_events();
+        $this->assertCount(1, $events);
+        $event = reset($events);
+
+        $this->assertInstanceOf('\core\event\group_updated', $event);
+        $group->name = $data->name;
+        $this->assertEventLegacyData($group, $event);
+        $this->assertEquals(context_course::instance($course->id), $event->get_context());
+        $this->assertEquals($group->id, $event->objectid);
+    }
 }
