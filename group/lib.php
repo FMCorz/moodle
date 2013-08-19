@@ -64,8 +64,9 @@ function groups_add_member($grouporid, $userorid, $component=null, $itemid=0) {
         $group = $DB->get_record('groups', array('id'=>$groupid), '*', MUST_EXIST);
     }
 
-    //check if the user a participant of the group course
-    if (!is_enrolled(context_course::instance($group->courseid), $userid)) {
+    // Check if the user a participant of the group course.
+    $context = context_course::instance($group->courseid);
+    if (!is_enrolled($context, $userid)) {
         return false;
     }
 
@@ -99,16 +100,22 @@ function groups_add_member($grouporid, $userorid, $component=null, $itemid=0) {
 
     $DB->insert_record('groups_members', $member);
 
-    //update group info
+    // Update group info.
     $DB->set_field('groups', 'timemodified', $member->timeadded, array('id'=>$groupid));
 
-    //trigger groups events
-    $eventdata = new stdClass();
-    $eventdata->groupid = $groupid;
-    $eventdata->userid  = $userid;
-    $eventdata->component = $member->component;
-    $eventdata->itemid = $member->itemid;
-    events_trigger('groups_member_added', $eventdata);
+    // Trigger group event.
+    $params = array(
+        'context' => $context,
+        'objectid' => $groupid,
+        'relateduserid' => $userid,
+        'other' => array(
+            'component' => $member->component,
+            'itemid' => $member->itemid
+        )
+    );
+    $event = \core\event\group_member_added::create($params);
+    $event->add_record_snapshot('groups', $group);
+    $event->trigger();
 
     return true;
 }
