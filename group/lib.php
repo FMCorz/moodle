@@ -268,8 +268,14 @@ function groups_create_group($data, $editform = false, $editoroptions = false) {
     // Invalidate the grouping cache for the course
     cache_helper::invalidate_by_definition('core', 'groupdata', array(), array($course->id));
 
-    //trigger groups events
-    events_trigger('groups_group_created', $group);
+    // Trigger group event.
+    $params = array(
+        'context' => $context,
+        'objectid' => $group->id
+    );
+    $event = \core\event\group_created::create($params);
+    $event->add_record_snapshot('groups', $group);
+    $event->trigger();
 
     return $group->id;
 }

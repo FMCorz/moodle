@@ -88,4 +88,22 @@ class core_group_lib_testcase extends advanced_testcase {
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
     }
+
+    public function test_group_created_event() {
+        $this->resetAfterTest();
+
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+
+        $sink = $this->redirectEvents();
+        $group = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $events = $sink->get_events();
+        $this->assertCount(1, $events);
+        $event = reset($events);
+
+        $this->assertInstanceOf('\core\event\group_created', $event);
+        $this->assertEventLegacyData($group, $event);
+        $this->assertEquals(context_course::instance($course->id), $event->get_context());
+        $this->assertEquals($group->id, $event->objectid);
+    }
 }
