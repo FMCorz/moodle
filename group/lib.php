@@ -667,28 +667,18 @@ function groups_delete_groups($courseid, $showfeedback=false) {
 function groups_delete_groupings($courseid, $showfeedback=false) {
     global $DB, $OUTPUT;
 
-    // delete any uses of groupings
-    $sql = "DELETE FROM {groupings_groups}
-             WHERE groupingid in (SELECT id FROM {groupings} g WHERE g.courseid = ?)";
-    $DB->execute($sql, array($courseid));
+    $groupings = $DB->get_recordset_select('groupings', 'courseid = ?', array($courseid));
+    foreach ($groupings as $grouping) {
+        groups_delete_grouping($grouping);
+    }
 
-    // remove the default groupingid from course
-    $DB->set_field('course', 'defaultgroupingid', 0, array('id'=>$courseid));
-    // remove the groupingid from all course modules
-    $DB->set_field('course_modules', 'groupingid', 0, array('course'=>$courseid));
-
-    // Delete all files associated with groupings for this course
-    $context = context_course::instance($courseid);
-    $fs = get_file_storage();
-    $fs->delete_area_files($context->id, 'grouping');
-
-    $DB->delete_records('groupings', array('courseid'=>$courseid));
-
-    // Invalidate the grouping cache for the course
+    // Invalidate the grouping cache for the course.
     cache_helper::invalidate_by_definition('core', 'groupdata', array(), array($courseid));
 
-    // trigger groups events
-    events_trigger('groups_groupings_deleted', $courseid);
+    // TODO MDL-41312 Remove events_trigger_legacy('groups_groupings_deleted').
+    // This event is kept here for backwards compatibility, because it cannot be
+    // translated to a new event as it is wrong.
+    events_trigger_legacy('groups_groupings_deleted', $courseid);
 
     if ($showfeedback) {
         echo $OUTPUT->notification(get_string('deleted').' - '.get_string('groupings', 'group'), 'notifysuccess');
