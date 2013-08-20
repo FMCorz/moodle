@@ -181,10 +181,8 @@ function groups_remove_member($grouporid, $userorid) {
 
     if (is_object($userorid)) {
         $userid = $userorid->id;
-        $user   = $userorid;
     } else {
         $userid = $userorid;
-        $user = $DB->get_record('user', array('id'=>$userid), '*', MUST_EXIST);
     }
 
     if (is_object($grouporid)) {
@@ -567,23 +565,29 @@ function groups_delete_group_members($courseid, $userid=0, $showfeedback=false) 
         return false;
     }
 
-    $params = array('courseid'=>$courseid);
+    // Select * so that the function groups_remove_member() gets the whole record.
+    $groupssql = "SELECT * FROM {groups} WHERE courseid = :courseid";
+    $groups = $DB->get_recordset_sql($groupssql, array('courseid' => $courseid));
+    foreach ($groups as $group) {
+        if ($userid) {
+            $userids = array($userid);
+        } else {
+            $userids = $DB->get_fieldset_sql("SELECT userid FROM {groups_members} WHERE groupid = :groupid",
+                array('groupid' => $group->id));
+        }
 
-    if ($userid) {
-        $usersql = "AND userid = :userid";
-        $params['userid'] = $userid;
-    } else {
-        $usersql = "";
+        foreach ($userids as $id) {
+            groups_remove_member($group, $id);
+        }
     }
 
-    $groupssql = "SELECT id FROM {groups} g WHERE g.courseid = :courseid";
-    $DB->delete_records_select('groups_members', "groupid IN ($groupssql) $usersql", $params);
-
-    //trigger groups events
+    // TODO MDL-41312 Remove events_trigger_legacy('groups_members_removed').
+    // This event is kept here for backwards compatibility, because it cannot be
+    // translated to a new event as it is wrong.
     $eventdata = new stdClass();
     $eventdata->courseid = $courseid;
     $eventdata->userid   = $userid;
-    events_trigger('groups_members_removed', $eventdata);
+    events_trigger_legacy('groups_members_removed', $eventdata);
 
     if ($showfeedback) {
         echo $OUTPUT->notification(get_string('deleted').' - '.get_string('groupmembers', 'group'), 'notifysuccess');
