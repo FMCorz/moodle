@@ -119,6 +119,7 @@ Event triggering and event handlers:
       be captured using handlers, but they should not be used any more.
       * groups_members_removed          -> \core\event\group_member_removed
       * groups_groupings_groups_removed -> (no replacement)
+      * groups_groups_deleted           -> \core\event\group_deleted
 
 === 2.5.1 ===
 
