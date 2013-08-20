@@ -219,4 +219,158 @@ class core_group_lib_testcase extends advanced_testcase {
         $this->assertEquals($group->id, $event->objectid);
     }
 
+    public function test_groups_delete_group_members() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user1->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user2->id, $course->id);
+        $group1 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $group2 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+
+        // Test deletion of all the users.
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group1->id, 'userid' => $user1->id));
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group2->id, 'userid' => $user1->id));
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group1->id, 'userid' => $user2->id));
+
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user2->id)));
+        groups_delete_group_members($course->id);
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user2->id)));
+
+        // Test deletion of a specific user.
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group1->id, 'userid' => $user1->id));
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group2->id, 'userid' => $user1->id));
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group1->id, 'userid' => $user2->id));
+
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user2->id)));
+        groups_delete_group_members($course->id, $user2->id);
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user2->id)));
+    }
+
+    public function test_groups_remove_member() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user1->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user2->id, $course->id);
+        $group1 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $group2 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group1->id, 'userid' => $user1->id));
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group2->id, 'userid' => $user1->id));
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group1->id, 'userid' => $user2->id));
+
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user2->id)));
+        groups_remove_member($group1->id, $user1->id);
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user2->id)));
+        groups_remove_member($group1->id, $user2->id);
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user2->id)));
+        groups_remove_member($group2->id, $user1->id);
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group2->id, 'userid' => $user1->id)));
+    }
+
+    public function test_groups_delete_groupings_groups() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+        $group1 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $group2 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $group1c2 = $this->getDataGenerator()->create_group(array('courseid' => $course2->id));
+        $grouping1 = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+        $grouping2 = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+        $grouping1c2 = $this->getDataGenerator()->create_grouping(array('courseid' => $course2->id));
+
+        $this->getDataGenerator()->create_grouping_group(array('groupingid' => $grouping1->id, 'groupid' => $group1->id));
+        $this->getDataGenerator()->create_grouping_group(array('groupingid' => $grouping1->id, 'groupid' => $group2->id));
+        $this->getDataGenerator()->create_grouping_group(array('groupingid' => $grouping2->id, 'groupid' => $group1->id));
+        $this->getDataGenerator()->create_grouping_group(array('groupingid' => $grouping1c2->id, 'groupid' => $group1c2->id));
+        $this->assertTrue($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping1->id)));
+        $this->assertTrue($DB->record_exists('groupings_groups', array('groupid' => $group2->id, 'groupingid' => $grouping1->id)));
+        $this->assertTrue($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping2->id)));
+        $this->assertTrue($DB->record_exists('groupings_groups',
+            array('groupid' => $group1c2->id, 'groupingid' => $grouping1c2->id)));
+        groups_delete_groupings_groups($course->id);
+        $this->assertFalse($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping1->id)));
+        $this->assertFalse($DB->record_exists('groupings_groups', array('groupid' => $group2->id, 'groupingid' => $grouping1->id)));
+        $this->assertFalse($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping2->id)));
+        $this->assertTrue($DB->record_exists('groupings_groups',
+            array('groupid' => $group1c2->id, 'groupingid' => $grouping1c2->id)));
+    }
+
+    public function test_groups_delete_groups() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+        $group1 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $group2 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $group1c2 = $this->getDataGenerator()->create_group(array('courseid' => $course2->id));
+        $grouping1 = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+        $grouping2 = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+        $user1 = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user1->id, $course->id);
+        $this->getDataGenerator()->create_group_member(array('groupid' => $group1->id, 'userid' => $user1->id));
+        $this->getDataGenerator()->create_grouping_group(array('groupid' => $group1->id, 'groupingid' => $grouping1->id));
+
+        $this->assertTrue($DB->record_exists('groups', array('id' => $group1->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groups', array('id' => $group2->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groups', array('id' => $group1c2->id, 'courseid' => $course2->id)));
+        $this->assertTrue($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groupings', array('id' => $grouping1->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping1->id)));
+        groups_delete_groups($course->id);
+        $this->assertFalse($DB->record_exists('groups', array('id' => $group1->id, 'courseid' => $course->id)));
+        $this->assertFalse($DB->record_exists('groups', array('id' => $group2->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groups', array('id' => $group1c2->id, 'courseid' => $course2->id)));
+        $this->assertFalse($DB->record_exists('groups_members', array('groupid' => $group1->id, 'userid' => $user1->id)));
+        $this->assertTrue($DB->record_exists('groupings', array('id' => $grouping1->id, 'courseid' => $course->id)));
+        $this->assertFalse($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping1->id)));
+    }
+
+    public function test_groups_delete_groupings() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+        $group1 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+        $grouping1 = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+        $grouping2 = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+        $grouping1c2 = $this->getDataGenerator()->create_grouping(array('courseid' => $course2->id));
+        $this->getDataGenerator()->create_grouping_group(array('groupid' => $group1->id, 'groupingid' => $grouping1->id));
+
+        $this->assertTrue($DB->record_exists('groups', array('id' => $group1->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groupings', array('id' => $grouping1->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groupings', array('id' => $grouping2->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groupings', array('id' => $grouping1c2->id, 'courseid' => $course2->id)));
+        $this->assertTrue($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping1->id)));
+        groups_delete_groupings($course->id);
+        $this->assertTrue($DB->record_exists('groups', array('id' => $group1->id, 'courseid' => $course->id)));
+        $this->assertFalse($DB->record_exists('groupings', array('id' => $grouping1->id, 'courseid' => $course->id)));
+        $this->assertFalse($DB->record_exists('groupings', array('id' => $grouping2->id, 'courseid' => $course->id)));
+        $this->assertTrue($DB->record_exists('groupings', array('id' => $grouping1c2->id, 'courseid' => $course2->id)));
+        $this->assertFalse($DB->record_exists('groupings_groups', array('groupid' => $group1->id, 'groupingid' => $grouping1->id)));
+    }
 }
