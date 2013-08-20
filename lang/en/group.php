@@ -73,6 +73,7 @@ $string['event_group_member_added'] = 'Group member added';
 $string['event_group_member_removed'] = 'Group member removed';
 $string['event_group_updated'] = 'Group updated';
 $string['event_grouping_created'] = 'Grouping created';
+$string['event_grouping_deleted'] = 'Grouping deleted';
 $string['event_grouping_updated'] = 'Grouping updated';
 $string['existingmembers'] = 'Existing members: {$a}';
 $string['filtergroups'] = 'Filter groups by:';

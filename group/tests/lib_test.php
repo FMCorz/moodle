@@ -201,4 +201,22 @@ class core_group_lib_testcase extends advanced_testcase {
         $this->assertEquals($group->id, $event->objectid);
     }
 
+    public function test_grouping_deleted_event() {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $group = $this->getDataGenerator()->create_grouping(array('courseid' => $course->id));
+
+        $sink = $this->redirectEvents();
+        groups_delete_grouping($group->id);
+        $events = $sink->get_events();
+        $this->assertCount(1, $events);
+        $event = reset($events);
+
+        $this->assertInstanceOf('\core\event\grouping_deleted', $event);
+        $this->assertEventLegacyData($group, $event);
+        $this->assertEquals(context_course::instance($course->id), $event->get_context());
+        $this->assertEquals($group->id, $event->objectid);
+    }
+
 }

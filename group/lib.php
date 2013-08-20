@@ -539,8 +539,14 @@ function groups_delete_grouping($groupingorid) {
     // Invalidate the grouping cache for the course
     cache_helper::invalidate_by_definition('core', 'groupdata', array(), array($grouping->courseid));
 
-    //trigger groups events
-    events_trigger('groups_grouping_deleted', $grouping);
+    // Trigger group event.
+    $params = array(
+        'context' => $context,
+        'objectid' => $groupingid
+    );
+    $event = \core\event\grouping_deleted::create($params);
+    $event->add_record_snapshot('groupings', $grouping);
+    $event->trigger();
 
     return true;
 }
