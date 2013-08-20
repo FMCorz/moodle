@@ -607,13 +607,20 @@ function groups_delete_groupings_groups($courseid, $showfeedback=false) {
     global $DB, $OUTPUT;
 
     $groupssql = "SELECT id FROM {groups} g WHERE g.courseid = ?";
-    $DB->delete_records_select('groupings_groups', "groupid IN ($groupssql)", array($courseid));
+    $results = $DB->get_recordset_select('groupings_groups', "groupid IN ($groupssql)",
+        array($courseid), '', 'groupid, groupingid');
+
+    foreach ($results as $result) {
+        groups_unassign_grouping($result->groupingid, $result->groupid, false);
+    }
 
     // Invalidate the grouping cache for the course
     cache_helper::invalidate_by_definition('core', 'groupdata', array(), array($courseid));
 
-    //trigger groups events
-    events_trigger('groups_groupings_groups_removed', $courseid);
+    // TODO MDL-41312 Remove events_trigger_legacy('groups_groupings_groups_removed').
+    // This event is kept here for backwards compatibility, because it cannot be
+    // translated to a new event as it is wrong.
+    events_trigger_legacy('groups_groupings_groups_removed', $courseid);
 
     // no need to show any feedback here - we delete usually first groupings and then groups
 
