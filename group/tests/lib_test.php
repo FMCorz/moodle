@@ -57,6 +57,7 @@ class core_group_lib_testcase extends advanced_testcase {
         $expected->component = 'mod_workshop';
         $expected->itemid = '123';
         $this->assertEventLegacyData($expected, $event);
+        $this->assertSame('groups_member_added', $event->get_legacy_eventname());
         $this->assertInstanceOf('\core\event\group_member_added', $event);
         $this->assertEquals($user->id, $event->relateduserid);
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
@@ -83,6 +84,7 @@ class core_group_lib_testcase extends advanced_testcase {
         $expected->groupid = $group->id;
         $expected->userid  = $user->id;
         $this->assertEventLegacyData($expected, $event);
+        $this->assertSame('groups_member_removed', $event->get_legacy_eventname());
         $this->assertInstanceOf('\core\event\group_member_removed', $event);
         $this->assertEquals($user->id, $event->relateduserid);
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
@@ -103,6 +105,7 @@ class core_group_lib_testcase extends advanced_testcase {
 
         $this->assertInstanceOf('\core\event\group_created', $event);
         $this->assertEventLegacyData($group, $event);
+        $this->assertSame('groups_group_created', $event->get_legacy_eventname());
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
     }
@@ -121,13 +124,14 @@ class core_group_lib_testcase extends advanced_testcase {
 
         $this->assertInstanceOf('\core\event\grouping_created', $event);
 
-        // 'Repairing' the object for comparison.
+        // 'Repairing' the object for comparison because of type of variables being wrong.
         $group->id = (int) $group->id;
         $group->timemodified = (int) $group->timemodified;
         $group->timecreated = (int) $group->timecreated;
         unset($group->idnumber);
         unset($group->configdata);
         $this->assertEventLegacyData($group, $event);
+        $this->assertSame('groups_grouping_created', $event->get_legacy_eventname());
 
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
@@ -152,6 +156,7 @@ class core_group_lib_testcase extends advanced_testcase {
         $this->assertInstanceOf('\core\event\group_updated', $event);
         $group->name = $data->name;
         $this->assertEventLegacyData($group, $event);
+        $this->assertSame('groups_group_updated', $event->get_legacy_eventname());
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
     }
@@ -167,6 +172,7 @@ class core_group_lib_testcase extends advanced_testcase {
         $data->id = $group->id;
         $data->courseid = $course->id;
         $data->name = 'Backend team';
+        $mostaccuratetimemodified = time();
         groups_update_grouping($data);
         $events = $sink->get_events();
         $this->assertCount(1, $events);
@@ -174,10 +180,11 @@ class core_group_lib_testcase extends advanced_testcase {
 
         $this->assertInstanceOf('\core\event\grouping_updated', $event);
 
-        // 'Repairing' the object for comparison.
+        // 'Repairing' the object for comparison because of type of variables being wrong.
         $data->id = (int) $group->id;
-        $data->timemodified = time();
+        $data->timemodified = $mostaccuratetimemodified;
         $this->assertEventLegacyData($data, $event);
+        $this->assertSame('groups_grouping_updated', $event->get_legacy_eventname());
 
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
@@ -197,6 +204,7 @@ class core_group_lib_testcase extends advanced_testcase {
 
         $this->assertInstanceOf('\core\event\group_deleted', $event);
         $this->assertEventLegacyData($group, $event);
+        $this->assertSame('groups_group_deleted', $event->get_legacy_eventname());
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
     }
@@ -215,6 +223,7 @@ class core_group_lib_testcase extends advanced_testcase {
 
         $this->assertInstanceOf('\core\event\grouping_deleted', $event);
         $this->assertEventLegacyData($group, $event);
+        $this->assertSame('groups_grouping_deleted', $event->get_legacy_eventname());
         $this->assertEquals(context_course::instance($course->id), $event->get_context());
         $this->assertEquals($group->id, $event->objectid);
     }
