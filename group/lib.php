@@ -100,8 +100,9 @@ function groups_add_member($grouporid, $userorid, $component=null, $itemid=0) {
 
     $DB->insert_record('groups_members', $member);
 
-    // Update group info.
+    // Update group info, and group object.
     $DB->set_field('groups', 'timemodified', $member->timeadded, array('id'=>$groupid));
+    $group->timemodified = $member->timeadded;
 
     // Trigger group event.
     $params = array(
@@ -200,7 +201,9 @@ function groups_remove_member($grouporid, $userorid) {
     $DB->delete_records('groups_members', array('groupid'=>$groupid, 'userid'=>$userid));
 
     // Update group info.
-    $DB->set_field('groups', 'timemodified', time(), array('id'=>$groupid));
+    $time = time();
+    $DB->set_field('groups', 'timemodified', $time, array('id' => $groupid));
+    $group->timemodified = $time;
 
     // Trigger group event.
     $params = array(
@@ -303,7 +306,6 @@ function groups_create_grouping($data, $editoroptions=null) {
         $data->descriptionformat = $data->description_editor['format'];
     }
 
-    $context = context_course::instance($data->courseid);
     $id = $DB->insert_record('groupings', $data);
     $data->id = $id;
 
@@ -320,7 +322,7 @@ function groups_create_grouping($data, $editoroptions=null) {
 
     // Trigger group event.
     $params = array(
-        'context' => $context,
+        'context' => context_course::instance($data->courseid),
         'objectid' => $id
     );
     $event = \core\event\grouping_created::create($params);
@@ -566,14 +568,12 @@ function groups_delete_group_members($courseid, $userid=0, $showfeedback=false) 
     }
 
     // Select * so that the function groups_remove_member() gets the whole record.
-    $groupssql = "SELECT * FROM {groups} WHERE courseid = :courseid";
-    $groups = $DB->get_recordset_sql($groupssql, array('courseid' => $courseid));
+    $groups = $DB->get_recordset('groups', array('courseid' => $courseid));
     foreach ($groups as $group) {
         if ($userid) {
             $userids = array($userid);
         } else {
-            $userids = $DB->get_fieldset_sql("SELECT userid FROM {groups_members} WHERE groupid = :groupid",
-                array('groupid' => $group->id));
+            $userids = $DB->get_fieldset_select('groups_members', 'userid', 'groupid = :groupid', array('groupid' => $group->id));
         }
 
         foreach ($userids as $id) {
@@ -637,7 +637,7 @@ function groups_delete_groupings_groups($courseid, $showfeedback=false) {
 function groups_delete_groups($courseid, $showfeedback=false) {
     global $CFG, $DB, $OUTPUT;
 
-    $groups = $DB->get_recordset_select('groups', 'courseid = ?', array($courseid));
+    $groups = $DB->get_recordset('groups', array('courseid' => $courseid));
     foreach ($groups as $group) {
         groups_delete_group($group);
     }
