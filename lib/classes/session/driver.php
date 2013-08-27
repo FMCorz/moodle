@@ -35,13 +35,22 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class driver implements sessionable {
+
+    /**
+     * Whether the user has just logged out or not.
+     *
+     * @var boolean
+     */
     protected $justloggedout;
 
+    /**
+     * Constructor.
+     */
     public function __construct() {
         global $CFG;
 
         if (NO_MOODLE_COOKIES) {
-            // session not used at all
+            // Session not used at all.
             $_SESSION = array();
             $_SESSION['SESSION'] = new \stdClass();
             $_SESSION['USER']    = new \stdClass();
@@ -74,7 +83,7 @@ abstract class driver implements sessionable {
     }
 
     /**
-     * Terminate current session
+     * Terminate current session.
      * @return void
      */
     public function terminate_current() {
@@ -83,14 +92,14 @@ abstract class driver implements sessionable {
         try {
             $DB->delete_records('external_tokens', array('sid'=>session_id(), 'tokentype'=>EXTERNAL_TOKEN_EMBEDDED));
         } catch (\Exception $ignored) {
-            // probably install/upgrade - ignore this problem
+            // Probably install/upgrade - ignore this problem.
         }
 
         if (NO_MOODLE_COOKIES) {
             return;
         }
 
-        // Initialize variable to pass-by-reference to headers_sent(&$file, &$line)
+        // Initialize variable to pass-by-reference to headers_sent(&$file, &$line).
         $_SESSION = array();
         $_SESSION['SESSION'] = new \stdClass();
         $_SESSION['USER']    = new \stdClass();
@@ -98,8 +107,8 @@ abstract class driver implements sessionable {
         if (isset($CFG->mnet_localhost_id)) {
             $_SESSION['USER']->mnethostid = $CFG->mnet_localhost_id;
         }
-        $SESSION = $_SESSION['SESSION']; // this may not work properly
-        $USER    = $_SESSION['USER'];    // this may not work properly
+        $SESSION = $_SESSION['SESSION']; // This may not work properly.
+        $USER    = $_SESSION['USER'];    // This may not work properly.
 
         $file = null;
         $line = null;
@@ -107,12 +116,12 @@ abstract class driver implements sessionable {
             error_log('Can not terminate session properly - headers were already sent in file: '.$file.' on line '.$line);
         }
 
-        // now let's try to get a new session id and delete the old one
+        // Now let's try to get a new session id and delete the old one.
         $this->justloggedout = true;
         session_regenerate_id(true);
         $this->justloggedout = false;
 
-        // write the new session
+        // Write the new session.
         session_write_close();
     }
 
@@ -130,7 +139,7 @@ abstract class driver implements sessionable {
     }
 
     /**
-     * Initialise $USER object, handles google access
+     * Initialise $USER object, handles Google access
      * and sets up not logged in user properly.
      *
      * @return void
@@ -139,7 +148,7 @@ abstract class driver implements sessionable {
         global $CFG;
 
         if (isset($_SESSION['USER']->id)) {
-            // already set up $USER
+            // Already set up $USER.
             return;
         }
 
@@ -150,7 +159,7 @@ abstract class driver implements sessionable {
                 $user = guest_user();
             }
             if (!empty($CFG->guestloginbutton) and !$user and !empty($_SERVER['HTTP_REFERER'])) {
-                // automaticaly log in users coming from search engine results
+                // Automaticaly log in users coming from search engine results.
                 if (strpos($_SERVER['HTTP_REFERER'], 'google') !== false ) {
                     $user = guest_user();
                 } else if (strpos($_SERVER['HTTP_REFERER'], 'altavista') !== false ) {
@@ -161,7 +170,7 @@ abstract class driver implements sessionable {
 
         if (!$user) {
             $user = new \stdClass();
-            $user->id = 0; // to enable proper function of $CFG->notloggedinroleid hack
+            $user->id = 0; // To enable proper function of $CFG->notloggedinroleid hack.
             if (isset($CFG->mnet_localhost_id)) {
                 $user->mnethostid = $CFG->mnet_localhost_id;
             } else {
@@ -172,7 +181,7 @@ abstract class driver implements sessionable {
     }
 
     /**
-     * Does various session security checks
+     * Does various session security checks.
      * @global void
      */
     protected function check_security() {
@@ -183,7 +192,7 @@ abstract class driver implements sessionable {
         }
 
         if (!empty($_SESSION['USER']->id) and !empty($CFG->tracksessionip)) {
-            /// Make sure current IP matches the one for this session
+            // Make sure current IP matches the one for this session.
             $remoteaddr = getremoteaddr();
 
             if (empty($_SESSION['USER']->sessionip)) {
@@ -191,7 +200,7 @@ abstract class driver implements sessionable {
             }
 
             if ($_SESSION['USER']->sessionip != $remoteaddr) {
-                // this is a security feature - terminate the session in case of any doubt
+                // This is a security feature - terminate the session in case of any doubt.
                 $this->terminate_current();
                 print_error('sessionipnomatch2', 'error');
             }
@@ -200,6 +209,7 @@ abstract class driver implements sessionable {
 
     /**
      * Prepare cookies and various system settings
+     * @return void
      */
     protected function prepare_cookies() {
         global $CFG;
@@ -212,12 +222,12 @@ abstract class driver implements sessionable {
             $CFG->cookiehttponly = 0;
         }
 
-    /// Set sessioncookie and sessioncookiepath variable if it isn't already
+        // Set sessioncookie and sessioncookiepath variable if it isn't already.
         if (!isset($CFG->sessioncookie)) {
             $CFG->sessioncookie = '';
         }
 
-        // make sure cookie domain makes sense for this wwwroot
+        // Make sure cookie domain makes sense for this wwwroot.
         if (!isset($CFG->sessioncookiedomain)) {
             $CFG->sessioncookiedomain = '';
         } else if ($CFG->sessioncookiedomain !== '') {
@@ -225,19 +235,19 @@ abstract class driver implements sessionable {
             if ($CFG->sessioncookiedomain !== $host) {
                 if (substr($CFG->sessioncookiedomain, 0, 1) === '.') {
                     if (!preg_match('|^.*'.preg_quote($CFG->sessioncookiedomain, '|').'$|', $host)) {
-                        // invalid domain - it must be end part of host
+                        // Invalid domain - it must be end part of host.
                         $CFG->sessioncookiedomain = '';
                     }
                 } else {
                     if (!preg_match('|^.*\.'.preg_quote($CFG->sessioncookiedomain, '|').'$|', $host)) {
-                        // invalid domain - it must be end part of host
+                        // Invalid domain - it must be end part of host.
                         $CFG->sessioncookiedomain = '';
                     }
                 }
             }
         }
 
-        // make sure the cookiepath is valid for this wwwroot or autodetect if not specified
+        // Make sure the cookiepath is valid for this wwwroot or autodetect if not specified.
         if (!isset($CFG->sessioncookiepath)) {
             $CFG->sessioncookiepath = '';
         }
@@ -252,14 +262,15 @@ abstract class driver implements sessionable {
             }
         }
 
-        //discard session ID from POST, GET and globals to tighten security,
-        //this is session fixation prevention
+        // Discard session ID from POST, GET and globals to tighten security,
+        // this is session fixation prevention.
         unset(${'MoodleSession'.$CFG->sessioncookie});
         unset($_GET['MoodleSession'.$CFG->sessioncookie]);
         unset($_POST['MoodleSession'.$CFG->sessioncookie]);
         unset($_REQUEST['MoodleSession'.$CFG->sessioncookie]);
 
-        //compatibility hack for Moodle Cron, cookies not deleted, but set to "deleted" - should not be needed with NO_MOODLE_COOKIES in cron.php now
+        // Compatibility hack for Moodle Cron, cookies not deleted, but set to "deleted",
+        // it should not be needed with NO_MOODLE_COOKIES in cron.php now.
         if (!empty($_COOKIE['MoodleSession'.$CFG->sessioncookie]) && $_COOKIE['MoodleSession'.$CFG->sessioncookie] == "deleted") {
             unset($_COOKIE['MoodleSession'.$CFG->sessioncookie]);
         }
@@ -267,6 +278,8 @@ abstract class driver implements sessionable {
 
     /**
      * Init session storage.
+     * @return void
      */
     protected abstract function init_session_storage();
+
 }

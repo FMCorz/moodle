@@ -36,15 +36,18 @@ defined('MOODLE_INTERNAL') || die();
  */
 class emergency implements sessionable {
 
+    /**
+     * Constructor.
+     */
     public function __construct() {
-        // session not used at all
+        // Session not used at all.
         $_SESSION = array();
         $_SESSION['SESSION'] = new \stdClass();
         $_SESSION['USER']    = new \stdClass();
     }
 
     /**
-     * Terminate current session
+     * Terminate current session.
      * @return void
      */
     public function terminate_current() {
@@ -61,11 +64,12 @@ class emergency implements sessionable {
     }
 
     /**
-     * Check for existing session with id $sid
-     * @param unknown_type $sid
-     * @return boolean true if session found.
+     * Check for existing session with id $sid.
+     * @param mixed $sid
+     * @return boolean return false.
      */
     public function session_exists($sid) {
         return false;
     }
+
 }

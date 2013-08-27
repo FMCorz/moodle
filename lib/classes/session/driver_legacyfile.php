@@ -34,37 +34,39 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class driver_legacyfile extends \core\session\driver {
+
     /**
      * Init session storage.
+     * @return void
      */
     protected function init_session_storage() {
         global $CFG;
 
         ini_set('session.save_handler', 'files');
 
-        // Some distros disable GC by setting probability to 0
-        // overriding the PHP default of 1
-        // (gc_probability is divided by gc_divisor, which defaults to 1000)
+        // Some distros disable GC by setting probability to 0, overriding the PHP default of 1.
+        // (gc_probability is divided by gc_divisor, which defaults to 1000).
         if (ini_get('session.gc_probability') == 0) {
             ini_set('session.gc_probability', 1);
         }
 
         ini_set('session.gc_maxlifetime', $CFG->sessiontimeout);
 
-        // make sure sessions dir exists and is writable, throws exception if not
+        // Make sure sessions dir exists and is writable, throws exception if not.
         make_upload_directory('sessions');
 
-        // Need to disable debugging since disk_free_space()
-        // will fail on very large partitions (see MDL-19222)
+        // Need to disable debugging since disk_free_space().
+        // will fail on very large partitions (see MDL-19222).
         $freespace = @disk_free_space($CFG->dataroot.'/sessions');
         if (!($freespace > 2048) and $freespace !== false) {
             print_error('sessiondiskfull', 'error');
         }
         ini_set('session.save_path', $CFG->dataroot .'/sessions');
     }
+
     /**
-     * Check for existing session with id $sid
-     * @param unknown_type $sid
+     * Check for existing session with id $sid.
+     * @param mixed $sid
      * @return boolean true if session found.
      */
     public function session_exists($sid){
@@ -74,4 +76,5 @@ class driver_legacyfile extends \core\session\driver {
         $sessionfile = "$CFG->dataroot/sessions/sess_$sid";
         return file_exists($sessionfile);
     }
+
 }

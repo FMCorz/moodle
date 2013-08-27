@@ -33,8 +33,8 @@ if (!defined('SESSION_ACQUIRE_LOCK_TIMEOUT')) {
 }
 
 /**
-  * Factory method returning moodle_session object.
-  * @return moodle_session
+  * Factory method returning a sessionable object.
+  * @return \core\session\sessionable
   */
 function session_get_instance() {
     global $CFG, $DB;
@@ -54,7 +54,7 @@ function session_get_instance() {
 
         try {
             if (defined('SESSION_CUSTOM_CLASS')) {
-                // this is a hook for webservices, key based login, etc.
+                // This is a hook for webservices, key based login, etc.
                 if (defined('SESSION_CUSTOM_FILE')) {
                     require_once($CFG->dirroot.SESSION_CUSTOM_FILE);
                 }
@@ -62,15 +62,15 @@ function session_get_instance() {
                 $session = new $session_class();
 
             } else if ((!isset($CFG->dbsessions) or $CFG->dbsessions) and $DB->session_lock_supported()) {
-                // default recommended session type
+                // Default recommended session type.
                 $session = new \core\session\driver_standard();
 
             } else {
-                // legacy limited file based storage - some features and auth plugins will not work, sorry
+                // Legacy limited file based storage - some features and auth plugins will not work, sorry.
                 $session = new \core\session\driver_legacyfile();
             }
         } catch (Exception $ex) {
-            // prevent repeated inits
+            // Prevent repeated inits.
             $session = new \core\session\emergency();
             throw $ex;
         }
@@ -81,7 +81,7 @@ function session_get_instance() {
 
 
 /**
- * Moodle session abstraction
+ * Moodle session abstraction.
  *
  * @package    core
  * @subpackage session

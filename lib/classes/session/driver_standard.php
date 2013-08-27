@@ -26,7 +26,7 @@ namespace core\session;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Recommended moodle session storage.
+ * Recommended moodle session driver.
  *
  * @package    core
  * @subpackage session
@@ -34,6 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class driver_standard extends driver {
+
     /** @var stdClass $record session record */
     protected $record   = null;
 
@@ -46,23 +47,29 @@ class driver_standard extends driver {
     /** @var string hash of the session data content */
     protected $lasthash = null;
 
+    /** @const MySQL error state value. */
+    const STATE_ERROR_MYSQL = 9;
+
+    /**
+     * Constructor.
+     */
     public function __construct() {
         global $DB;
         $this->database = $DB;
         parent::__construct();
 
         if (!empty($this->record->state)) {
-            // something is very wrong
+            // Something is very wrong.
             session_kill($this->record->sid);
 
-            if ($this->record->state == 9) {
+            if ($this->record->state == self::STATE_ERROR_MYSQL) {
                 print_error('dbsessionmysqlpacketsize', 'error');
             }
         }
     }
 
     /**
-     * Check for existing session with id $sid
+     * Check for existing session with id $sid.
      * @param string $sid
      * @return boolean true if session found.
      */
@@ -71,7 +78,6 @@ class driver_standard extends driver {
         try {
             $sql = "SELECT * FROM {sessions} WHERE timemodified < ? AND sid=? AND state=?";
             $params = array(time() + $CFG->sessiontimeout, $sid, 0);
-
             return $this->database->record_exists_sql($sql, $params);
         } catch (\dml_exception $ex) {
             error_log('Error checking existance of database session');
@@ -81,28 +87,30 @@ class driver_standard extends driver {
 
     /**
      * Init session storage.
+     * @return void
      */
     protected function init_session_storage() {
         global $CFG;
 
-        // gc only from CRON - individual user timeouts now checked during each access
+        // GC only from CRON - individual user timeouts now checked during each access.
         ini_set('session.gc_probability', 0);
-
         ini_set('session.gc_maxlifetime', $CFG->sessiontimeout);
 
-        $result = session_set_save_handler(array($this, 'handler_open'),
-                                           array($this, 'handler_close'),
-                                           array($this, 'handler_read'),
-                                           array($this, 'handler_write'),
-                                           array($this, 'handler_destroy'),
-                                           array($this, 'handler_gc'));
+        $result = session_set_save_handler(
+            array($this, 'handler_open'),
+            array($this, 'handler_close'),
+            array($this, 'handler_read'),
+            array($this, 'handler_write'),
+            array($this, 'handler_destroy'),
+            array($this, 'handler_gc')
+        );
         if (!$result) {
             print_error('dbsessionhandlerproblem', 'error');
         }
     }
 
     /**
-     * Open session handler
+     * Open session handler.
      *
      * {@see http://php.net/manual/en/function.session-set-save-handler.php}
      *
@@ -115,7 +123,7 @@ class driver_standard extends driver {
     }
 
     /**
-     * Close session handler
+     * Close session handler.
      *
      * {@see http://php.net/manual/en/function.session-set-save-handler.php}
      *
@@ -126,7 +134,7 @@ class driver_standard extends driver {
             try {
                 $this->database->release_session_lock($this->record->id);
             } catch (\Exception $ex) {
-                // ignore any problems
+                // Ignore any problems.
             }
         }
         $this->record = null;
@@ -134,7 +142,7 @@ class driver_standard extends driver {
     }
 
     /**
-     * Read session handler
+     * Read session handler.
      *
      * {@see http://php.net/manual/en/function.session-set-save-handler.php}
      *
@@ -163,7 +171,7 @@ class driver_standard extends driver {
                 $record->id           = $this->database->insert_record_raw('sessions', $record);
             }
         } catch (\Exception $ex) {
-            // do not rethrow exceptions here, we need this to work somehow before 1.9.x upgrade and during install
+            // Do not rethrow exceptions here, we need this to work somehow before 1.9.x upgrade and during install.
             error_log('Can not read or insert database sessions');
             $this->failed = true;
             return '';
@@ -194,17 +202,17 @@ class driver_standard extends driver {
             return '';
         }
 
-        // verify timeout
+        // Verify timeout.
         if ($record->timemodified + $CFG->sessiontimeout < time()) {
             $ignoretimeout = false;
-            if (!empty($record->userid)) { // skips not logged in
+            if (!empty($record->userid)) { // Skips not logged in.
                 if ($user = $this->database->get_record('user', array('id'=>$record->userid))) {
 
-                    // Refresh session if logged as a guest
+                    // Refresh session if logged as a guest.
                     if (isguestuser($user)) {
                         $ignoretimeout = true;
                     } else {
-                        $authsequence = get_enabled_auth_plugins(); // auths, in sequence
+                        $authsequence = get_enabled_auth_plugins(); // Auths, in sequence.
                         foreach($authsequence as $authname) {
                             $authplugin = get_auth_plugin($authname);
                             if ($authplugin->ignore_timeout_hook($user, $record->sid, $record->timecreated, $record->timemodified)) {
@@ -216,18 +224,18 @@ class driver_standard extends driver {
                 }
             }
             if ($ignoretimeout) {
-                //refresh session
+                // Refresh session.
                 $record->timemodified = time();
                 try {
                     $this->database->update_record('sessions', $record);
                 } catch (\Exception $ex) {
-                    // very unlikely error
+                    // Very unlikely error.
                     error_log('Can not refresh database session');
                     $this->failed = true;
                     throw $ex;
                 }
             } else {
-                //time out session
+                // Time out session.
                 $record->state        = 0;
                 $record->sessdata     = null;
                 $record->userid       = 0;
@@ -236,7 +244,7 @@ class driver_standard extends driver {
                 try {
                     $this->database->update_record('sessions', $record);
                 } catch (\Exception $ex) {
-                    // very unlikely error
+                    // Very unlikely error.
                     error_log('Can not time out database session');
                     $this->failed = true;
                     throw $ex;
@@ -252,7 +260,7 @@ class driver_standard extends driver {
             $this->lasthash = sha1($record->sessdata);
         }
 
-        unset($record->sessdata); // conserve memory
+        unset($record->sessdata); // Conserve memory.
         $this->record = $record;
 
         return $data;
@@ -276,7 +284,7 @@ class driver_standard extends driver {
         // TODO: MDL-20625 we need to rollback all active transactions and log error if any open needed
 
         if ($this->failed) {
-            // do not write anything back - we failed to start the session properly
+            // Do not write anything back - we failed to start the session properly.
             return false;
         }
 
@@ -288,16 +296,14 @@ class driver_standard extends driver {
         }
 
         if (isset($this->record->id)) {
-            $data = base64_encode($session_data);  // There might be some binary mess :-(
+            $data = base64_encode($session_data);  // There might be some binary mess :-(!
 
-            // Skip db update if nothing changed,
-            // do not update the timemodified each second.
+            // Skip db update if nothing changed, do not update the timemodified each second.
             $hash = sha1($data);
             if ($this->lasthash === $hash
-                and $this->record->userid == $userid
-                and (time() - $this->record->timemodified < 20)
-                and $this->record->lastip == getremoteaddr()
-            ) {
+                    and $this->record->userid == $userid
+                    and (time() - $this->record->timemodified < 20)
+                    and $this->record->lastip == getremoteaddr()) {
                 // No need to update anything!
                 return true;
             }
@@ -313,7 +319,7 @@ class driver_standard extends driver {
             } catch (\dml_exception $ex) {
                 if ($this->database->get_dbfamily() === 'mysql') {
                     try {
-                        $this->database->set_field('sessions', 'state', 9, array('id'=>$this->record->id));
+                        $this->database->set_field('sessions', 'state', self::STATE_ERROR_MYSQL, array('id'=>$this->record->id));
                     } catch (\Exception $ignored) {
                     }
                     error_log('Can not write database session - please verify max_allowed_packet is at least 4M!');
@@ -327,12 +333,12 @@ class driver_standard extends driver {
             }
 
         } else {
-            // fresh new session
+            // Fresh new session.
             try {
                 $record = new \stdClass();
                 $record->state        = 0;
                 $record->sid          = $sid;
-                $record->sessdata     = base64_encode($session_data); // there might be some binary mess :-(
+                $record->sessdata     = base64_encode($session_data); // There might be some binary mess :-(!
                 $record->userid       = $userid;
                 $record->timecreated  = $record->timemodified = time();
                 $record->firstip      = $record->lastip = getremoteaddr();
@@ -343,7 +349,7 @@ class driver_standard extends driver {
 
                 $this->database->get_session_lock($this->record->id, SESSION_ACQUIRE_LOCK_TIMEOUT);
             } catch (\Exception $ex) {
-                // this should not happen
+                // This should not happen.
                 error_log('Can not write new database session or acquire session lock');
                 $this->failed = true;
                 return false;
@@ -354,7 +360,7 @@ class driver_standard extends driver {
     }
 
     /**
-     * Destroy session handler
+     * Destroy session handler.
      *
      * {@see http://php.net/manual/en/function.session-set-save-handler.php}
      *
@@ -368,7 +374,7 @@ class driver_standard extends driver {
             try {
                 $this->database->release_session_lock($this->record->id);
             } catch (\Exception $ex) {
-                // ignore problems
+                // Ignore problems.
             }
             $this->record = null;
         }
@@ -379,7 +385,7 @@ class driver_standard extends driver {
     }
 
     /**
-     * GC session handler
+     * GC session handler.
      *
      * {@see http://php.net/manual/en/function.session-set-save-handler.php}
      *
