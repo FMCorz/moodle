@@ -26,12 +26,11 @@ namespace core\session;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Standard session driver.
- *
- * This driver uses the database to store the current sessions.
+ * Recommended moodle session storage.
  *
  * @package    core
- * @copyright  2013 Frédéric Massart
+ * @subpackage session
+ * @copyright  2009 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class driver_standard extends driver {
@@ -74,7 +73,7 @@ class driver_standard extends driver {
             $params = array(time() + $CFG->sessiontimeout, $sid, 0);
 
             return $this->database->record_exists_sql($sql, $params);
-        } catch (dml_exception $ex) {
+        } catch (\dml_exception $ex) {
             error_log('Error checking existance of database session');
             return false;
         }
@@ -126,7 +125,7 @@ class driver_standard extends driver {
         if (isset($this->record->id)) {
             try {
                 $this->database->release_session_lock($this->record->id);
-            } catch (Exception $ex) {
+            } catch (\Exception $ex) {
                 // ignore any problems
             }
         }
@@ -154,7 +153,7 @@ class driver_standard extends driver {
         try {
             // Do not fetch full record yet, wait until it is locked.
             if (!$record = $this->database->get_record('sessions', array('sid'=>$sid), 'id, userid')) {
-                $record = new stdClass();
+                $record = new \stdClass();
                 $record->state        = 0;
                 $record->sid          = $sid;
                 $record->sessdata     = null;
@@ -163,7 +162,7 @@ class driver_standard extends driver {
                 $record->firstip      = $record->lastip = getremoteaddr();
                 $record->id           = $this->database->insert_record_raw('sessions', $record);
             }
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             // do not rethrow exceptions here, we need this to work somehow before 1.9.x upgrade and during install
             error_log('Can not read or insert database sessions');
             $this->failed = true;
@@ -179,7 +178,7 @@ class driver_standard extends driver {
             } else {
                 $this->database->get_session_lock($record->id, SESSION_ACQUIRE_LOCK_TIMEOUT);
             }
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             // This is a fatal error, better inform users.
             // It should not happen very often - all pages that need long time to execute
             // should close session soon after access control checks
@@ -221,7 +220,7 @@ class driver_standard extends driver {
                 $record->timemodified = time();
                 try {
                     $this->database->update_record('sessions', $record);
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     // very unlikely error
                     error_log('Can not refresh database session');
                     $this->failed = true;
@@ -236,7 +235,7 @@ class driver_standard extends driver {
                 $record->firstip      = $record->lastip = getremoteaddr();
                 try {
                     $this->database->update_record('sessions', $record);
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     // very unlikely error
                     error_log('Can not time out database session');
                     $this->failed = true;
@@ -311,18 +310,18 @@ class driver_standard extends driver {
             try {
                 $this->database->update_record_raw('sessions', $this->record);
                 $this->lasthash = $hash;
-            } catch (dml_exception $ex) {
+            } catch (\dml_exception $ex) {
                 if ($this->database->get_dbfamily() === 'mysql') {
                     try {
                         $this->database->set_field('sessions', 'state', 9, array('id'=>$this->record->id));
-                    } catch (Exception $ignored) {
+                    } catch (\Exception $ignored) {
                     }
                     error_log('Can not write database session - please verify max_allowed_packet is at least 4M!');
                 } else {
                     error_log('Can not write database session');
                 }
                 return false;
-            } catch (Exception $ex) {
+            } catch (\Exception $ex) {
                 error_log('Can not write database session');
                 return false;
             }
@@ -330,7 +329,7 @@ class driver_standard extends driver {
         } else {
             // fresh new session
             try {
-                $record = new stdClass();
+                $record = new \stdClass();
                 $record->state        = 0;
                 $record->sid          = $sid;
                 $record->sessdata     = base64_encode($session_data); // there might be some binary mess :-(
@@ -343,7 +342,7 @@ class driver_standard extends driver {
                 $this->lasthash = sha1($record->sessdata);
 
                 $this->database->get_session_lock($this->record->id, SESSION_ACQUIRE_LOCK_TIMEOUT);
-            } catch (Exception $ex) {
+            } catch (\Exception $ex) {
                 // this should not happen
                 error_log('Can not write new database session or acquire session lock');
                 $this->failed = true;
@@ -368,7 +367,7 @@ class driver_standard extends driver {
         if (isset($this->record->id) and $this->record->sid === $sid) {
             try {
                 $this->database->release_session_lock($this->record->id);
-            } catch (Exception $ex) {
+            } catch (\Exception $ex) {
                 // ignore problems
             }
             $this->record = null;

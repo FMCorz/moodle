@@ -43,8 +43,8 @@ abstract class driver implements sessionable {
         if (NO_MOODLE_COOKIES) {
             // session not used at all
             $_SESSION = array();
-            $_SESSION['SESSION'] = new stdClass();
-            $_SESSION['USER']    = new stdClass();
+            $_SESSION['SESSION'] = new \stdClass();
+            $_SESSION['USER']    = new \stdClass();
 
         } else {
             $this->prepare_cookies();
@@ -58,13 +58,13 @@ abstract class driver implements sessionable {
             session_set_cookie_params(0, $CFG->sessioncookiepath, $CFG->sessioncookiedomain, $CFG->cookiesecure, $CFG->cookiehttponly);
             session_start();
             if (!isset($_SESSION['SESSION'])) {
-                $_SESSION['SESSION'] = new stdClass();
+                $_SESSION['SESSION'] = new \stdClass();
                 if (!$newsession and !$this->justloggedout) {
                     $_SESSION['SESSION']->has_timed_out = true;
                 }
             }
             if (!isset($_SESSION['USER'])) {
-                $_SESSION['USER'] = new stdClass();
+                $_SESSION['USER'] = new \stdClass();
             }
         }
 
@@ -82,7 +82,7 @@ abstract class driver implements sessionable {
 
         try {
             $DB->delete_records('external_tokens', array('sid'=>session_id(), 'tokentype'=>EXTERNAL_TOKEN_EMBEDDED));
-        } catch (Exception $ignored) {
+        } catch (\Exception $ignored) {
             // probably install/upgrade - ignore this problem
         }
 
@@ -92,8 +92,8 @@ abstract class driver implements sessionable {
 
         // Initialize variable to pass-by-reference to headers_sent(&$file, &$line)
         $_SESSION = array();
-        $_SESSION['SESSION'] = new stdClass();
-        $_SESSION['USER']    = new stdClass();
+        $_SESSION['SESSION'] = new \stdClass();
+        $_SESSION['USER']    = new \stdClass();
         $_SESSION['USER']->id = 0;
         if (isset($CFG->mnet_localhost_id)) {
             $_SESSION['USER']->mnethostid = $CFG->mnet_localhost_id;
@@ -160,7 +160,7 @@ abstract class driver implements sessionable {
         }
 
         if (!$user) {
-            $user = new stdClass();
+            $user = new \stdClass();
             $user->id = 0; // to enable proper function of $CFG->notloggedinroleid hack
             if (isset($CFG->mnet_localhost_id)) {
                 $user->mnethostid = $CFG->mnet_localhost_id;

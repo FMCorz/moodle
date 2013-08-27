@@ -39,8 +39,8 @@ class emergency implements sessionable {
     public function __construct() {
         // session not used at all
         $_SESSION = array();
-        $_SESSION['SESSION'] = new stdClass();
-        $_SESSION['USER']    = new stdClass();
+        $_SESSION['SESSION'] = new \stdClass();
+        $_SESSION['USER']    = new \stdClass();
     }
 
     /**
