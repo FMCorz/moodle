@@ -77,4 +77,62 @@ class driver_legacyfile extends \core\session\driver {
         return file_exists($sessionfile);
     }
 
+    /**
+     * Garbage collection.
+     *
+     * @return void
+     */
+    public static function gc() {
+        return;
+    }
+
+    /**
+     * Kill the session specified.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function kill($sid) {
+        global $CFG;
+        $sid = clean_param($sid, PARAM_FILE);
+        $sessionfile = "$CFG->dataroot/sessions/sess_$sid";
+        @unlink($sessionfile);
+    }
+
+
+    public static function kill_all() {
+        global $CFG;
+        $sessiondir = "$CFG->dataroot/sessions";
+        if (is_dir($sessiondir)) {
+            foreach (glob("$sessiondir/sess_*") as $filename) {
+                @unlink($filename);
+            }
+        }
+    }
+
+    /**
+     * Kill the sessions of the user.
+     *
+     * @param int $userid user ID.
+     * @return void
+     */
+    public static function kill_user($userid) {
+        return;
+    }
+
+    /**
+     * Mark session as accessed to prevent timeout.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function touch($sid) {
+        global $CFG;
+        $sid = clean_param($sid, PARAM_FILE);
+        $sessionfile = clean_param("$CFG->dataroot/sessions/sess_$sid", PARAM_FILE);
+        if (file_exists($sessionfile)) {
+            // If the file is locked it means that it will be updated anyway.
+            @touch($sessionfile);
+        }
+    }
 }

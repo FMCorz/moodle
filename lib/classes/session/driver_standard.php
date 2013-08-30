@@ -60,7 +60,7 @@ class driver_standard extends driver {
 
         if (!empty($this->record->state)) {
             // Something is very wrong.
-            session_kill($this->record->sid);
+            self::kill($this->record->sid);
 
             if ($this->record->state == self::STATE_ERROR_MYSQL) {
                 print_error('dbsessionmysqlpacketsize', 'error');
@@ -368,7 +368,7 @@ class driver_standard extends driver {
      * @return bool success
      */
     public function handler_destroy($sid) {
-        session_kill($sid);
+        self::kill($sid);
 
         if (isset($this->record->id) and $this->record->sid === $sid) {
             try {
@@ -393,7 +393,126 @@ class driver_standard extends driver {
      * @return bool success
      */
     public function handler_gc($ignored_maxlifetime) {
-        session_gc();
+        self::gc();
         return true;
     }
+
+    /**
+     * Garbage collection.
+     *
+     * @return void
+     */
+    public static function gc() {
+        global $DB, $CFG;
+        $maxlifetime = $CFG->sessiontimeout;
+
+        try {
+            // Kill all sessions of deleted users.
+            $DB->delete_records_select('sessions', "userid IN (SELECT id FROM {user} WHERE deleted <> 0)");
+
+            // Kill sessions of users with disabled plugins.
+            $auth_sequence = get_enabled_auth_plugins(true);
+            $auth_sequence = array_flip($auth_sequence);
+            unset($auth_sequence['nologin']); // No login auth is allowed.
+            $auth_sequence = array_flip($auth_sequence);
+            $notplugins = null;
+            list($notplugins, $params) = $DB->get_in_or_equal($auth_sequence, SQL_PARAMS_QM, '', false);
+            $DB->delete_records_select('sessions', "userid IN (SELECT id FROM {user} WHERE auth $notplugins)", $params);
+
+            // Now get a list of time-out candidates.
+            $sql = "SELECT u.*, s.sid, s.timecreated AS s_timecreated, s.timemodified AS s_timemodified
+                      FROM {user} u
+                      JOIN {sessions} s ON s.userid = u.id
+                     WHERE s.timemodified + ? < ? AND u.id <> ?";
+            $params = array($maxlifetime, time(), $CFG->siteguest);
+
+            $authplugins = array();
+            foreach($auth_sequence as $authname) {
+                $authplugins[$authname] = get_auth_plugin($authname);
+            }
+            $rs = $DB->get_recordset_sql($sql, $params);
+            foreach ($rs as $user) {
+                foreach ($authplugins as $authplugin) {
+                    if ($authplugin->ignore_timeout_hook($user, $user->sid, $user->s_timecreated, $user->s_timemodified)) {
+                        continue;
+                    }
+                }
+                $DB->delete_records('sessions', array('sid'=>$user->sid));
+            }
+            $rs->close();
+
+            // Extending the timeout period for guest sessions as they are renewed.
+            $purgebefore = time() - $maxlifetime;
+            $purgebeforeguests = time() - ($maxlifetime * 5);
+
+            // Delete expired sessions for guest user account.
+            $DB->delete_records_select('sessions', 'userid = ? AND timemodified < ?', array($CFG->siteguest, $purgebeforeguests));
+            // Delete expired sessions for userid = 0 (not logged in).
+            $DB->delete_records_select('sessions', 'userid = 0 AND timemodified < ?', array($purgebefore));
+        } catch (dml_exception $ex) {
+            error_log('Error gc-ing sessions');
+        }
+    }
+
+    /**
+     * Kill the session specified.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function kill($sid) {
+        global $DB;
+        try {
+            $DB->delete_records('sessions', array('sid'=>$sid));
+        } catch (dml_exception $ignored) {
+            // Do not show any warnings - might be during upgrade/installation.
+        }
+    }
+
+    /**
+     * Kill all the sessions.
+     *
+     * @return void
+     */
+    public static function kill_all() {
+        global $DB;
+        try {
+            $DB->delete_records('sessions');
+        } catch (dml_exception $ignored) {
+            // Do not show any warnings - might be during upgrade/installation.
+        }
+    }
+
+    /**
+     * Kill the sessions of the user.
+     *
+     * @param int $userid user ID.
+     * @return void
+     */
+    public static function kill_user($userid) {
+        global $DB;
+        try {
+            $DB->delete_records('sessions', array('userid'=>$userid));
+        } catch (dml_exception $ignored) {
+            // Do not show any warnings - might be during upgrade/installation.
+        }
+    }
+
+    /**
+     * Mark session as accessed to prevent timeout.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function touch($sid) {
+        global $DB;
+        try {
+            $sql = "UPDATE {sessions} SET timemodified=? WHERE sid=?";
+            $params = array(time(), $sid);
+            $DB->execute($sql, $params);
+        } catch (dml_exception $ignored) {
+            // Do not show any warnings - might be during upgrade/installation.
+        }
+    }
+
 }

@@ -72,4 +72,52 @@ class emergency implements sessionable {
         return false;
     }
 
+    /**
+     * Garbage collection.
+     *
+     * @return void
+     */
+    public static function gc() {
+        return;
+    }
+
+    /**
+     * Kill the session specified.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function kill($sid) {
+        return;
+    }
+
+    /**
+     * Kill all the sessions.
+     *
+     * @return void
+     */
+    public static function kill_all() {
+        return;
+    }
+
+    /**
+     * Kill the sessions of the user.
+     *
+     * @param int $userid user ID.
+     * @return void
+     */
+    public static function kill_user($userid) {
+        return;
+    }
+
+    /**
+     * Mark session as accessed to prevent timeout.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function touch($sid) {
+        return;
+    }
+
 }

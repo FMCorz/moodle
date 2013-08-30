@@ -32,6 +32,37 @@ if (!defined('SESSION_ACQUIRE_LOCK_TIMEOUT')) {
     define('SESSION_ACQUIRE_LOCK_TIMEOUT', 60*2);
 }
 
+function session_get_driver() {
+    global $DB;
+
+    if (!defined('NO_MOODLE_COOKIES') or empty($DB)) {
+        // Moodle was not initialised properly in lib/setup.php.
+        return '\core\session\emergency';
+    }
+
+    if (defined('SESSION_CUSTOM_CLASS')) {
+        // This is a hook for webservices, key based login, etc.
+        if (defined('SESSION_CUSTOM_FILE')) {
+            require_once($CFG->dirroot . SESSION_CUSTOM_FILE);
+        }
+        if (!class_exists(SESSION_CUSTOM_CLASS)) {
+            return '\core\session\emergency';
+        }
+        return SESSION_CUSTOM_CLASS;
+    } else if ((!isset($CFG->dbsessions) or $CFG->dbsessions) and $DB->session_lock_supported()) {
+        if (empty($DB)) {
+            return '\core\session\emergency';
+        }
+        // Default recommended session type.
+        return '\core\session\driver_standard';
+
+    } else {
+        // Legacy limited file based storage - some features and auth plugins will not work, sorry.
+        return '\core\session\driver_legacyfile';
+    }
+
+}
+
 /**
   * Factory method returning a sessionable object.
   * @return \core\session\sessionable
@@ -42,33 +73,11 @@ function session_get_instance() {
     static $session = null;
 
     if (is_null($session)) {
-        if (!defined('NO_MOODLE_COOKIES') or empty($DB)) {
-            // Moodle was not initialised properly in lib/setup.php.
-            $session = new \core\session\emergency();
-            return $session;
-        }
 
-        if (empty($CFG->sessiontimeout)) {
-            $CFG->sessiontimeout = 7200;
-        }
+        $class = session_get_driver();
 
         try {
-            if (defined('SESSION_CUSTOM_CLASS')) {
-                // This is a hook for webservices, key based login, etc.
-                if (defined('SESSION_CUSTOM_FILE')) {
-                    require_once($CFG->dirroot.SESSION_CUSTOM_FILE);
-                }
-                $session_class = SESSION_CUSTOM_CLASS;
-                $session = new $session_class();
-
-            } else if ((!isset($CFG->dbsessions) or $CFG->dbsessions) and $DB->session_lock_supported()) {
-                // Default recommended session type.
-                $session = new \core\session\driver_standard();
-
-            } else {
-                // Legacy limited file based storage - some features and auth plugins will not work, sorry.
-                $session = new \core\session\driver_legacyfile();
-            }
+            $session = new $class();
         } catch (Exception $ex) {
             // Prevent repeated inits.
             $session = new \core\session\emergency();
@@ -132,72 +141,6 @@ abstract class session_stub extends \core\session\driver {
 class legacy_file_session extends \core\session\driver_legacyfile {
 }
 
-/**
- * Memcached session handler
- *
- * @package    core
- * @subpackage session
- * @copyright  Copyright (c) 2013 Moodlerooms Inc. (http://www.moodlerooms.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @author     Mark Nielsen
- */
-class memcached_session extends session_stub {
-    protected function init_session_storage() {
-        global $CFG;
-
-        if (empty($CFG->session_save_path_memcached)) {
-            throw new coding_exception('The $CFG->session_save_path_memcached is empty and must be configured for Memcached sessions');
-        }
-        ini_set('session.save_handler', 'memcached');
-        ini_set('session.save_path', $CFG->session_save_path_memcached);
-        ini_set('session.gc_maxlifetime', $CFG->sessiontimeout);
-    }
-
-    public function session_exists($sid) {
-        // Note: $sid is session_id().
-        $memcached = new Memcached();
-        $memcached->addServers($this->connection_string_to_servers());
-        $value = $memcached->get(ini_get('memcached.sess_prefix').$sid);
-        $memcached->quit();
-
-        if ($value !== false) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Convert a connection string to an array of servers
-     *
-     * EG: Converts: "abc:123, xyz:789" to
-     *
-     *  array(
-     *      array('abc', '123'),
-     *      array('xyz', '789'),
-     *  )
-     *
-     * @return array
-     */
-    protected function connection_string_to_servers() {
-        global $CFG;
-
-        $servers = array();
-        $parts   = explode(',', $CFG->session_save_path_memcached);
-        foreach ($parts as $part) {
-            $part = trim($part);
-            $pos  = strrpos($part, ':');
-            if ($pos !== false) {
-                $host = substr($part, 0, $pos);
-                $port = substr($part, ($pos + 1));
-            } else {
-                $host = $part;
-                $port = 11211;
-            }
-            $servers[] = array($host, $port);
-        }
-        return $servers;
-    }
-}
 
 /**
  * Recommended moodle session storage.
@@ -215,9 +158,11 @@ class database_session extends \core\session\driver_standard {
 /**
  * returns true if legacy session used.
  * @return bool true if legacy(==file) based session used
+ * @deprecated since 2.6
  */
 function session_is_legacy() {
     global $CFG, $DB;
+    debugging('The function session_is_legacy() is deprecated, do not rely on it.', DEBUG_DEVELOPER);
     return ((isset($CFG->dbsessions) and !$CFG->dbsessions) or !$DB->session_lock_supported());
 }
 
@@ -228,21 +173,8 @@ function session_is_legacy() {
 function session_kill_all() {
     global $CFG, $DB;
 
-    // always check db table - custom session classes use sessions table
-    try {
-        $DB->delete_records('sessions');
-    } catch (dml_exception $ignored) {
-        // do not show any warnings - might be during upgrade/installation
-    }
-
-    if (session_is_legacy()) {
-        $sessiondir = "$CFG->dataroot/sessions";
-        if (is_dir($sessiondir)) {
-            foreach (glob("$sessiondir/sess_*") as $filename) {
-                @unlink($filename);
-            }
-        }
-    }
+    $driver = session_get_driver();
+    return $driver::kill_all();
 }
 
 /**
@@ -252,23 +184,8 @@ function session_kill_all() {
 function session_touch($sid) {
     global $CFG, $DB;
 
-    // always check db table - custom session classes use sessions table
-    try {
-        $sql = "UPDATE {sessions} SET timemodified=? WHERE sid=?";
-        $params = array(time(), $sid);
-        $DB->execute($sql, $params);
-    } catch (dml_exception $ignored) {
-        // do not show any warnings - might be during upgrade/installation
-    }
-
-    if (session_is_legacy()) {
-        $sid = clean_param($sid, PARAM_FILE);
-        $sessionfile = clean_param("$CFG->dataroot/sessions/sess_$sid", PARAM_FILE);
-        if (file_exists($sessionfile)) {
-            // if the file is locked it means that it will be updated anyway
-            @touch($sessionfile);
-        }
-    }
+    $driver = session_get_driver();
+    return $driver::touch($sid);
 }
 
 /**
@@ -279,20 +196,8 @@ function session_touch($sid) {
 function session_kill($sid) {
     global $CFG, $DB;
 
-    // always check db table - custom session classes use sessions table
-    try {
-        $DB->delete_records('sessions', array('sid'=>$sid));
-    } catch (dml_exception $ignored) {
-        // do not show any warnings - might be during upgrade/installation
-    }
-
-    if (session_is_legacy()) {
-        $sid = clean_param($sid, PARAM_FILE);
-        $sessionfile = "$CFG->dataroot/sessions/sess_$sid";
-        if (file_exists($sessionfile)) {
-            @unlink($sessionfile);
-        }
-    }
+    $driver = session_get_driver();
+    return $driver::kill_all($sid);
 }
 
 /**
@@ -304,16 +209,8 @@ function session_kill($sid) {
 function session_kill_user($userid) {
     global $CFG, $DB;
 
-    // always check db table - custom session classes use sessions table
-    try {
-        $DB->delete_records('sessions', array('userid'=>$userid));
-    } catch (dml_exception $ignored) {
-        // do not show any warnings - might be during upgrade/installation
-    }
-
-    if (session_is_legacy()) {
-        // log error?
-    }
+    $driver = session_get_driver();
+    return $driver::kill_user($userid);
 }
 
 /**
@@ -325,56 +222,8 @@ function session_kill_user($userid) {
  * NOTE: this can not work when legacy file sessions used!
  */
 function session_gc() {
-    global $CFG, $DB;
-
-    $maxlifetime = $CFG->sessiontimeout;
-
-    try {
-        /// kill all sessions of deleted users
-        $DB->delete_records_select('sessions', "userid IN (SELECT id FROM {user} WHERE deleted <> 0)");
-
-        /// kill sessions of users with disabled plugins
-        $auth_sequence = get_enabled_auth_plugins(true);
-        $auth_sequence = array_flip($auth_sequence);
-        unset($auth_sequence['nologin']); // no login allowed
-        $auth_sequence = array_flip($auth_sequence);
-        $notplugins = null;
-        list($notplugins, $params) = $DB->get_in_or_equal($auth_sequence, SQL_PARAMS_QM, '', false);
-        $DB->delete_records_select('sessions', "userid IN (SELECT id FROM {user} WHERE auth $notplugins)", $params);
-
-        /// now get a list of time-out candidates
-        $sql = "SELECT u.*, s.sid, s.timecreated AS s_timecreated, s.timemodified AS s_timemodified
-                  FROM {user} u
-                  JOIN {sessions} s ON s.userid = u.id
-                 WHERE s.timemodified + ? < ? AND u.id <> ?";
-        $params = array($maxlifetime, time(), $CFG->siteguest);
-
-        $authplugins = array();
-        foreach($auth_sequence as $authname) {
-            $authplugins[$authname] = get_auth_plugin($authname);
-        }
-        $rs = $DB->get_recordset_sql($sql, $params);
-        foreach ($rs as $user) {
-            foreach ($authplugins as $authplugin) {
-                if ($authplugin->ignore_timeout_hook($user, $user->sid, $user->s_timecreated, $user->s_timemodified)) {
-                    continue;
-                }
-            }
-            $DB->delete_records('sessions', array('sid'=>$user->sid));
-        }
-        $rs->close();
-
-        // Extending the timeout period for guest sessions as they are renewed.
-        $purgebefore = time() - $maxlifetime;
-        $purgebeforeguests = time() - ($maxlifetime * 5);
-
-        // delete expired sessions for guest user account
-        $DB->delete_records_select('sessions', 'userid = ? AND timemodified < ?', array($CFG->siteguest, $purgebeforeguests));
-        // delete expired sessions for userid = 0 (not logged in)
-        $DB->delete_records_select('sessions', 'userid = 0 AND timemodified < ?', array($purgebefore));
-    } catch (dml_exception $ex) {
-        error_log('Error gc-ing sessions');
-    }
+    $driver = session_get_driver();
+    return $driver::gc();
 }
 
 /**

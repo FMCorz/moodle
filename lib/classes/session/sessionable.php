@@ -57,4 +57,42 @@ interface sessionable {
      */
     public function session_exists($sid);
 
+    /**
+     * Garbage collection.
+     *
+     * @return void
+     */
+    public static function gc();
+
+    /**
+     * Kill the session specified.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function kill($sid);
+
+    /**
+     * Kill all the sessions.
+     *
+     * @return void
+     */
+    public static function kill_all();
+
+    /**
+     * Kill the sessions of the user.
+     *
+     * @param int $userid user ID.
+     * @return void
+     */
+    public static function kill_user($userid);
+
+    /**
+     * Mark session as accessed to prevent timeout.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function touch($sid);
+
 }

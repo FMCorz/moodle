@@ -28,6 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Memcached session handler.
  *
+ * Note that this driver lacks some features offered by the standard driver.
+ * Also, this requires the PECL extension Memcached with version >= 2.0.
+ *
  * @package    core
  * @subpackage session
  * @copyright  Copyright (c) 2013 Moodlerooms Inc. (http://www.moodlerooms.com)
@@ -35,6 +38,13 @@ defined('MOODLE_INTERNAL') || die();
  * @author     Mark Nielsen
  */
 class driver_memcached extends driver {
+
+    /**
+     * Memcached object.
+     *
+     * @var object
+     */
+    static protected $memcached;
 
     /**
      * Initialise the storage.
@@ -63,15 +73,26 @@ class driver_memcached extends driver {
      */
     public function session_exists($sid) {
 
-        $memcached = new \Memcached();
-        $memcached->addServers($this->connection_string_to_servers());
+        $memcached = self::get_memcached();
         $value = $memcached->get(ini_get('memcached.sess_prefix') . $sid);
-        $memcached->quit();
 
         if ($value !== false) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Return a memcached object.
+     *
+     * @return Memcached
+     */
+    protected static function get_memcached() {
+        if (empty(self::$memcached)) {
+            self::$memcached = new \Memcached();
+            self::$memcached->addServers(self::connection_string_to_servers());
+        }
+        return self::$memcached;
     }
 
     /**
@@ -88,7 +109,7 @@ class driver_memcached extends driver {
      * @uses SESSION_DRIVER_MEMCACHED_SAVE_PATH
      * @return array array(0 => array(host, port), 1 => ...)
      */
-    protected function connection_string_to_servers() {
+    protected static function connection_string_to_servers() {
         $servers = array();
         $parts   = explode(',', SESSION_DRIVER_MEMCACHED_SAVE_PATH);
         foreach ($parts as $part) {
@@ -104,6 +125,65 @@ class driver_memcached extends driver {
             $servers[] = array($host, $port);
         }
         return $servers;
+    }
+
+    /**
+     * Garbage collection.
+     *
+     * @return void
+     */
+    public static function gc() {
+        return;
+    }
+
+    /**
+     * Kill the session specified.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function kill($sid) {
+        $memcached = self::get_memcached();
+        $memcached->delete(ini_get('memcached.sess_prefix') . $sid);
+    }
+
+    /**
+     * Kill all the sessions.
+     *
+     * @return void
+     */
+    public static function kill_all() {
+        $memcached = self::get_memcached();
+        $prefix = ini_get('memcached.sess_prefix');
+        $keys = $memcached->getAllKeys();
+        $delete = array();
+        foreach ($keys as $key) {
+            if (strpos($key, $prefix) === 0) {
+                $delete[] = $key;
+            }
+        }
+        $memcached->deleteMulti($delete);
+    }
+
+    /**
+     * Kill the sessions of the user.
+     *
+     * @param int $userid user ID.
+     * @return void
+     */
+    public static function kill_user($userid) {
+        return;
+    }
+
+    /**
+     * Mark session as accessed to prevent timeout.
+     *
+     * @param string $sid session ID.
+     * @return void
+     */
+    public static function touch($sid) {
+        $memcached = self::get_memcached();
+        $memcached->touch(ini_get('memcached.sess_prefix') . $sid, 0);
     }
 
 }
