@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2009 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class driver_legacyfile extends \core\session\driver {
+class driver_file extends \core\session\driver {
 
     /**
      * Init session storage.

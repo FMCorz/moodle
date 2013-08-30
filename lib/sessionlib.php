@@ -58,7 +58,7 @@ function session_get_driver() {
 
     } else {
         // Legacy limited file based storage - some features and auth plugins will not work, sorry.
-        return '\core\session\driver_legacyfile';
+        return '\core\session\driver_file';
     }
 
 }
@@ -136,9 +136,9 @@ abstract class session_stub extends \core\session\driver {
  * @subpackage session
  * @copyright  2009 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since 2.6, use \core\session\driver_legacyfile instead.
+ * @deprecated since 2.6, use \core\session\driver_file instead.
  */
-class legacy_file_session extends \core\session\driver_legacyfile {
+class legacy_file_session extends \core\session\driver_file {
 }
 
 
