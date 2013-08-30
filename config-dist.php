@@ -236,6 +236,25 @@ $CFG->admin = 'admin';
 // like AOL.
 //      $CFG->tracksessionip = true;
 //
+// If you wish to use different sessions mechanisms you can set an alternative
+// driver by declaring the constants SESSION_CUSTOM_CLASS and SESSION_CUSTOM_FILE.
+// However, please note that only the standard driver using the table {sessions}
+// is fully supported. Some features like killing the session of a user,
+// cancelling a session timeout, or garbage collecting the sessions can be
+// missing in other drivers.
+//
+// To use the Memcached driver, define the following constant. The save_path
+// will be used to set the session.save_path ini setting. This requires
+// PECL memcached >= 2.0.
+//
+//      define('SESSION_CUSTOM_CLASS', '\core\session\memcached');
+//      define('SESSION_DRIVER_MEMCACHED_SAVE_PATH', '127.0.0.1:11211');
+//
+// Read more:
+//      http://www.php.net/manual/en/memcached.sessions.php
+//      http://www.php.net/manual/en/memcached.configuration.php
+//
+//
 // The following lines are for handling email bounces.
 //      $CFG->handlebounces = true;
 //      $CFG->minbounces = 10;
