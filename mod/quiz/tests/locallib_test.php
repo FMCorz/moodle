@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/mod/quiz/locallib.php');
  * @copyright  2008 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_quiz_locallib_testcase extends basic_testcase {
+class mod_quiz_locallib_testcase extends advanced_testcase {
     public function test_quiz_questions_in_quiz() {
         $this->assertEquals(quiz_questions_in_quiz(''), '');
         $this->assertEquals(quiz_questions_in_quiz('0'), '');
@@ -238,5 +238,62 @@ class mod_quiz_locallib_testcase extends basic_testcase {
         $quiz->timeclose = time() - 3600;
 
         $this->assertEquals(mod_quiz_display_options::AFTER_CLOSE, quiz_attempt_state($quiz, $attempt));
+    }
+
+    public function test_quiz_attempt_started_event() {
+        global $USER;
+
+        $this->resetAfterTest();
+
+        // Create a user.
+        $user = $this->getDataGenerator()->create_user();
+
+        // Create a course.
+        $course = $this->getDataGenerator()->create_course();
+
+        // Create a quiz module.
+        $record = new stdClass();
+        $record->course = $course->id;
+        $record->name = 'Mod quiz event test';
+        $record->intro = 'Mod quiz attempt started event test';
+        $quizmodule = $this->getDataGenerator()->create_module('quiz', $record);
+        $cm = get_coursemodule_from_instance("quiz", $quizmodule->id, $course->id);
+
+        // Create a quiz object.
+        $quizobj = quiz::create($cm->instance, $user->id);
+        $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+
+        // Create a quiz attempt.
+        $attempt = quiz_create_attempt($quizobj, 1, false, time(), false);
+        $attempt = quiz_attempt_save_started($quizobj, $quba, $attempt);
+
+        // Catch the event.
+        $sink = $this->redirectEvents();
+        quiz_fire_attempt_started_event($attempt, $quizobj);
+        $events = $sink->get_events();
+        $sink->close();
+
+        // Legacy event data.
+        $legacydata = new stdClass();
+        $legacydata->component = 'mod_quiz';
+        $legacydata->attemptid = $attempt->id;
+        $legacydata->timestart = $attempt->timestart;
+        $legacydata->timestamp = $attempt->timestart;
+        $legacydata->userid = $attempt->userid;
+        $legacydata->quizid = $quizobj->get_quizid();
+        $legacydata->cmid = $quizobj->get_cmid();
+        $legacydata->courseid = $quizobj->get_courseid();
+
+        // Validate the event.
+        $this->assertCount(1, $events);
+        $event = $events[0];
+        $this->assertInstanceOf('\mod_quiz\event\attempt_started', $event);
+        $this->assertEquals('quiz_attempts', $event->objecttable);
+        $this->assertEquals($attempt->id, $event->objectid);
+        $this->assertEquals($attempt->userid, $event->relateduserid);
+        $this->assertEquals($quizobj->get_context(), $event->get_context());
+        $this->assertEquals('quiz_attempt_started', $event->get_legacy_eventname());
+        $this->assertEventLegacyData($legacydata, $event);
     }
 }
