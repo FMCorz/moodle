@@ -23,34 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 defined('MOODLE_INTERNAL') || die();
-
-
-$handlers = array(
-    // Handle group events, so that open quiz attempts with group overrides get
-    // updated check times.
-    'groups_member_added' => array (
-        'handlerfile'     => '/mod/quiz/locallib.php',
-        'handlerfunction' => 'quiz_groups_member_added_handler',
-        'schedule'        => 'instant',
-    ),
-    'groups_member_removed' => array (
-        'handlerfile'     => '/mod/quiz/locallib.php',
-        'handlerfunction' => 'quiz_groups_member_removed_handler',
-        'schedule'        => 'instant',
-    ),
-    'groups_members_removed' => array (
-        'handlerfile'     => '/mod/quiz/locallib.php',
-        'handlerfunction' => 'quiz_groups_members_removed_handler',
-        'schedule'        => 'instant',
-    ),
-    'groups_group_deleted' => array (
-        'handlerfile'     => '/mod/quiz/locallib.php',
-        'handlerfunction' => 'quiz_groups_group_deleted_handler',
-        'schedule'        => 'instant',
-    ),
-);
 
 $observers = array(
     // Handle our own \mod_quiz\event\attempt_timelimit_exceeded event, to email
@@ -71,4 +44,20 @@ $observers = array(
         'internal' => false
     ),
 
+    // Handle group events, so that open quiz attempts with group overrides get updated check times.
+    array(
+        'eventname' => '\core\event\group_member_added',
+        'callback' => 'quiz_groups_member_added_handler',
+        'includefile' => '/mod/quiz/locallib.php',
+    ),
+    array(
+        'eventname' => '\core\event\group_member_removed',
+        'includefile' => '/mod/quiz/locallib.php',
+        'callback' => 'quiz_groups_member_removed_handler',
+    ),
+    array(
+        'eventname' => '\core\event\group_deleted',
+        'includefile' => '/mod/quiz/locallib.php',
+        'callback' => 'quiz_groups_group_deleted_handler',
+    ),
 );

@@ -1784,7 +1784,7 @@ function quiz_attempt_overdue_handler($event) {
  * @param object $event the event object.
  */
 function quiz_groups_member_added_handler($event) {
-    quiz_update_open_attempts(array('userid'=>$event->userid, 'groupid'=>$event->groupid));
+    quiz_update_open_attempts(array('userid'=>$event->relateduserid, 'groupid'=>$event->objectid));
 }
 
 /**
@@ -1793,7 +1793,7 @@ function quiz_groups_member_added_handler($event) {
  * @param object $event the event object.
  */
 function quiz_groups_member_removed_handler($event) {
-    quiz_update_open_attempts(array('userid'=>$event->userid, 'groupid'=>$event->groupid));
+    quiz_update_open_attempts(array('userid'=>$event->relateduserid, 'groupid'=>$event->objectid));
 }
 
 /**
@@ -1821,11 +1821,19 @@ function quiz_groups_group_deleted_handler($event) {
 }
 
 /**
- * Handle groups_members_removed event
+ * Handle groups_members_removed event.
+ *
+ * This was previously used as a handler for the event removing
+ * members from a group in bulk. This event has been deprecated
+ * and so is this function. All the magic is now happening
+ * in {@link quiz_groups_member_removed_handler()}.
  *
  * @param object $event the event object.
+ * @deprecated since 2.6
  */
 function quiz_groups_members_removed_handler($event) {
+    debugging('quiz_groups_members_removed_handler() is deprecated, please use quiz_groups_member_removed_handler() instead.',
+        DEBUG_DEVELOPER);
     if ($event->userid == 0) {
         quiz_update_open_attempts(array('courseid'=>$event->courseid));
     } else {

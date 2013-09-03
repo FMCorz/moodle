@@ -5,6 +5,8 @@ This files describes API changes in the quiz code.
 
 * mod_quiz_renderer::view_best_score has been removed. (It did not do what the
   name suggested anyway.)
+* quiz_groups_members_removed_handler() has been deprecated, quiz_groups_member_removed_handler()
+  should be used instead.
 
 
 === 2.4 ===
