@@ -1341,6 +1341,11 @@ function quiz_reset_userdata($data) {
     $componentstr = get_string('modulenameplural', 'quiz');
     $status = array();
 
+    // Do processing if the course reset has removed all the group members.
+    if (!empty($data->reset_groups_members)) {
+        quiz_update_open_attempts(array('courseid' => $data->courseid));
+    }
+
     // Delete attempts.
     if (!empty($data->reset_quiz_attempts)) {
         question_engine::delete_questions_usage_by_activities(new qubaid_join(

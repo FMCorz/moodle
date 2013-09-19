@@ -1827,6 +1827,11 @@ function quiz_groups_group_deleted_handler($event) {
  * @param object $event the event object.
  */
 function quiz_groups_members_removed_handler($event) {
+    if (!empty($event->incoursereset)) {
+        // We do not need to do any processing if this event was fired during a course reset.
+        // The processing will happen in quiz_reset_userdata().
+        return;
+    }
     if ($event->userid == 0) {
         quiz_update_open_attempts(array('courseid'=>$event->courseid));
     } else {

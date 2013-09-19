@@ -5285,7 +5285,7 @@ function reset_course_userdata($data) {
 
     // Remove all group members.
     if (!empty($data->reset_groups_members)) {
-        groups_delete_group_members($data->courseid);
+        groups_reset_group_members($data->courseid);
         $status[] = array('component' => $componentstr, 'item' => get_string('removegroupsmembers', 'group'), 'error' => false);
     }
 

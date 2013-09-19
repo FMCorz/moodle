@@ -567,6 +567,11 @@ function groups_delete_group_members($courseid, $userid=0, $showfeedback=false) 
         return false;
     }
 
+    if (empty($userid)) {
+        debugging('Warning, this function is terribly inefficient, you should only be deleting all the groups of a course ' .
+            'during a course reset.', DEBUG_DEVELOPER);
+    }
+
     // Select * so that the function groups_remove_member() gets the whole record.
     $groups = $DB->get_recordset('groups', array('courseid' => $courseid));
     foreach ($groups as $group) {
@@ -592,6 +597,34 @@ function groups_delete_group_members($courseid, $userid=0, $showfeedback=false) 
     if ($showfeedback) {
         echo $OUTPUT->notification(get_string('deleted').' - '.get_string('groupmembers', 'group'), 'notifysuccess');
     }
+    return true;
+}
+
+/**
+ * This removes all the members from all the groups in a course.
+ *
+ * This function is much faster than {@link groups_delete_group_members}
+ * because it does not trigger any event. It is intented to be used
+ * during a course reset only.
+ *
+ * @param int $courseid The course ID.
+ * @return true Always returns true.
+ */
+function groups_reset_group_members($courseid) {
+    global $DB;
+
+    $groupssql = "SELECT id FROM {groups} g WHERE g.courseid = :courseid";
+    $params = array('courseid' => $courseid);
+    $DB->delete_records_select('groups_members', "groupid IN ($groupssql)", $params);
+
+    // TODO MDL-41312 Remove events_trigger_legacy('groups_members_removed').
+    // This event is kept here for backwards compatibility, because it cannot be
+    // translated to a new event as it is wrong.
+    $eventdata = new stdClass();
+    $eventdata->courseid = $courseid;
+    $eventdata->userid = $userid;
+    $eventdata->incoursereset = true;
+    events_trigger_legacy('groups_members_removed', $eventdata);
 
     return true;
 }
