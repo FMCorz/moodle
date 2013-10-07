@@ -503,6 +503,19 @@ class cache_helper {
     }
 
     /**
+     * Updates the default stores.
+     *
+     * @return void
+     */
+    public static function update_default_stores() {
+        global $CFG;
+        require_once($CFG->dirroot.'/cache/locallib.php');
+        cache_config_writer::update_default_config_stores();
+        // Second reset anything we have already initialised to ensure we're all up to date.
+        cache_factory::reset();
+    }
+
+    /**
      * Finds all definitions and updates them within the cache config file.
      *
      * @param bool $coreonly If set to true only core definitions will be updated.
