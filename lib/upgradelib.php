@@ -1539,7 +1539,9 @@ function upgrade_core($version, $verbose) {
         external_update_descriptions('moodle');
         events_update_definition('moodle');
         message_update_providers('moodle');
-        // Update core definitions.
+
+        // Update core definitions and default stores.
+        cache_helper::update_default_stores();
         cache_helper::update_definitions(true);
 
         // Purge caches again, just to be sure we arn't holding onto old stuff now.
