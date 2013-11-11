@@ -931,11 +931,19 @@ function portfolio_handle_event($eventdata) {
     global $CFG;
 
     require_once($CFG->libdir . '/portfolio/exporter.php');
-    $exporter = portfolio_exporter::rewaken_object($eventdata);
-    $exporter->process_stage_package();
-    $exporter->process_stage_send();
-    $exporter->save();
-    $exporter->process_stage_cleanup();
+    try {
+        $exporter = portfolio_exporter::rewaken_object($eventdata);
+    } catch (portfolio_exception $e) {
+        // Unknown portfolio export.
+        mtrace('Skipping unknown portfolio export with ID ' . $eventdata);
+        $exporter = null;
+    }
+    if ($exporter !== null) {
+        $exporter->process_stage_package();
+        $exporter->process_stage_send();
+        $exporter->save();
+        $exporter->process_stage_cleanup();
+    }
     return true;
 }
 
