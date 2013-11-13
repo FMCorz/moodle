@@ -570,6 +570,7 @@ $string['emaildisplaycourse'] = 'Allow only other course members to see my email
 $string['emaildisplayhidden'] = 'Email hidden';
 $string['emaildisplayno'] = 'Hide my email address from everyone';
 $string['emaildisplayyes'] = 'Allow everyone to see my email address';
+$string['emailempty'] = 'Email empty';
 $string['emailenable'] = 'This email address is enabled';
 $string['emailenableclick'] = 'Click here to re-enable all email being sent to this address';
 $string['emailexists'] = 'This email address is already registered.';
