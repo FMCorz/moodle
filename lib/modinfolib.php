@@ -688,6 +688,8 @@ class course_modinfo {
  * are allowed to use any of the following set methods:
  * - {@link cm_info::set_after_edit_icons()}
  * - {@link cm_info::set_after_link()}
+ * - {@link cm_info::set_badge()}
+ * - {@link cm_info::set_label()}
  * - {@link cm_info::set_content()}
  * - {@link cm_info::set_extra_classes()}
  *
@@ -769,6 +771,8 @@ class course_modinfo {
  * @property-read mixed $customdata Optional custom data stored in modinfo cache for this activity, or null if none
  * @property-read string $afterlink Extra HTML code to display after link - calculated on request
  * @property-read string $afterediticons Extra HTML code to display after editing icons (e.g. more icons) - calculated on request
+ * @property-read string $badge A badge to display after the module link - calculated on request
+ * @property-read string $label A label to display after the module link - calculated on request
  */
 class cm_info implements IteratorAggregate {
     /**
@@ -1079,6 +1083,16 @@ class cm_info implements IteratorAggregate {
     private $afterediticons;
 
     /**
+     * @var \core\renderable\badge
+     */
+    private $badge;
+
+    /**
+     * @var \core\renderable\label
+     */
+    private $label;
+
+    /**
      * List of class read-only properties and their getter methods.
      * Used by magic functions __get(), __isset(), __empty()
      * @var array
@@ -1091,6 +1105,8 @@ class cm_info implements IteratorAggregate {
         'customdata' => 'get_custom_data',
         'afterlink' => 'get_after_link',
         'afterediticons' => 'get_after_edit_icons',
+        'badge' => 'get_badge',
+        'label' => 'get_label',
         'modfullname' => 'get_module_type_name',
         'modplural' => 'get_module_type_name_plural',
         'id' => false,
@@ -1370,6 +1386,26 @@ class cm_info implements IteratorAggregate {
     }
 
     /**
+     * Return the badge.
+     * Note: Will collect view data, if not already obtained.
+     * @return \core\renderable\badge
+     */
+    private function get_badge() {
+        $this->obtain_view_data();
+        return $this->badge;
+    }
+
+    /**
+     * Return the label.
+     * Note: Will collect view data, if not already obtained.
+     * @return \core\renderable\badge
+     */
+    private function get_label() {
+        $this->obtain_view_data();
+        return $this->label;
+    }
+
+    /**
      * @param moodle_core_renderer $output Output render to use, or null for default (global)
      * @return moodle_url Icon URL for a suitable icon to put beside this cm
      */
@@ -1561,6 +1597,22 @@ class cm_info implements IteratorAggregate {
      */
     public function set_after_edit_icons($afterediticons) {
         $this->afterediticons = $afterediticons;
+    }
+
+    /**
+     * Set the badge to display after the instance link.
+     * @param corerenderablebadge $badge Badge object.
+     */
+    public function set_badge(\core\renderable\badge $badge) {
+        $this->badge = $badge;
+    }
+
+    /**
+     * Set the label to display after the instance link.
+     * @param corerenderablelabel $label Label object.
+     */
+    public function set_label(\core\renderable\label $label) {
+        $this->label = $label;
     }
 
     /**

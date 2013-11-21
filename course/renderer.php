@@ -1004,6 +1004,16 @@ class core_course_renderer extends plugin_renderer_base {
                 $output .= ' ' . course_get_cm_rename_action($mod, $sectionreturn);
             }
 
+            if (($badge = $mod->badge) !== null) {
+                $output .= $this->output->render($badge);
+                unset($badge);
+            }
+
+            if (($label = $mod->label) !== null) {
+                $output .= $this->output->render($label);
+                unset($label);
+            }
+
             // Module can put text after the link (e.g. forum unread)
             $output .= $mod->get_after_link();
 

@@ -61,6 +61,11 @@
     right: auto;
 }
 
+.section .activity .activityinstance .instancename { margin-right: 3px;}
+.dir-rtl .section .activity .activityinstance .instancename { margin-left: 3px; margin-right: 0;}
+.section .activity .activityinstance .badge,
+.section .activity .activityinstance .label { margin: 0 3px }
+
 .sitetopic .section .activity .activityinstance div,
 .course-content .section .activity .activityinstance div { display: inline;}
 .course-content .section .activity .activityinstance form { display: inline;}
@@ -99,6 +104,21 @@
 .dir-rtl .course-content .section .activity .contentwithoutlink {
     padding-left: 32px;
     padding-right: initial;
+}
+
+/** Restore the defaults to ignore bootstrap-style label class */
+li.activity.label,
+.file-picker td.label {
+  background: inherit;
+  color: inherit;
+  border: inherit;
+  text-shadow: none;
+  padding: 8px;
+  white-space: normal;
+  display: block;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
 }
 
 .sitetopic .section .activity .filler,

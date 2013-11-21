@@ -90,13 +90,14 @@ class renderer_base {
      * interface.
      * If will then be rendered by a method based upon the classname for the widget.
      * For instance a widget of class `crazywidget` will be rendered by a protected
-     * render_crazywidget method of this renderer.
+     * render_crazywidget method of this renderer. This will work for classes
+     * like \core\renderable\crazywidget too.
      *
      * @param renderable $widget instance with renderable interface
      * @return string
      */
     public function render(renderable $widget) {
-        $rendermethod = 'render_'.get_class($widget);
+        $rendermethod = 'render_' . str_replace('core\renderable\\', '', get_class($widget));
         if (method_exists($this, $rendermethod)) {
             return $this->$rendermethod($widget);
         }
@@ -3069,6 +3070,56 @@ EOD;
         }
         // Return the sub menu
         return $content;
+    }
+
+    /**
+     * Render a badge.
+     *
+     * @param \core\renderable\badge $badge
+     * @return string
+     */
+    protected function render_badge(\core\renderable\badge $badge) {
+        $class = 'badge-default';
+        switch ($badge->type) {
+            case \core\renderable\badge::TYPE_SUCCESS:
+                $class = 'badge-success';
+                break;
+            case \core\renderable\badge::TYPE_WARNING:
+                $class = 'badge-warning';
+                break;
+            case \core\renderable\badge::TYPE_DANGER:
+                $class = 'badge-important';
+                break;
+            case \core\renderable\badge::TYPE_INFO:
+                $class = 'badge-info';
+                break;
+        }
+        return html_writer::tag('span', $badge->count, array('aria-label' => $badge->label, 'class' => 'badge ' . $class));
+    }
+
+    /**
+     * Render a label.
+     *
+     * @param \core\renderable\label $label
+     * @return string
+     */
+    protected function render_label(\core\renderable\label $label) {
+        $class = '';
+        switch ($label->type) {
+            case \core\renderable\label::TYPE_SUCCESS:
+                $class = 'label-success';
+                break;
+            case \core\renderable\label::TYPE_WARNING:
+                $class = 'label-warning';
+                break;
+            case \core\renderable\label::TYPE_DANGER:
+                $class = 'label-important';
+                break;
+            case \core\renderable\label::TYPE_INFO:
+                $class = 'label-info';
+                break;
+        }
+        return html_writer::tag('span', $label->text, array('class' => 'label ' . $class));
     }
 
     /**
