@@ -694,17 +694,6 @@ td.eventskey {
     background: #f3f8ed;
 }
 
-.path-course-view .section .forum .unread {
-    margin-left: 20px;
-}
-
-.path-course-view .section .forum .unread a:link,
-.path-course-view .section .forum .unread a:visited {
-    color: #888;
-    background: #fcffd8;
-    font-size: 0.9em;
-}
-
 #page-mod-forum-search .generalbox {
     width: 85%;
 }
