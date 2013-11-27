@@ -187,6 +187,8 @@ class core_filelib_testcase extends advanced_testcase {
 
         $curl = new curl();
         $contents = $curl->get($testhtml);
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame('47250a973d1b88d9445f94db4ef2c97a', md5($contents));
         $this->assertSame(0, $curl->get_errno());
 
@@ -215,6 +217,8 @@ class core_filelib_testcase extends advanced_testcase {
 
         $curl = new curl();
         $contents = $curl->get("$testurl?redir=2", array(), array('CURLOPT_MAXREDIRS'=>2));
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(2, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -222,12 +226,16 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get("$testurl?redir=2", array(), array('CURLOPT_MAXREDIRS'=>2));
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(2, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
 
         $curl = new curl();
         $contents = $curl->get("$testurl?redir=3", array(), array('CURLOPT_FOLLOWLOCATION'=>0));
+        $response = $curl->getResponse();
+        $this->assertSame('302 Found', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(302, $curl->info['http_code']);
         $this->assertSame('', $contents);
@@ -235,6 +243,8 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get("$testurl?redir=3", array(), array('CURLOPT_FOLLOWLOCATION'=>0));
+        $response = $curl->getResponse();
+        $this->assertSame('302 Found', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(302, $curl->info['http_code']);
         $this->assertSame('', $contents);
@@ -297,6 +307,8 @@ class core_filelib_testcase extends advanced_testcase {
 
         $curl = new curl();
         $contents = $curl->get($testurl);
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -304,6 +316,8 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get($testurl);
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -313,6 +327,8 @@ class core_filelib_testcase extends advanced_testcase {
 
         $curl = new curl();
         $contents = $curl->get("$testurl?type=301");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -320,12 +336,16 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get("$testurl?type=301");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
 
         $curl = new curl();
         $contents = $curl->get("$testurl?type=302");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -333,12 +353,16 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get("$testurl?type=302");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
 
         $curl = new curl();
         $contents = $curl->get("$testurl?type=303");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -346,12 +370,16 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get("$testurl?type=303");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
 
         $curl = new curl();
         $contents = $curl->get("$testurl?type=307");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -359,12 +387,16 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get("$testurl?type=307");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
 
         $curl = new curl();
         $contents = $curl->get("$testurl?type=308");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
@@ -372,9 +404,30 @@ class core_filelib_testcase extends advanced_testcase {
         $curl = new curl();
         $curl->emulateredirects = true;
         $contents = $curl->get("$testurl?type=308");
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
         $this->assertSame(0, $curl->get_errno());
         $this->assertSame(1, $curl->info['redirect_count']);
         $this->assertSame('done', $contents);
+
+        $testpost = $this->getExternalTestFileUrl('/test_post.php');
+
+        // Test post request.
+        $curl = new curl();
+        $contents = $curl->post($testpost, 'data=moodletest');
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
+        $this->assertSame(0, $curl->get_errno());
+        $this->assertSame('OK', $contents);
+
+        // Test 100 requests.
+        $curl = new curl();
+        $curl->setHeader('Expect: 100-continue');
+        $contents = $curl->post($testpost, 'data=moodletest');
+        $response = $curl->getResponse();
+        $this->assertSame('200 OK', reset($response));
+        $this->assertSame(0, $curl->get_errno());
+        $this->assertSame('OK', $contents);
     }
 
     /**
