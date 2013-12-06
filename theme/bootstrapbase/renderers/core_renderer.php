@@ -73,7 +73,7 @@ class theme_bootstrapbase_core_renderer extends core_renderer {
         global $CFG;
 
         if (!empty($CFG->custommenuitems)) {
-            $custommenuitems .= $CFG->custommenuitems;
+            // $custommenuitems .= $CFG->custommenuitems;
         }
         $custommenu = new custom_menu($custommenuitems, current_language());
         return $this->render_custom_menu($custommenu);
