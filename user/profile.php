@@ -80,8 +80,8 @@ if (!$currentuser &&
     // Course managers can be browsed at site level. If not forceloginforprofiles, allow access (bug #4366)
     $struser = get_string('user');
     $PAGE->set_context(context_system::instance());
-    $PAGE->set_title("$SITE->shortname: $struser");  // Do not leak the name
-    $PAGE->set_heading("$SITE->shortname: $struser");
+    $PAGE->set_title("$SITE->fullname: $struser");  // Do not leak the name
+    $PAGE->set_heading("$SITE->fullname");
     $PAGE->set_url('/user/profile.php', array('id'=>$userid));
     $PAGE->navbar->add($struser);
     echo $OUTPUT->header();
@@ -140,7 +140,7 @@ $strpublicprofile = get_string('publicprofile');
 $PAGE->blocks->add_region('content');
 $PAGE->set_subpage($currentpage->id);
 $PAGE->set_title(fullname($user).": $strpublicprofile");
-$PAGE->set_heading(fullname($user).": $strpublicprofile");
+$PAGE->set_heading($SITE->fullname);
 
 if (!$currentuser) {
     $PAGE->navigation->extend_for_user($user);
