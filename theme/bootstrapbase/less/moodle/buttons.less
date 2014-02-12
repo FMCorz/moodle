@@ -15,6 +15,9 @@
 .btn-lineup {
     margin: 0 0 10px 5px;
 }
+.dir-rtl .btn-lineup {
+    margin: 0 5px 10px 0;
+}
 input[name="searchwikicontent"] + input[type="submit"],
 select + input[type="submit"],
 input[type="text"] + input[type="button"],
@@ -22,6 +25,16 @@ input[type="password"] + input[type="submit"],
 input[type="text"] + button,
 input[type="text"] + input[type="submit"] {
     .btn-lineup
+}
+.dir-rtl {
+    input[name="searchwikicontent"] + input[type="submit"],
+    select + input[type="submit"],
+    input[type="text"] + input[type="button"],
+    input[type="password"] + input[type="submit"],
+    input[type="text"] + button,
+    input[type="text"] + input[type="submit"] {
+        .dir-rtl .btn-lineup
+    }
 }
 p.arrow_button {
     margin-top: 5em;
@@ -65,6 +78,16 @@ input[type="submit"],
 input[type="reset"]
 {
     .btn-lineup
+}
+.dir-rtl {
+    button,
+    input.form-submit,
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"]
+    {
+        .dir-rtl .btn-lineup
+    }
 }
 button.yui3-button.closebutton,
 button.yui3-button.closebutton:hover {

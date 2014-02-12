@@ -20,3 +20,99 @@
     width: (@columnWidth * @columns) + (@gutterWidth * (@columns - 1));
     *width: (@columnWidth * @columns) + (@gutterWidth * (@columns - 1)) - (.5 / @gridRowWidth * 100 * 1%);
 }
+
+// RTL overrides
+// file: dropdowns
+.dir-rtl .dropdown .caret {
+  margin-right: 2px;
+  margin-left: 0;
+}
+
+.dir-rtl .dropdown-menu {
+  left: auto;
+  right: 0;
+  float: right;
+  *border-left-width: 2px;
+}
+
+// file: navbar
+.dir-rtl .navbar .nav > li > .dropdown-menu {
+  &:before {
+    left: auto;
+    right: 9px;
+  }
+  &:after {
+    left: auto;
+    right: 10px;
+  }
+}
+
+.dir-rtl .navbar .brand {
+  float: right;
+  margin-left: 0;
+  margin-right: -20px; // negative indent to right-align the text down the page
+}
+
+.dir-rtl {
+  .navbar .nav {
+    left: auto;
+    right: 0;
+    float: right;
+    margin: 0 0 0 10px;
+  }
+  .navbar .nav.pull-right {
+    float: left; // redeclare due to specificity
+    margin-left: 0; // remove margin on float left nav
+  }
+  .navbar .nav > li {
+    float: right;
+  }
+}
+
+// file: forms
+.dir-rtl {
+  .form-horizontal {
+    // Float the labels right
+    .control-label {
+      float: right;
+      text-align: left;
+    }
+    // Move over all input controls and content
+    .controls {
+      // Super jank IE7 fix to ensure the inputs in .input-append and input-prepend
+      // don't inherit the margin of the parent, in this case .controls
+      *padding-left: 0;
+      *padding-right: 20px;
+      margin-left: 0;
+      *margin-left: 0;
+      margin-right: @horizontalComponentOffset;
+      *margin-right: 0;
+      &:first-child {
+        *padding-left: 0;
+        *padding-right: @horizontalComponentOffset;
+      }
+    }
+    // And apply it only to .help-block instances that follow a form control
+    // Move over buttons in .form-actions to align with .controls
+    .form-actions {
+      padding-left: 0;
+      padding-right: @horizontalComponentOffset;
+    }
+  }
+}
+
+// file: close
+.dir-rtl .close {
+  float: left;
+}
+
+// file: alerts
+.dir-rtl .alert {
+  padding-left: 35px;
+  padding-right: 14px;
+}
+
+.dir-rtl .alert .close {
+  right: auto;
+  left: -21px;
+}

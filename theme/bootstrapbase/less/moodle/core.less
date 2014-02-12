@@ -346,8 +346,8 @@ form.popupform div {
     font-size: 1em;
 }
 .dir-rtl .accesshide {
-    top: -30000px;
     left: auto;
+    right: -10000px;
 }
 span.hide,
 div.hide {
@@ -484,6 +484,9 @@ a.skip:active {
     margin-top: 1em;
     text-align: left;
 }
+.dir-rtl .loginbox .loginform {
+    text-align: right;
+}
 .loginbox .loginform .form-label {
     float: left;
     text-align: right;
@@ -492,15 +495,16 @@ a.skip:active {
     white-space: nowrap;
 }
 .dir-rtl .loginbox .loginform .form-label {
-    float: left;
-    text-align: right;
-    width: 44%;
-    direction: ltr;
-    white-space: nowrap;
+    float: right;
+    text-align: left;
+    direction: rtl;
 }
 .loginbox .loginform .form-input {
     float: right;
     width: 55%;
+}
+.dir-rtl .loginbox .loginform .form-input {
+    float: left;
 }
 .loginbox .loginform .form-input input {
     width: 6em;
@@ -1190,13 +1194,6 @@ body.tag .managelink {
 }
 .dir-rtl .headermenu {
     float: left;
-}
-.dir-rtl .loginbox .loginform .form-label {
-    float: right;
-    text-align: left;
-}
-.dir-rtl .loginbox .loginform .form-input {
-    text-align: right;
 }
 .dir-rtl .yui3-menu-hidden {
     left: 0;
