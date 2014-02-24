@@ -30,3 +30,8 @@ h4 small { font-size: round(@baseFontSize * 0.85); } // ~12px
     width: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1));
     *width: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1)) - (.5 / @gridRowWidth * 100 * 1%);
 }
+
+// Implement missing variables.
+.breadcrumb {
+    background-color: @wellBackground;
+}
