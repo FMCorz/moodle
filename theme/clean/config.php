@@ -38,7 +38,11 @@ $THEME->name = 'clean';
 //
 $THEME->doctype = 'html5';
 $THEME->parents = array('bootstrapbase');
+$THEME->parents_exclude_sheets_when_lessfile = array('bootstrapbase' => array('moodle' => true));
 $THEME->sheets = array('custom');
+$THEME->lessfile = 'moodle';
+$THEME->lessvariablescallback = 'theme_clean_less_variables';
+$THEME->extralesscallback = 'theme_clean_extra_less';
 $THEME->supportscssoptimisation = false;
 $THEME->yuicssmodules = array();
 $THEME->enable_dock = true;

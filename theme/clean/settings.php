@@ -65,4 +65,40 @@ if ($ADMIN->fulltree) {
     $setting = new admin_setting_confightmleditor($name, $title, $description, $default);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
+
+    // @bodyBackground setting.
+    $name = 'theme_clean/bodybackground';
+    $title = get_string('bodybackground', 'theme_clean');
+    $description = '';
+    $default = '';
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+
+    // @textColor setting.
+    $name = 'theme_clean/textcolor';
+    $title = get_string('textcolor', 'theme_clean');
+    $description = '';
+    $default = '';
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+
+    // @linkColor setting.
+    $name = 'theme_clean/linkcolor';
+    $title = get_string('linkcolor', 'theme_clean');
+    $description = '';
+    $default = '';
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+
+    // Secondary background color.
+    $name = 'theme_clean/background';
+    $title = get_string('background', 'theme_clean');
+    $description = '';
+    $default = '';
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
 }

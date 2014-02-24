@@ -29,6 +29,43 @@
  */
 
 /**
+ * Extra LESS code to inject.
+ *
+ * @param theme_config $theme The theme config object.
+ * @return string Raw LESS code.
+ */
+function theme_clean_extra_less($theme) {
+    return '';
+}
+
+/**
+ * Returns variables for LESS.
+ *
+ * @param theme_config $theme The theme config object.
+ * @return array of LESS variables without the @.
+ */
+function theme_clean_less_variables($theme) {
+    $variables = array();
+    if (!empty($theme->settings->bodybackground)) {
+        $variables['bodyBackground'] = $theme->settings->bodybackground;
+    }
+    if (!empty($theme->settings->textcolor)) {
+        $variables['textColor'] = $theme->settings->textcolor;
+    }
+    if (!empty($theme->settings->linkcolor)) {
+        $variables['linkColor'] = $theme->settings->linkcolor;
+    }
+    if (!empty($theme->settings->background)) {
+        $variables['wellBackground'] = $theme->settings->background;
+        $variables['tableBackgroundHover'] = '@wellBackground';
+        $variables['navbarBackground'] = '@wellBackground';
+        $variables['formActionsBackground'] = '@wellBackground';
+        $variables['paginationActiveBackground'] = '@wellBackground';
+    }
+    return $variables;
+}
+
+/**
  * Parses CSS before it is cached.
  *
  * This function can make alterations and replace patterns within the CSS.

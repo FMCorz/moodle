@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['background'] = 'Secondary background';
+$string['bodybackground'] = 'Body background';
 $string['choosereadme'] = '
 <div class="clearfix">
 <div class="well">
@@ -56,6 +58,7 @@ $string['footnotedesc'] = 'Whatever you add to this textarea will be displayed i
 $string['invert'] = 'Invert navbar';
 $string['invertdesc'] = 'Swaps text and background for the navbar at the top of the page between black and white.';
 
+$string['linkcolor'] = 'Link colour';
 $string['logo'] = 'Logo';
 $string['logodesc'] = 'Please upload your custom logo here if you want to add it to the header.<br>
 If the height of your logo is more than 75px add the following CSS rule to the Custom CSS box below.<br>
@@ -65,4 +68,6 @@ $string['pluginname'] = 'Clean';
 
 $string['region-side-post'] = 'Right';
 $string['region-side-pre'] = 'Left';
+$string['textcolor'] = 'Text colour';
+
 
