@@ -41,6 +41,8 @@ $THEME->parents = array('bootstrapbase');
 $THEME->sheets = array('custom');
 $THEME->lessfile = 'moodle';
 $THEME->parents_exclude_sheets_when_lessfile = array('bootstrapbase' => array('moodle'));
+$THEME->lessvariablescallback = 'theme_clean_less_variables';
+$THEME->extralesscallback = 'theme_clean_extra_less';
 $THEME->supportscssoptimisation = false;
 $THEME->yuicssmodules = array();
 $THEME->enable_dock = true;
