@@ -1,4 +1,10 @@
 /* calendar.less */
+
+@calendarEventCourseColor: #FFD3BD;
+@calendarEventGlobalColor: #D6F8CD;
+@calendarEventGroupColor: #FEE7AE;
+@calendarEventUserColor: #DCE7EC;
+
 .calendartable {
     width: 100%;
 }
@@ -10,16 +16,16 @@
     border: 0;
 }
 .calendar_event_course {
-    background-color: #FFD3BD;
+    background-color: @calendarEventCourseColor;
 }
 .calendar_event_global {
-    background-color: #D6F8CD;
+    background-color: @calendarEventGlobalColor;
 }
 .calendar_event_group {
-    background-color: #FEE7AE;
+    background-color: @calendarEventGroupColor;
 }
 .calendar_event_user {
-    background-color: #DCE7EC;
+    background-color: @calendarEventUserColor;
 }
 .path-calendar .calendar-controls .previous,
 .path-calendar .calendar-controls .next,
@@ -144,7 +150,7 @@
     margin-right: auto;
 }
 .block .minicalendar td.weekend {
-    color: #A00;
+    .muted;
 }
 .block .calendar-controls .previous {
     text-align: left;
