@@ -168,7 +168,14 @@ class tinymce_texteditor extends texteditor {
             $decoded = json_decode($config->customconfig, true);
             if (is_array($decoded)) {
                 foreach ($decoded as $k=>$v) {
-                    $params[$k] = $v;
+                    if ($k === 'plugins') {
+                        // If the key 'plugins' is specified we assume that the user wants to enable more
+                        // plugins rather than removing all the default one. So let's just add them to
+                        // the default list of plugins.
+                        $params[$k] = rtrim($params[$k], ',') . ',' . $v;
+                    } else {
+                        $params[$k] = $v;
+                    }
                 }
             }
         }
