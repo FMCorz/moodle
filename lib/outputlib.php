@@ -1045,6 +1045,7 @@ class theme_config {
      * @return bool|string Return false when the compilation failed. Else the compiled string.
      */
     protected function get_css_content_from_less($themedesigner) {
+        global $CFG;
 
         $lessfile = $this->lessfile;
         if (!$lessfile || !is_readable($this->dir . '/less/' . $lessfile . '.less')) {
@@ -1060,6 +1061,45 @@ class theme_config {
         // Get the LESS file path for relative imports.
         $relativeto = $files['theme'][$lessfile];
 
+        // Building file list.
+        $tocompilelist = array();
+        foreach ($files as $type => $filelist) {
+            foreach ($filelist as $identifier => $filespaths) {
+                if (!is_array($filespaths)) {
+                    // Some groups, like 'parents' are set in an array or theme, let's make sure we always have an array.
+                    $filespaths = array($identifier => $filespaths);
+                }
+                foreach ($filespaths as $identifier => $filepath) {
+                    $isless = strtolower(substr($filepath, -5)) === '.less';
+                    if ($type == 'theme' && $isless && $identifier === $lessfile) {
+                        $filetype = 'theme';
+                    } else if ($isless) {
+                        $filetype = 'import';
+                    } else {
+                        $filetype = 'css';
+                    }
+                    $infos = array('type' => $filetype, 'file' => $filepath);
+                    if ($themedesigner) {
+                        // Save this call when not required.
+                        $infos['hash'] = sha1_file($filepath);
+                    }
+                    $tocompilelist[] = $infos;
+                }
+            }
+        }
+        $tocompilelist[] = array('type' => 'extraless', 'value' => $this->get_extra_less_code());
+        $tocompilelist[] = array('type' => 'variables', 'value' => $this->get_less_variables());
+
+        // Cache check, so that we do not recompile if nothing has changed.
+        if ($themedesigner) {
+            $cachedir = 'lessphp/' . $this->name . '/' . theme_get_revision();
+            make_cache_directory($cachedir);
+            $cachefile = $CFG->cachedir . '/' . $cachedir . '/' . sha1(serialize($tocompilelist));
+            if (file_exists($cachefile)) {
+                return file_get_contents($cachefile);
+            }
+        }
+
         // Instantiate the compiler.
         $compiler = new core_lessc(array(
             // We need to set the import directory to where $lessfile is.
@@ -1071,33 +1111,30 @@ class theme_config {
         ));
 
         try {
-            foreach ($files as $type => $filelist) {
-                foreach ($filelist as $identifier => $filespaths) {
-                    if (!is_array($filespaths)) {
-                        // Some groups, like 'parents' are set in an array or theme, let's make sure we always have an array.
-                        $filespaths = array($identifier => $filespaths);
-                    }
-                    foreach ($filespaths as $identifier => $filepath) {
-                        $isless = strtolower(substr($filepath, -5)) === '.less';
-                        if ($type == 'theme' && $isless && $identifier === $lessfile) {
-                            // This is the theme LESS file.
-                            $compiler->parse_file_content($filepath);
-                        } else if ($isless) {
-                            // This is a LESS file, we import it to preserve @imports.
-                            $compiler->import_file($filepath, $relativeto);
-                        } else {
-                            // This is a CSS file, we import its content manually because we need to post_process() it.
-                            // If we delay the post processing of this CSS, we might end up with invalid LESS.
-                            // A good example of this is our [[setting:customcss]] which is not LESS compatible.
-                            $compiler->parse($this->post_process(file_get_contents($filepath)));
-                        }
-                    }
+            foreach ($tocompilelist as $tocompile) {
+                switch ($tocompile['type']) {
+                    case 'theme':
+                        // This is the theme LESS file.
+                        $compiler->parse_file_content($tocompile['file']);
+                        break;
+                    case 'import':
+                        // This is a LESS file, we import it to preserve @imports.
+                        $compiler->import_file($tocompile['file'], $relativeto);
+                        break;
+                    case 'css':
+                        // This is a CSS file, we import its content manually because we need to post_process() it.
+                        // If we delay the post processing of this CSS, we might end up with invalid LESS.
+                        // A good example of this is our [[setting:customcss]] which is not LESS compatible.
+                        $compiler->parse($this->post_process(file_get_contents($tocompile['file'])));
+                        break;
+                    case 'extraless':
+                        $compiler->parse($tocompile['value']);
+                        break;
+                    case 'variables':
+                        $compiler->ModifyVars($tocompile['value']);
+                        break;
                 }
             }
-
-            // Get the callbacks.
-            $compiler->parse($this->get_extra_less_code());
-            $compiler->ModifyVars($this->get_less_variables());
 
             // Compile the CSS.
             $compiled = $compiler->getCss();
@@ -1107,6 +1144,19 @@ class theme_config {
         } catch (Less_Exception_Parser $e) {
             $compiled = false;
             debugging('Error while compiling LESS ' . $lessfile . ' file: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        }
+
+        // Save the compiled files if we are in designer mode. In non-designer mode there is no need for caching
+        // as it is handled during the serving of the file.
+        if ($compiled && $themedesigner) {
+            // Atomic operation.
+            if ($fp = fopen($cachefile . '.tmp', 'xb')) {
+                fwrite($fp, $compiled);
+                fclose($fp);
+                rename($cachefile . '.tmp', $cachefile);
+                @chmod($cachefile, $CFG->filepermissions);
+                @unlink($cachefile . '.tmp'); // Just in case anything fails.
+            }
         }
 
         // Try to save memory.
