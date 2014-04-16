@@ -87,6 +87,29 @@ class filelib_testcase extends advanced_testcase {
         $this->assertEquals('47250a973d1b88d9445f94db4ef2c97a', md5($contents));
     }
 
+    public function test_curl_file() {
+        $this->resetAfterTest();
+        $testurl = $this->getExternalTestFileUrl('/test_file.php');
+
+        $fs = get_file_storage();
+        $filerecord = array(
+            'contextid' => context_system::instance()->id,
+            'component' => 'test',
+            'filearea' => 'curl_post',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'test.txt'
+        );
+        $teststring = 'moodletest';
+        $testfile = $fs->create_file_from_string($filerecord, $teststring);
+
+        // Test post with file.
+        $data = array('testfile' => $testfile);
+        $curl = new curl();
+        $contents = $curl->post($testurl, $data);
+        $this->assertSame('OK', $contents);
+    }
+
     /**
      * Testing prepare draft area
      *
