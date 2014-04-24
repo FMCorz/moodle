@@ -68,8 +68,9 @@ class feedback_updated extends base {
      * Init method.
      */
     protected function init() {
-        $this->data['crud'] = 'r';
+        $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
+        $this->data['objecttable'] = 'assign_grades';
     }
 
     /**

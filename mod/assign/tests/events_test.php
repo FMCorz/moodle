@@ -662,6 +662,7 @@ class assign_events_testcase extends mod_assign_base_testcase {
             'userid' => 2,
             'relateduserid' => 2,
             'context' => $assign->get_context(),
+            'objectid' => 10,
             'other' => array(
                 'assignid' => $assign->get_instance()->id
             )
@@ -675,6 +676,7 @@ class assign_events_testcase extends mod_assign_base_testcase {
         $event = reset($events);
 
         $this->assertInstanceOf('\mod_assign\event\feedback_updated', $event);
+        $this->assertSame(10, $event->objectid);
         $this->assertEquals($assign->get_context(), $event->get_context());
         $expectedlog = array($assign->get_course()->id, 'assign', 'save grading feedback', 'view.php?id=' . $assign->get_course_module()->id,
             $logdesc, $assign->get_course_module()->id);
