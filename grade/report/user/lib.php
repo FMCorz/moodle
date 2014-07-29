@@ -152,6 +152,12 @@ class grade_report_user extends grade_report {
     public $pbarurl;
 
     /**
+     * When set to true, grade items associated with activities not visible to the current user will be displayed.
+     * @var bool
+     */
+    protected $ignoreactivityvisibility = false;
+
+    /**
      * Constructor. Sets local copies of user preferences and initialises grade_tree.
      * @param int $courseid
      * @param object $gpr grade plugin return tracking object
@@ -243,6 +249,18 @@ class grade_report_user extends grade_report {
         return $count;
     }
 
+    /**
+     * Set the flag $ignoreactivityvisibility.
+     *
+     * When set to true, the grade items associated with activities that are not
+     * currently visible to the user, due to conditional access for instance, will
+     * still be displayed.
+     *
+     * @param bool $value True to ignore activity visibility.
+     */
+    public function ignore_activity_visibility($value) {
+        $this->ignoreactivityvisibility = $value;
+    }
 
     /**
      * Prepares the headers and attributes of the flexitable.
@@ -359,7 +377,8 @@ class grade_report_user extends grade_report {
                     $this->showhiddenitems == GRADE_REPORT_USER_HIDE_HIDDEN ||
                     ($this->showhiddenitems == GRADE_REPORT_USER_HIDE_UNTIL && !$grade_grade->is_hiddenuntil()))) {
                 $hide = true;
-            } else if (!empty($grade_object->itemmodule) && !empty($grade_object->iteminstance)) {
+            } else if (!empty($grade_object->itemmodule) && !empty($grade_object->iteminstance)
+                    && !$this->ignoreactivityvisibility) {
                 // The grade object can be marked visible but still be hidden if
                 // the student cannot see the activity due to conditional access
                 // and it's set to be hidden entirely.
@@ -908,6 +927,7 @@ function grade_report_user_profilereport($course, $user) {
         $gpr = new grade_plugin_return(array('type'=>'report', 'plugin'=>'user', 'courseid'=>$course->id, 'userid'=>$user->id));
         // Create a report instance
         $report = new grade_report_user($course->id, $gpr, $context, $user->id);
+        $report->ignore_activity_visibility(true);
 
         // print the page
         echo '<div class="grade-report-user">'; // css fix to share styles with real report page
