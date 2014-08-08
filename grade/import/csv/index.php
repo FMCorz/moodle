@@ -120,5 +120,6 @@ if ($formdata = $mform2->get_data()) {
 } else {
     // If data hasn't been submitted then display the data mapping form.
     $mform2->display();
-    echo $OUTPUT->footer();
 }
+echo $OUTPUT->footer();
+

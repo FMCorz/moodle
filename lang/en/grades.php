@@ -224,6 +224,7 @@ $string['fullview'] = 'Full view';
 $string['generalsettings'] = 'General settings';
 $string['grade'] = 'Grade';
 $string['gradeadministration'] = 'Grade administration';
+$string['gradealreadyupdated'] = 'The grades were updated after this file was exported. To avoid overwriting grades accidentally, nothing has been imported.';
 $string['gradeanalysis'] = 'Grade analysis';
 $string['gradebook'] = 'Gradebook';
 $string['gradebookhiddenerror'] = 'The gradebook is currently set to hide everything from students.';

@@ -259,16 +259,22 @@ class gradeimport_csv_load_data {
      * @param array $map Mapping information provided by the user.
      * @param int $key The line that we are currently working on.
      * @param bool $verbosescales Form setting for grading with scales.
-     * @param string $value The grade value .
+     * @param string $value The grade value.
+     * @param int $timeexported Time at which the grade was exported.
      * @return array grades to be updated.
      */
-    protected function update_grade_item($courseid, $map, $key, $verbosescales, $value) {
+    protected function update_grade_item($courseid, $map, $key, $verbosescales, $value, $timeexported) {
         // Case of an id, only maps id of a grade_item.
         // This was idnumber.
         if (!$gradeitem = new grade_item(array('id' => $map[$key], 'courseid' => $courseid))) {
             // Supplied bad mapping, should not be possible since user
             // had to pick mapping.
             $this->cleanup_import(get_string('importfailed', 'grades'));
+            return null;
+        }
+
+        if (!empty($timeexported) && ($timeexported < $gradeitem->timemodified)) {
+            $this->cleanup_import(get_string('gradealreadyupdated', 'grades'));
             return null;
         }
 
@@ -338,9 +344,10 @@ class gradeimport_csv_load_data {
      * @param int $courseid The course ID.
      * @param int $feedbackgradeid The ID of the grade item that the feedback relates to.
      * @param bool $verbosescales Form setting for grading with scales.
+     * @param int $timeexported The time at which the grade was exported.
      */
     protected function map_user_data_with_value($mappingidentifier, $value, $header, $map, $key, $courseid, $feedbackgradeid,
-            $verbosescales) {
+            $verbosescales, $timeexported) {
 
         // Fields that the user can be mapped from.
         $userfields = array(
@@ -386,8 +393,10 @@ class gradeimport_csv_load_data {
             default:
                 // Existing grade items.
                 if (!empty($map[$key])) {
+
+                    // Check that time modified is earlier than time exported.
                     $this->newgrades = $this->update_grade_item($courseid, $map, $key, $verbosescales, $value,
-                            $mappingidentifier);
+                        $mappingidentifier, $timeexported);
                 }
                 // Otherwise, we ignore this column altogether because user has chosen
                 // to ignore them (e.g. institution, address etc).
@@ -422,10 +431,14 @@ class gradeimport_csv_load_data {
         $this->trim_headers();
 
         $map = array();
+        $timeexportkey = null;
         // Loops mapping_0, mapping_1 .. mapping_n and construct $map array.
         foreach ($header as $i => $head) {
             if (isset($formdata->{'mapping_'.$i})) {
                 $map[$i] = $formdata->{'mapping_'.$i};
+            }
+            if ($head == get_string('timeexported', 'gradeexport_txt')) {
+                $timeexportkey = $i;
             }
         }
 
@@ -458,6 +471,12 @@ class gradeimport_csv_load_data {
                 continue;
             }
 
+            // Get the time at which the line was exported.
+            $timeexported = null;
+            if ($timeexportkey) {
+                $timeexported = $line[$timeexportkey];
+            }
+
             // Array to hold all grades to be inserted.
             $this->newgrades = array();
             // Array to hold all feedback.
@@ -486,7 +505,8 @@ class gradeimport_csv_load_data {
                     $feedbackgradeid = '';
                 }
 
-                $this->map_user_data_with_value($mappingidentifier, $value, $header, $map, $key, $courseid, $feedbackgradeid, $verbosescales);
+                $this->map_user_data_with_value($mappingidentifier, $value, $header, $map, $key, $courseid, $feedbackgradeid,
+                    $verbosescales, $timeexported);
                 if ($this->status === false) {
                     return $this->status;
                 }
@@ -519,6 +539,13 @@ class gradeimport_csv_load_data {
                             return $this->status;
                         }
                     }
+
+                    if (!empty($timeexported) && ($timeexported < $grade_grade->timemodified)) {
+                        // The grade was modified since the export.
+                        $this->cleanup_import(get_string('gradealreadyupdated', 'grades'));
+                        return $this->status;
+                    }
+
                     $insertid = self::insert_grade_record($newgrade, $this->studentid);
                     // Check to see if the insert was successful.
                     if (empty($insertid)) {
