@@ -383,7 +383,7 @@ function resource_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
 
     // should we apply filters?
     $mimetype = $file->get_mimetype();
-    if ($mimetype === 'text/html' or $mimetype === 'text/plain') {
+    if ($mimetype === 'text/html' or $mimetype === 'application/xhtml+xml' or $mimetype === 'text/plain') {
         $filter = $DB->get_field('resource', 'filterfiles', array('id'=>$cm->instance));
         $CFG->embeddedsoforcelinktarget = true;
     } else {

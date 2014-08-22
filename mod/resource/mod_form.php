@@ -132,7 +132,12 @@ class mod_resource_mod_form extends moodleform_mod {
             $mform->setDefault('printintro', $config->printintro);
         }
 
-        $options = array('0' => get_string('none'), '1' => get_string('allfiles'), '2' => get_string('htmlfilesonly'));
+        $options = array(
+            '0' => get_string('none'),
+            '1' => get_string('allfiles'),
+            '2' => get_string('htmlfilesonly'),
+            '3' => get_string('htmlandxhtmlfilesonly')
+        );
         $mform->addElement('select', 'filterfiles', get_string('filterfiles', 'resource'), $options);
         $mform->setDefault('filterfiles', $config->filterfiles);
         $mform->setAdvanced('filterfiles', true);

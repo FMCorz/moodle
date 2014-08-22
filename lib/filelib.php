@@ -2320,7 +2320,8 @@ function send_file($path, $filename, $lifetime = null , $filter=0, $pathisstring
 
     } else {
         // Try to put the file through filters
-        if ($mimetype == 'text/html') {
+        if (($mimetype == 'text/html' and $filter > 0) or
+                ($mimetype == 'application/xhtml+xml' and ($filter == 1 or $filter > 2))) {
             $options = new stdClass();
             $options->noclean = true;
             $options->nocache = true; // temporary workaround for MDL-5136
@@ -2371,7 +2372,7 @@ function send_file($path, $filename, $lifetime = null , $filter=0, $pathisstring
  * @category files
  * @param stored_file $stored_file local file object
  * @param int $lifetime Number of seconds before the file should expire from caches (null means $CFG->filelifetime)
- * @param int $filter 0 (default)=no filtering, 1=all files, 2=html files only
+ * @param int $filter 0 (default)=no filtering, 1=all files, 2=html files only, 3=html and xhtml files only
  * @param bool $forcedownload If true (default false), forces download of file rather than view in browser/plugin
  * @param array $options additional options affecting the file serving
  * @return null script execution stopped unless $options['dontdie'] is true
@@ -2494,7 +2495,8 @@ function send_stored_file($stored_file, $lifetime=null, $filter=0, $forcedownloa
         readfile_accel($stored_file, $mimetype, !$dontdie);
 
     } else {     // Try to put the file through filters
-        if ($mimetype == 'text/html') {
+        if (($mimetype == 'text/html' and $filter > 0) or
+                ($mimetype == 'application/xhtml+xml' and ($filter == 1 or $filter > 2))) {
             $options = new stdClass();
             $options->noclean = true;
             $options->nocache = true; // temporary workaround for MDL-5136

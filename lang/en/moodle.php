@@ -924,6 +924,7 @@ $string['home'] = 'Home';
 $string['hour'] = 'hour';
 $string['hours'] = 'hours';
 $string['howtomakethemes'] = 'How to make new themes';
+$string['htmlandxhtmlfilesonly'] = 'HTML and XHTML files only';
 $string['htmleditor'] = 'Use HTML editor';
 $string['htmleditoravailable'] = 'The HTML editor is available';
 $string['htmleditordisabled'] = 'You have disabled the HTML editor in your user profile';

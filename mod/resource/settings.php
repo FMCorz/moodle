@@ -68,7 +68,12 @@ if ($ADMIN->fulltree) {
         get_string('popupwidth', 'resource'), get_string('popupwidthexplain', 'resource'), 620, PARAM_INT, 7));
     $settings->add(new admin_setting_configtext('resource/popupheight',
         get_string('popupheight', 'resource'), get_string('popupheightexplain', 'resource'), 450, PARAM_INT, 7));
-    $options = array('0' => get_string('none'), '1' => get_string('allfiles'), '2' => get_string('htmlfilesonly'));
+    $options = array(
+        '0' => get_string('none'),
+        '1' => get_string('allfiles'),
+        '2' => get_string('htmlfilesonly'),
+        '3' => get_string('htmlandxhtmlfilesonly')
+    );
     $settings->add(new admin_setting_configselect('resource/filterfiles',
         get_string('filterfiles', 'resource'), get_string('filterfilesexplain', 'resource'), 0, $options));
 }
