@@ -95,6 +95,14 @@ class edit_item_form extends moodleform {
         $mform->disabledIf('grademin', 'gradetype', 'noteq', GRADE_TYPE_VALUE);
         $mform->setType('grademin', PARAM_RAW);
 
+        $mform->addElement('checkbox', 'weightoverride', get_string('adjustedweight', 'grades'));
+        $mform->addHelpButton('weightoverride', 'weightoverride', 'grades');
+
+        $mform->addElement('text', 'aggregationcoef2', get_string('weight', 'grades'));
+        $mform->addHelpButton('aggregationcoef2', 'weight', 'grades');
+        $mform->setType('aggregationcoef2', PARAM_RAW);
+        $mform->hardFreeze('aggregationcoef2');
+
         $mform->addElement('text', 'gradepass', get_string('gradepass', 'grades'));
         $mform->addHelpButton('gradepass', 'gradepass', 'grades');
         $mform->disabledIf('gradepass', 'gradetype', 'eq', GRADE_TYPE_NONE);
@@ -285,6 +293,17 @@ class edit_item_form extends moodleform {
                 }
 
                 $mform->disabledIf('aggregationcoef', 'parentcategory', 'eq', $parent_category->id);
+            }
+
+            // Remove fields used by natural weighting if the parent category is not using natural weighting.
+            if ($parent_category->aggregation != GRADE_AGGREGATE_SUM) {
+                print_object('removing');
+                if ($mform->elementExists('weightoverride')) {
+                    $mform->removeElement('weightoverride');
+                }
+                if ($mform->elementExists('aggregationcoef2')) {
+                    $mform->removeElement('aggregationcoef2');
+                }
             }
 
             if ($category = $grade_item->get_item_category()) {
