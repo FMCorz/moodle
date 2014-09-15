@@ -161,6 +161,12 @@ class grade_category extends grade_object {
     public $coefstring = null;
 
     /**
+     * Static variable storing the result from {@link self::can_apply_limit_rules}.
+     * @var bool
+     */
+    protected $canapplylimitrules;
+
+    /**
      * Builds this category's path string based on its parents (if any) and its own id number.
      * This is typically done just before inserting this object in the DB for the first time,
      * or when a new parent is added or changed. It is a recursive function: once the calling
@@ -1150,6 +1156,10 @@ class grade_category extends grade_object {
      * @return array Limited grades.
      */
     public function apply_limit_rules(&$grade_values, $items) {
+        if (!$this->can_apply_limit_rules()) {
+            return;
+        }
+
         $extraused = $this->is_extracredit_used();
 
         if (!empty($this->droplow)) {
@@ -1238,6 +1248,62 @@ class grade_category extends grade_object {
                 }
             }
         }
+    }
+
+    /**
+     * Returns whether or not we can apply the limit rules.
+     *
+     * There are cases where drop lowest or keep highest should not be used
+     * at all. This method will determine whether or not this logic can be
+     * applied considering the current setup of the category.
+     *
+     * @return bool
+     */
+    public function can_apply_limit_rules() {
+        if ($this->canapplylimitrules !== null) {
+            return $this->canapplylimitrules;
+        }
+
+        // Set it to be supported by default.
+        $this->canapplylimitrules = true;
+
+        // Natural aggregation.
+        if ($this->aggregation == GRADE_AGGREGATE_SUM) {
+            $canapply = true;
+
+            // Check that each children has a similar weight and maxgrade.
+            $gradeitems = $this->get_children();
+            $lastweight = null;
+            $lastmaxgrade = null;
+            foreach ($gradeitems as $gradeitem) {
+                $gi = $gradeitem['object'];
+                if ($gradeitem['type'] == 'category') {
+                    $gi = $gi->load_grade_item();
+                }
+
+                if ($gi->aggregationcoef > 0) {
+                    // We can ignore the extra credit items.
+                    continue;
+                }
+
+                if ($lastweight !== null && $lastweight != $gi->aggregationcoef2) {
+                    $canapply = false;
+                    break;
+                }
+
+                if ($lastmaxgrade !== null && $lastmaxgrade != $gi->grademax) {
+                    $canapply = false;
+                    break;
+                }
+
+                $lastweight = $gi->aggregationcoef2;
+                $lastmaxgrade = $gi->grademax;
+            }
+
+            $this->canapplylimitrules = $canapply;
+        }
+
+        return $this->canapplylimitrules;
     }
 
     /**
