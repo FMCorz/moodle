@@ -930,12 +930,32 @@ class grade_category extends grade_object {
 
             case GRADE_AGGREGATE_SUM:    // Add up all the items.
                 $num = count($grade_values);
+                $overrideweight = null;
+
+                if ($this->can_apply_limit_rules() && count($items) !== $num) {
+                    // It appears that we have dropped some items, we need to re-calculate the weight.
+                    // The maxgrade of the category should have been set properly before.
+                    $nbitems = 0;
+                    foreach ($grade_values as $itemid => $unused) {
+                        if ($items[$itemid]->aggregationcoef > 0) {
+                            continue;
+                        }
+                        $nbitems++;
+                    }
+                    $overrideweight = round(1 / $nbitems, 4);
+                }
+
                 $total = $this->grade_item->grademax;
                 $sum = 0;
                 foreach ($grade_values as $itemid => $grade_value) {
-                    $sum += ($grade_value / $items[$itemid]->grademax) * ($items[$itemid]->aggregationcoef2*1) * $total;
+                    $weight = $items[$itemid]->aggregationcoef2;
+                    if ($items[$itemid]->aggregationcoef <= 0 && $overrideweight) {
+                        // Override the weight of the items which are not using extra credit.
+                        $weight = $overrideweight;
+                    }
+                    $sum += ($grade_value / $items[$itemid]->grademax) * ($weight) * $total;
                     if ($weights !== null && $num > 0) {
-                        $weights[$itemid] = $items[$itemid]->aggregationcoef2*1;
+                        $weights[$itemid] = $weight;
                     }
                 }
                 $agg_grade = $sum;
