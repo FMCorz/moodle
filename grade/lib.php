@@ -2692,7 +2692,7 @@ abstract class grade_helper {
             return self::$edittree;
         }
         if (has_capability('moodle/grade:manage', context_course::instance($courseid))) {
-            $url = new moodle_url('/grade/edit/tree/index.php', array('sesskey'=>sesskey(), 'showadvanced'=>'0', 'id'=>$courseid));
+            $url = new moodle_url('/grade/edit/tree/index.php', array('id'=>$courseid));
             self::$edittree = array(
                 'setup' => new grade_plugin_info('setup', $url, get_string('setup', 'grades')),
             );
