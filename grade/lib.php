@@ -2408,10 +2408,9 @@ function grade_extend_settings($plugininfo, $courseid) {
     }
 
     if ($categories = grade_helper::get_info_edit_structure($courseid)) {
-        $categoriesnode = $gradenode->add(get_string('categoriesanditems','grades'), null, navigation_node::TYPE_CONTAINER);
-        foreach ($categories as $category) {
-            $categoriesnode->add($category->string, $category->link, navigation_node::TYPE_SETTING, null, $category->id, new pix_icon('i/report', ''));
-        }
+        $category = reset($categories);
+        $gradenode->add(get_string('categoriesitems','grades'), $category->link,
+            navigation_node::TYPE_SETTING, null, $category->id, new pix_icon('i/report', ''));
     }
 
     if ($gradenode->contains_active_node()) {
@@ -2513,7 +2512,7 @@ abstract class grade_helper {
         if (self::$pluginstrings === null) {
             self::$pluginstrings = array(
                 'report' => get_string('view'),
-                'edittree' => get_string('edittree', 'grades'),
+                'edittree' => get_string('categoriesitems', 'grades'),
                 'scale' => get_string('scales'),
                 'outcome' => get_string('outcomes', 'grades'),
                 'letter' => get_string('letters', 'grades'),
@@ -2695,8 +2694,7 @@ abstract class grade_helper {
         if (has_capability('moodle/grade:manage', context_course::instance($courseid))) {
             $url = new moodle_url('/grade/edit/tree/index.php', array('sesskey'=>sesskey(), 'showadvanced'=>'0', 'id'=>$courseid));
             self::$edittree = array(
-                'simpleview' => new grade_plugin_info('simpleview', $url, get_string('simpleview', 'grades')),
-                'fullview' => new grade_plugin_info('fullview', new moodle_url($url, array('showadvanced'=>'1')), get_string('fullview', 'grades'))
+                'setup' => new grade_plugin_info('setup', $url, get_string('setup', 'grades')),
             );
         } else {
             self::$edittree = false;
