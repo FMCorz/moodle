@@ -48,6 +48,9 @@ class grade_edit_tree {
 
     public $uses_weight2 = false;
 
+    /** @var bool indicates if tree has categories with aggregation method other than Natural. */
+    protected $uses_non_natural = false;
+
     public $table;
 
     public $categories = array();
@@ -62,8 +65,10 @@ class grade_edit_tree {
         $this->gpr = $gpr;
         $this->deepest_level = $this->get_deepest_level($this->gtree->top_element);
 
-        $this->columns = array(grade_edit_tree_column::factory('name', array('deepest_level' => $this->deepest_level)),
-                               grade_edit_tree_column::factory('aggregation', array('flag' => true)));
+        $this->columns = array(grade_edit_tree_column::factory('name', array('deepest_level' => $this->deepest_level)));
+        if ($this->uses_non_natural) {
+            $this->columns[] = grade_edit_tree_column::factory('aggregation', array('flag' => true));
+        }
 
         if ($this->uses_weight2) {
             $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'aggregationcoef2'));
@@ -72,20 +77,20 @@ class grade_edit_tree {
         if ($this->uses_weight) {
             $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'aggregationcoef'));
         }
-        if ($this->uses_extra_credit) {
-            $this->columns[] = grade_edit_tree_column::factory('extracredit', array('adv' => 'aggregationcoef'));
-        }
 
         $this->columns[] = grade_edit_tree_column::factory('range'); // This is not a setting... How do we deal with it?
-        $this->columns[] = grade_edit_tree_column::factory('aggregateonlygraded', array('flag' => true));
+        /*$this->columns[] = grade_edit_tree_column::factory('aggregateonlygraded', array('flag' => true));
         $this->columns[] = grade_edit_tree_column::factory('aggregatesubcats', array('flag' => true));
         $this->columns[] = grade_edit_tree_column::factory('aggregateoutcomes', array('flag' => true));
         $this->columns[] = grade_edit_tree_column::factory('droplow', array('flag' => true));
         $this->columns[] = grade_edit_tree_column::factory('keephigh', array('flag' => true));
         $this->columns[] = grade_edit_tree_column::factory('multfactor', array('adv' => true));
-        $this->columns[] = grade_edit_tree_column::factory('plusfactor', array('adv' => true));
+        $this->columns[] = grade_edit_tree_column::factory('plusfactor', array('adv' => true));*/
         $this->columns[] = grade_edit_tree_column::factory('actions');
-        $this->columns[] = grade_edit_tree_column::factory('select');
+
+        if ($this->deepest_level > 1) {
+            $this->columns[] = grade_edit_tree_column::factory('select');
+        }
 
         $this->table = new html_table();
         $this->table->id = "grade_edit_tree_table";
@@ -502,6 +507,10 @@ class grade_edit_tree {
         $level++;
         $coefstring = $element['object']->get_coefstring();
         if ($element['type'] == 'category') {
+            if ($element['object']->aggregation != GRADE_AGGREGATE_SUM) {
+                $this->uses_non_natural = true;
+            }
+
             if ($coefstring == 'aggregationcoefweight') {
                 $this->uses_weight = true;
             } elseif ($coefstring ==  'aggregationcoefextraweight' || $coefstring == 'aggregationcoefextrasum') {
@@ -683,25 +692,7 @@ class grade_edit_tree_column_aggregation extends grade_edit_tree_column_category
         }
 
         $options = grade_helper::get_aggregation_strings();
-
-        $visible = explode(',', $CFG->grade_aggregations_visible);
-        foreach ($options as $constant => $string) {
-            if (!in_array($constant, $visible) && $constant != $category->aggregation) {
-                unset($options[$constant]);
-            }
-        }
-
-        if ($this->forced) {
-            $aggregation = $options[$category->aggregation];
-        } else {
-            $attributes = array();
-            $attributes['id'] = 'aggregation_'.$category->id;
-            $attributes['class'] = 'ignoredirty';
-            $aggregation = html_writer::label(get_string('aggregation', 'grades'), 'aggregation_'.$category->id, false, array('class' => 'accesshide'));
-            $aggregation .= html_writer::select($options, 'aggregation_'.$category->id, $category->aggregation, null, $attributes);
-            $action = new component_action('change', 'update_category_aggregation', array('courseid' => $params['id'], 'category' => $category->id, 'sesskey' => sesskey()));
-            $OUTPUT->add_action_handler($action, 'aggregation_'.$category->id);
-        }
+        $aggregation = $options[$category->aggregation];
 
         $categorycell = clone($this->categorycell);
         $categorycell->attributes['class'] .= ' ' . $levelclass;
