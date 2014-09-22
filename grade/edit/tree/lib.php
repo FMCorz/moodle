@@ -42,11 +42,7 @@ class grade_edit_tree {
 
     public $deepest_level;
 
-    public $uses_extra_credit = false;
-
     public $uses_weight = false;
-
-    public $uses_weight2 = false;
 
     /** @var bool indicates if tree has categories with aggregation method other than Natural. */
     protected $uses_non_natural = false;
@@ -66,16 +62,13 @@ class grade_edit_tree {
         $this->deepest_level = $this->get_deepest_level($this->gtree->top_element);
 
         $this->columns = array(grade_edit_tree_column::factory('name', array('deepest_level' => $this->deepest_level)));
+
         if ($this->uses_non_natural) {
             $this->columns[] = grade_edit_tree_column::factory('aggregation', array('flag' => true));
         }
 
-        if ($this->uses_weight2) {
-            $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'aggregationcoef2'));
-        }
-
         if ($this->uses_weight) {
-            $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'aggregationcoef'));
+            $this->columns[] = grade_edit_tree_column::factory('weight');
         }
 
         $this->columns[] = grade_edit_tree_column::factory('range'); // This is not a setting... How do we deal with it?
@@ -351,10 +344,9 @@ class grade_edit_tree {
     /**
      * Given a grade_item object, returns a labelled input if an aggregation coefficient (weight or extra credit) applies to it.
      * @param grade_item $item
-     * @param string type "extra" or "weight": the type of the column hosting the weight input
      * @return string HTML
      */
-    static function get_weight_input($item, $type) {
+    static function get_weight_input($item) {
         global $OUTPUT;
 
         if (!is_object($item) || get_class($item) !== 'grade_item') {
@@ -370,22 +362,17 @@ class grade_edit_tree {
         $parent_category->apply_forced_settings();
         $aggcoef = $item->get_coefstring();
 
-        if ((($aggcoef == 'aggregationcoefweight' || $aggcoef == 'aggregationcoef') && $type == 'weight') ||
-            ($aggcoef == 'aggregationcoefextraweight' && $type == 'extra')) {
-            return '<label class="accesshide" for="aggregationcoef_'.$item->id.'">'.
+        $str = '';
+
+        if ($aggcoef == 'aggregationcoefweight' || $aggcoef == 'aggregationcoef' || $aggcoef == 'aggregationcoefextraweight') {
+            $str .= '<label class="accesshide" for="aggregationcoef_'.$item->id.'">'.
                 get_string('extracreditvalue', 'grades', $item->itemname).'</label>'.
                 '<input type="text" size="6" id="aggregationcoef_'.$item->id.'" name="aggregationcoef_'.$item->id.'"
                 value="'.grade_edit_tree::format_number($item->aggregationcoef).'" />';
-        } elseif ($aggcoef == 'aggregationcoefextrasum' && $type == 'extra') {
-            $checked = ($item->aggregationcoef > 0) ? 'checked="checked"' : '';
-            return '<input type="hidden" name="extracredit_'.$item->id.'" value="0" />
-                <label class="accesshide" for="extracredit_'.$item->id.'">'.
-                get_string('extracreditvalue', 'grades', $item->itemname).'</label>
-                <input type="checkbox" id="extracredit_'.$item->id.'" name="extracredit_'.$item->id.'" value="1" '."$checked />\n";
-        } else if ($aggcoef == 'aggregationcoefextrasum' && $type == 'weight') {
+        } else if ($aggcoef == 'aggregationcoefextrasum') {
             $label = '';
             if ($item->weightoverride && $parent_category->aggregation == GRADE_AGGREGATE_SUM) {
-                $label = get_string('adjusted', 'grades');
+                $label = ' '.get_string('adjusted', 'grades');
             }
 
             $name = 'aggregationcoef2_' . $item->id;
@@ -409,10 +396,15 @@ class grade_edit_tree {
                 )
             );
 
-            return $hiddenlabel . $input . $label;
-        } else {
-            return '';
+            $str .= $hiddenlabel . $input . $label;
+
+            if ($item->aggregationcoef > 0) {
+                $str .= ' ' . html_writer::tag('abbr', get_string('aggregationcoefextrasumabbr', 'grades'),
+                        array('title' => get_string('aggregationcoefextrasum', 'grades')));
+            }
         }
+
+        return $str;
     }
 
     //Trims trailing zeros
@@ -511,13 +503,8 @@ class grade_edit_tree {
                 $this->uses_non_natural = true;
             }
 
-            if ($coefstring == 'aggregationcoefweight') {
+            if ($coefstring == 'aggregationcoefweight' || $coefstring == 'aggregationcoefextrasum') {
                 $this->uses_weight = true;
-            } elseif ($coefstring ==  'aggregationcoefextraweight' || $coefstring == 'aggregationcoefextrasum') {
-                $this->uses_extra_credit = true;
-            }
-            if ($coefstring == 'aggregationcoefextrasum') { // TODO: coefstring2?
-                $this->uses_weight2 = true;
             }
 
             foreach($element['children'] as $child_el) {
@@ -708,48 +695,6 @@ class grade_edit_tree_column_aggregation extends grade_edit_tree_column_category
     }
 }
 
-class grade_edit_tree_column_extracredit extends grade_edit_tree_column {
-
-    public function get_header_cell() {
-        global $OUTPUT;
-        $headercell = clone($this->headercell);
-        $headercell->text = get_string('aggregationcoefextra', 'grades').$OUTPUT->help_icon('aggregationcoefextra', 'grades');
-        return $headercell;
-    }
-
-    public function get_category_cell($category, $levelclass, $params) {
-        $item = $category->get_grade_item();
-        $categorycell = clone($this->categorycell);
-        $categorycell->attributes['class'] .= ' ' . $levelclass;
-        $categorycell->text = grade_edit_tree::get_weight_input($item, 'extra');
-        return $categorycell;
-    }
-
-    public function get_item_cell($item, $params) {
-        if (empty($params['element'])) {
-            throw new Exception('Array key (element) missing from 2nd param of grade_edit_tree_column_weightorextracredit::get_item_cell($item, $params)');
-        }
-
-        $itemcell = clone($this->itemcell);
-        $itemcell->text = '&nbsp;';
-
-        if (!in_array($params['element']['object']->itemtype, array('courseitem', 'categoryitem', 'category'))) {
-            $itemcell->text = grade_edit_tree::get_weight_input($item, 'extra');
-        }
-
-        return $itemcell;
-    }
-
-    public function is_hidden($mode='simple') {
-        global $CFG;
-        if ($mode == 'simple') {
-            return strstr($CFG->grade_item_advanced, 'aggregationcoef');
-        } elseif ($mode == 'advanced') {
-            return false;
-        }
-    }
-}
-
 class grade_edit_tree_column_weight extends grade_edit_tree_column {
 
     public function get_header_cell() {
@@ -764,7 +709,7 @@ class grade_edit_tree_column_weight extends grade_edit_tree_column {
         $item = $category->get_grade_item();
         $categorycell = clone($this->categorycell);
         $categorycell->attributes['class']  .= ' ' . $levelclass;
-        $categorycell->text = grade_edit_tree::get_weight_input($item, 'weight');
+        $categorycell->text = grade_edit_tree::get_weight_input($item);
         return $categorycell;
     }
 
@@ -776,7 +721,7 @@ class grade_edit_tree_column_weight extends grade_edit_tree_column {
         $itemcell->text = '&nbsp;';
 
         if (!in_array($params['element']['object']->itemtype, array('courseitem', 'categoryitem', 'category'))) {
-            $itemcell->text = grade_edit_tree::get_weight_input($item, 'weight');
+            $itemcell->text = grade_edit_tree::get_weight_input($item);
         }
 
         return $itemcell;
