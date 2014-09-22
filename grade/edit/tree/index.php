@@ -203,7 +203,7 @@ if ($data = data_submitted() and confirm_sesskey()) {
             $recreatetree = true;
 
         // Grade item text inputs
-        } elseif (preg_match('/^(grademax|aggregationcoef|aggregationcoef2|multfactor|plusfactor)_([0-9]+)$/', $key, $matches)) {
+        } elseif (preg_match('/^(aggregationcoef|aggregationcoef2|multfactor|plusfactor)_([0-9]+)$/', $key, $matches)) {
             $param = $matches[1];
             $aid   = $matches[2];
 
@@ -215,11 +215,6 @@ if ($data = data_submitted() and confirm_sesskey()) {
             }
 
             $grade_item = grade_item::fetch(array('id' => $aid, 'courseid' => $courseid));
-
-            if ($param === 'grademax' and $value < $grade_item->grademin) {
-                // better not allow values lower than grade min
-                $value = $grade_item->grademin;
-            }
 
             if ($param === 'aggregationcoef2' && round($grade_item->aggregationcoef2, 4) != round($value, 4)) {
                 $grade_item->weightoverride = 1;

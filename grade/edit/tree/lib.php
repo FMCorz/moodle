@@ -762,7 +762,7 @@ class grade_edit_tree_column_range extends grade_edit_tree_column {
             $grademax = ' - ';
         } else if ($parent_cat->aggregation == GRADE_AGGREGATE_SUM) {
             $grademax = format_float($item->grademax, $item->get_decimals());
-        } elseif ($item->gradetype == GRADE_TYPE_SCALE) {
+        } else if ($item->gradetype == GRADE_TYPE_SCALE) {
             $scale = $DB->get_record('scale', array('id' => $item->scaleid));
             $scale_items = null;
             if (empty($scale)) { //if the item is using a scale that's been removed
@@ -771,12 +771,8 @@ class grade_edit_tree_column_range extends grade_edit_tree_column {
                 $scale_items = explode(',', $scale->scale);
             }
             $grademax = end($scale_items) . ' (' . count($scale_items) . ')';
-        } elseif ($item->is_external_item()) {
-            $grademax = format_float($item->grademax, $item->get_decimals());
         } else {
-            $grademax = '<label class="accesshide" for="grademax'.$item->id.'">'.get_string('grademax', 'grades').'</label>
-                <input type="text" size="6" id="grademax'.$item->id.'" name="grademax_'.$item->id.'" value="'.
-                format_float($item->grademax, $item->get_decimals()).'" />';
+            $grademax = format_float($item->grademax, $item->get_decimals());
         }
 
         $itemcell = clone($this->itemcell);
