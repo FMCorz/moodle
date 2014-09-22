@@ -277,10 +277,9 @@ if ($data = data_submitted() and confirm_sesskey()) {
             if ($param === 'weight') {
                 $aggcoef = $grade_item->get_coefstring();
                 if ($aggcoef == 'aggregationcoefextraweightsum') {
+                    // The field 'weight' should only be sent when the checkbox 'weighoverride' is checked,
+                    // so there is not need to set weightoverride here, it is done below.
                     $value = $value / 100.0;
-                    if (round($grade_item->aggregationcoef2, 4) != round($value, 4)) {
-                        $grade_item->weightoverride = 1;
-                    }
                     $grade_item->aggregationcoef2 = $value;
                 } else if ($aggcoef == 'aggregationcoefweight') {
                     $grade_item->aggregationcoef = $value;
@@ -294,13 +293,18 @@ if ($data = data_submitted() and confirm_sesskey()) {
             $recreatetree = true;
 
         // Grade item checkbox inputs
-        } elseif (preg_match('/^extracredit_([0-9]+)$/', $key, $matches)) { // Sum extra credit checkbox
-            $aid   = $matches[1];
-            $value = clean_param($value, PARAM_BOOL);
+        } elseif (preg_match('/^(extracredit|weightoverride)_([0-9]+)$/', $key, $matches)) { // Sum extra credit checkbox
+            $param   = $matches[1];
+            $aid     = $matches[2];
+            $value   = clean_param($value, PARAM_BOOL);
 
             $grade_item = grade_item::fetch(array('id' => $aid, 'courseid' => $courseid));
 
-            $grade_item->aggregationcoef = $value;
+            if ($param === 'extracredit') {
+                $grade_item->aggregationcoef = $value;
+            } else {
+                $grade_item->$param = $value;
+            }
 
             $grade_item->update();
 
