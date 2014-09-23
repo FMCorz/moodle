@@ -203,24 +203,35 @@ if ($data = data_submitted() and confirm_sesskey()) {
             $recreatetree = true;
 
         // Grade item text inputs
-        } elseif (preg_match('/^(aggregationcoef|aggregationcoef2|multfactor|plusfactor)_([0-9]+)$/', $key, $matches)) {
+        } elseif (preg_match('/^(weight|multfactor|plusfactor)_([0-9]+)$/', $key, $matches)) {
             $param = $matches[1];
             $aid   = $matches[2];
 
             $value = unformat_float($value);
             $value = clean_param($value, PARAM_FLOAT);
 
-            if (preg_match('/^(aggregationcoef2)_([0-9]+)$/', $key, $matches)) {
-                $value = $value / 100.0;
-            }
-
             $grade_item = grade_item::fetch(array('id' => $aid, 'courseid' => $courseid));
 
-            if ($param === 'aggregationcoef2' && round($grade_item->aggregationcoef2, 4) != round($value, 4)) {
-                $grade_item->weightoverride = 1;
+            if ($param === 'grademax' and $value < $grade_item->grademin) {
+                // better not allow values lower than grade min
+                $value = $grade_item->grademin;
             }
 
-            $grade_item->$param = $value;
+            // Convert weight to aggregation coef2.
+            if ($param === 'weight') {
+                $aggcoef = $grade_item->get_coefstring();
+                if ($aggcoef == 'aggregationcoefextraweightsum') {
+                    $value = $value / 100.0;
+                    if (round($grade_item->aggregationcoef2, 4) != round($value, 4)) {
+                        $grade_item->weightoverride = 1;
+                    }
+                    $grade_item->aggregationcoef2 = $value;
+                } else if ($aggcoef == 'aggregationcoefweight') {
+                    $grade_item->aggregationcoef = $value;
+                }
+            } else {
+                $grade_item->$param = $value;
+            }
 
             $grade_item->update();
 

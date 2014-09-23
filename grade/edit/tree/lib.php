@@ -68,7 +68,7 @@ class grade_edit_tree {
         }
 
         if ($this->uses_weight) {
-            $this->columns[] = grade_edit_tree_column::factory('weight');
+            $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'weight'));
         }
 
         $this->columns[] = grade_edit_tree_column::factory('range'); // This is not a setting... How do we deal with it?
@@ -365,17 +365,17 @@ class grade_edit_tree {
         $str = '';
 
         if ($aggcoef == 'aggregationcoefweight' || $aggcoef == 'aggregationcoef' || $aggcoef == 'aggregationcoefextraweight') {
-            $str .= '<label class="accesshide" for="aggregationcoef_'.$item->id.'">'.
+            return '<label class="accesshide" for="weight_'.$item->id.'">'.
                 get_string('extracreditvalue', 'grades', $item->itemname).'</label>'.
-                '<input type="text" size="6" id="aggregationcoef_'.$item->id.'" name="aggregationcoef_'.$item->id.'"
+                '<input type="text" size="6" id="weight_'.$item->id.'" name="weight_'.$item->id.'"
                 value="'.grade_edit_tree::format_number($item->aggregationcoef).'" />';
-        } else if ($aggcoef == 'aggregationcoefextrasum') {
+        } else if ($aggcoef == 'aggregationcoefextraweightsum') {
             $label = '';
             if ($item->weightoverride && $parent_category->aggregation == GRADE_AGGREGATE_SUM) {
                 $label = ' '.get_string('adjusted', 'grades');
             }
 
-            $name = 'aggregationcoef2_' . $item->id;
+            $name = 'weight_' . $item->id;
             $hiddenlabel = html_writer::tag(
                 'label',
                 get_string('weight', 'grades', $item->itemname),
@@ -503,7 +503,8 @@ class grade_edit_tree {
                 $this->uses_non_natural = true;
             }
 
-            if ($coefstring == 'aggregationcoefweight' || $coefstring == 'aggregationcoefextrasum') {
+            if ($coefstring == 'aggregationcoefweight' || $coefstring == 'aggregationcoefextraweightsum' ||
+                    $coefstring == 'aggregationcoefextraweight') {
                 $this->uses_weight = true;
             }
 
