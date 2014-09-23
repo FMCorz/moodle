@@ -366,22 +366,28 @@ class grade_edit_tree {
         $parent_category->apply_forced_settings();
         $aggcoef = $item->get_coefstring();
 
+        $itemname = $item->itemname;
+        if ($item->is_category_item()) {
+            // Remember, the parent category of a category item is the category itself.
+            $itemname = $parent_category->get_name();
+        }
+
         if ((($aggcoef == 'aggregationcoefweight' || $aggcoef == 'aggregationcoef') && $type == 'weight') ||
             ($aggcoef == 'aggregationcoefextraweight' && $type == 'extra')) {
             return '<label class="accesshide" for="weight_'.$item->id.'">'.
-                get_string('extracreditvalue', 'grades', $item->itemname).'</label>'.
+                get_string('extracreditvalue', 'grades', $itemname).'</label>'.
                 '<input type="text" size="6" id="weight_'.$item->id.'" name="weight_'.$item->id.'"
                 value="'.grade_edit_tree::format_number($item->aggregationcoef).'" />';
         } elseif (($aggcoef == 'aggregationcoefextrasum' || $aggcoef == 'aggregationcoefextraweightsum') && $type == 'extra') {
             $checked = ($item->aggregationcoef > 0) ? 'checked="checked"' : '';
             return '<input type="hidden" name="extracredit_'.$item->id.'" value="0" />
                 <label class="accesshide" for="extracredit_'.$item->id.'">'.
-                get_string('extracreditvalue', 'grades', $item->itemname).'</label>
+                get_string('extracreditvalue', 'grades', $itemname).'</label>
                 <input type="checkbox" id="extracredit_'.$item->id.'" name="extracredit_'.$item->id.'" value="1" '."$checked />\n";
         } else if ($aggcoef == 'aggregationcoefextraweightsum' && $type == 'weight') {
 
             $checkboxname = 'weightoverride_' . $item->id;
-            $checkboxlbl = html_writer::tag('label', get_string('overrideweight', 'grades'),
+            $checkboxlbl = html_writer::tag('label', get_string('overrideweightofa', 'grades', $itemname),
                 array('for' => $checkboxname, 'class' => 'accesshide'));
             $checkbox = html_writer::empty_tag('input', array('name' => $checkboxname,
                 'type' => 'hidden', 'value' => 0));
@@ -392,7 +398,7 @@ class grade_edit_tree {
             $name = 'weight_' . $item->id;
             $hiddenlabel = html_writer::tag(
                 'label',
-                get_string('weight', 'grades', $item->itemname),
+                get_string('weightofa', 'grades', $itemname),
                 array(
                     'class' => 'accesshide',
                     'for' => $name
@@ -700,7 +706,8 @@ class grade_edit_tree_column_aggregation extends grade_edit_tree_column_category
             $attributes = array();
             $attributes['id'] = 'aggregation_'.$category->id;
             $attributes['class'] = 'ignoredirty';
-            $aggregation = html_writer::label(get_string('aggregation', 'grades'), 'aggregation_'.$category->id, false, array('class' => 'accesshide'));
+            $aggregation = html_writer::label(get_string('aggregationofa', 'grades', $category->get_name()),
+                'aggregation_'.$category->id, false, array('class' => 'accesshide'));
             $aggregation .= html_writer::select($options, 'aggregation_'.$category->id, $category->aggregation, null, $attributes);
             $action = new component_action('change', 'update_category_aggregation', array('courseid' => $params['id'], 'category' => $category->id, 'sesskey' => sesskey()));
             $OUTPUT->add_action_handler($action, 'aggregation_'.$category->id);
