@@ -46,6 +46,8 @@ class grade_edit_tree {
 
     public $uses_weight = false;
 
+    public $uses_weight2 = false;
+
     public $table;
 
     public $categories = array();
@@ -63,8 +65,12 @@ class grade_edit_tree {
         $this->columns = array(grade_edit_tree_column::factory('name', array('deepest_level' => $this->deepest_level)),
                                grade_edit_tree_column::factory('aggregation', array('flag' => true)));
 
+        if ($this->uses_weight2) {
+            $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'aggregationcoef2'));
+        }
+
         if ($this->uses_weight) {
-            $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'weight'));
+            $this->columns[] = grade_edit_tree_column::factory('weight', array('adv' => 'aggregationcoef'));
         }
         if ($this->uses_extra_credit) {
             $this->columns[] = grade_edit_tree_column::factory('extracredit', array('adv' => 'aggregationcoef'));
@@ -361,23 +367,23 @@ class grade_edit_tree {
 
         if ((($aggcoef == 'aggregationcoefweight' || $aggcoef == 'aggregationcoef') && $type == 'weight') ||
             ($aggcoef == 'aggregationcoefextraweight' && $type == 'extra')) {
-            return '<label class="accesshide" for="weight_'.$item->id.'">'.
+            return '<label class="accesshide" for="aggregationcoef_'.$item->id.'">'.
                 get_string('extracreditvalue', 'grades', $item->itemname).'</label>'.
-                '<input type="text" size="6" id="weight_'.$item->id.'" name="weight_'.$item->id.'"
+                '<input type="text" size="6" id="aggregationcoef_'.$item->id.'" name="aggregationcoef_'.$item->id.'"
                 value="'.grade_edit_tree::format_number($item->aggregationcoef).'" />';
-        } elseif (($aggcoef == 'aggregationcoefextrasum' || $aggcoef == 'aggregationcoefextraweightsum') && $type == 'extra') {
+        } elseif ($aggcoef == 'aggregationcoefextrasum' && $type == 'extra') {
             $checked = ($item->aggregationcoef > 0) ? 'checked="checked"' : '';
             return '<input type="hidden" name="extracredit_'.$item->id.'" value="0" />
                 <label class="accesshide" for="extracredit_'.$item->id.'">'.
                 get_string('extracreditvalue', 'grades', $item->itemname).'</label>
                 <input type="checkbox" id="extracredit_'.$item->id.'" name="extracredit_'.$item->id.'" value="1" '."$checked />\n";
-        } else if ($aggcoef == 'aggregationcoefextraweightsum' && $type == 'weight') {
+        } else if ($aggcoef == 'aggregationcoefextrasum' && $type == 'weight') {
             $label = '';
             if ($item->weightoverride && $parent_category->aggregation == GRADE_AGGREGATE_SUM) {
                 $label = get_string('adjusted', 'grades');
             }
 
-            $name = 'weight_' . $item->id;
+            $name = 'aggregationcoef2_' . $item->id;
             $hiddenlabel = html_writer::tag(
                 'label',
                 get_string('weight', 'grades', $item->itemname),
@@ -496,11 +502,13 @@ class grade_edit_tree {
         $level++;
         $coefstring = $element['object']->get_coefstring();
         if ($element['type'] == 'category') {
-            if ($coefstring == 'aggregationcoefweight' || $coefstring == 'aggregationcoefextraweightsum') {
+            if ($coefstring == 'aggregationcoefweight') {
                 $this->uses_weight = true;
-            }
-            if ($coefstring ==  'aggregationcoefextraweight' || $coefstring == 'aggregationcoefextraweightsum' || $coefstring == 'aggregationcoefextrasum') {
+            } elseif ($coefstring ==  'aggregationcoefextraweight' || $coefstring == 'aggregationcoefextrasum') {
                 $this->uses_extra_credit = true;
+            }
+            if ($coefstring == 'aggregationcoefextrasum') { // TODO: coefstring2?
+                $this->uses_weight2 = true;
             }
 
             foreach($element['children'] as $child_el) {
