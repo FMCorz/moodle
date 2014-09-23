@@ -211,16 +211,29 @@ function get_unenrolled_users_in_import($importcode, $courseid) {
 }
 
 /**
- * removes entries from grade import buffer tables grade_import_value and grade_import_newitem
- * after a successful import, or during an import abort
- * @param string importcode - import batch identifier
+ * Removes entries from grade import buffer tables grade_import_value and grade_import_newitem
+ * after a successful import, or during an import abort. It is possible delete only a single entry
+ * using grade item id or user id.
+ *
+ * @param string $importcode import batch identifier
+ * @param int $itemid grade item id
+ * @param int $userid user id
  */
-function import_cleanup($importcode) {
+function import_cleanup($importcode, $itemid = null, $userid = null) {
     global $USER, $DB;
 
+    $params = array('importcode' => $importcode, 'importer' => $USER->id);
+
+    if ($itemid) {
+        $params['itemid'] = $itemid;
+    }
+
+    if ($userid) {
+        $params['userid'] = $userid;
+    }
+
     // remove entries from buffer table
-    $DB->delete_records('grade_import_values', array('importcode' => $importcode, 'importer' => $USER->id));
+    $DB->delete_records('grade_import_values', $params);
     $DB->delete_records('grade_import_newitem', array('importcode' => $importcode, 'importer' => $USER->id));
 }
-
 
