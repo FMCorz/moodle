@@ -352,6 +352,10 @@ class grade_edit_tree {
         }
 
         $parent_category = $item->get_parent_category();
+        if ($item->is_category_item()) {
+            // If this is category item, get_parent_category() will return this category but we need it's parent.
+            $parent_category = $parent_category->get_parent_category();
+        }
         $parent_category->apply_forced_settings();
         $aggcoef = $item->get_coefstring();
 
