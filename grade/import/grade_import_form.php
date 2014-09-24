@@ -70,6 +70,9 @@ class grade_import_form extends moodleform {
         $options = array('10'=>10, '20'=>20, '100'=>100, '1000'=>1000, '100000'=>100000);
         $mform->addElement('select', 'previewrows', get_string('rowpreviewnum', 'grades'), $options); // TODO: localize
         $mform->setType('previewrows', PARAM_INT);
+        $mform->addElement('checkbox', 'forceimport', get_string('forceimport', 'grades'));
+        $mform->addHelpButton('forceimport', 'forceimport', 'grades');
+        $mform->setDefault('forceimport', 0);
         $mform->addElement('hidden', 'groupid', groups_get_course_group($COURSE));
         $mform->setType('groupid', PARAM_INT);
         $this->add_action_buttons(false, get_string('uploadgrades', 'grades'));
@@ -148,11 +151,13 @@ class grade_import_mapping_form extends moodleform {
         $mform->setConstant('importcode', $this->_customdata['importcode']);
         $mform->addElement('hidden', 'verbosescales', 1);
         $mform->setType('verbosescales', PARAM_INT);
-        $mform->setConstant('verbosescales', $this->_customdata['importcode']);
+        $mform->setConstant('verbosescales', $this->_customdata['verbosescales']);
         $mform->addElement('hidden', 'groupid', groups_get_course_group($COURSE));
         $mform->setType('groupid', PARAM_INT);
         $mform->setConstant('groupid', groups_get_course_group($COURSE));
+        $mform->addElement('hidden', 'forceimport', 0);
+        $mform->setType('forceimport', PARAM_INT);
+        $mform->setConstant('forceimport', $this->_customdata['forceimport']);
         $this->add_action_buttons(false, get_string('uploadgrades', 'grades'));
-
     }
 }

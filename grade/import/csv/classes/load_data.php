@@ -59,6 +59,8 @@ class gradeimport_csv_load_data {
     protected $gradebookerrors;
     /** @var array $newgradeitems An array of new grade items to be inserted into the gradebook. */
     protected $newgradeitems;
+    /** @var bool $forceimport When true the import is forced. */
+    protected $forceimport;
 
     /**
      * Load CSV content for previewing.
@@ -260,21 +262,15 @@ class gradeimport_csv_load_data {
      * @param int $key The line that we are currently working on.
      * @param bool $verbosescales Form setting for grading with scales.
      * @param string $value The grade value.
-     * @param int $timeexported Time at which the grade was exported.
      * @return array grades to be updated.
      */
-    protected function update_grade_item($courseid, $map, $key, $verbosescales, $value, $timeexported) {
+    protected function update_grade_item($courseid, $map, $key, $verbosescales, $value) {
         // Case of an id, only maps id of a grade_item.
         // This was idnumber.
         if (!$gradeitem = new grade_item(array('id' => $map[$key], 'courseid' => $courseid))) {
             // Supplied bad mapping, should not be possible since user
             // had to pick mapping.
             $this->cleanup_import(get_string('importfailed', 'grades'));
-            return null;
-        }
-
-        if (!empty($timeexported) && ($timeexported < $gradeitem->timemodified)) {
-            $this->cleanup_import(get_string('gradealreadyupdated', 'grades'));
             return null;
         }
 
@@ -344,10 +340,9 @@ class gradeimport_csv_load_data {
      * @param int $courseid The course ID.
      * @param int $feedbackgradeid The ID of the grade item that the feedback relates to.
      * @param bool $verbosescales Form setting for grading with scales.
-     * @param int $timeexported The time at which the grade was exported.
      */
     protected function map_user_data_with_value($mappingidentifier, $value, $header, $map, $key, $courseid, $feedbackgradeid,
-            $verbosescales, $timeexported) {
+            $verbosescales) {
 
         // Fields that the user can be mapped from.
         $userfields = array(
@@ -396,7 +391,7 @@ class gradeimport_csv_load_data {
 
                     // Check that time modified is earlier than time exported.
                     $this->newgrades = $this->update_grade_item($courseid, $map, $key, $verbosescales, $value,
-                        $mappingidentifier, $timeexported);
+                        $mappingidentifier);
                 }
                 // Otherwise, we ignore this column altogether because user has chosen
                 // to ignore them (e.g. institution, address etc).
@@ -426,6 +421,7 @@ class gradeimport_csv_load_data {
         $this->headers = $header;
         $this->studentid = null;
         $this->gradebookerrors = null;
+        $this->forceimport = $formdata->forceimport;
         // Temporary array to keep track of what new headers are processed.
         $this->newgradeitems = array();
         $this->trim_headers();
@@ -506,7 +502,7 @@ class gradeimport_csv_load_data {
                 }
 
                 $this->map_user_data_with_value($mappingidentifier, $value, $header, $map, $key, $courseid, $feedbackgradeid,
-                    $verbosescales, $timeexported);
+                    $verbosescales);
                 if ($this->status === false) {
                     return $this->status;
                 }
@@ -540,10 +536,9 @@ class gradeimport_csv_load_data {
                         }
                     }
 
-                    if (!empty($timeexported) && ($timeexported < $grade_grade->timemodified)) {
-                        // The grade was modified since the export.
-                        $this->cleanup_import(get_string('gradealreadyupdated', 'grades'));
-                        return $this->status;
+                    // The grade was modified since the export.
+                    if (!$this->forceimport && !empty($timeexported) && ($timeexported < $gradegrade->timemodified)) {
+                        continue;
                     }
 
                     $insertid = self::insert_grade_record($newgrade, $this->studentid);
