@@ -279,8 +279,7 @@ class grade_edit_tree {
             $headercell->scope = 'row';
             $headercell->attributes['title'] = $object->stripped_name;
             $headercell->attributes['class'] = 'cell rowspan ' . $levelclass;
-            $headercell->rowspan = $row_count + 1;
-            $row->cells[] = $headercell;
+            $headercell->rowspan = $row_count;
 
             foreach ($this->columns as $column) {
                 if (!($this->moving && $column->hide_when_moving)) {
@@ -291,12 +290,13 @@ class grade_edit_tree {
             }
 
             $returnrows[] = $row;
+            array_unshift($html_children[0]->cells, $headercell);
 
             $returnrows = array_merge($returnrows, $html_children);
 
             // Print a coloured row to show the end of the category across the table
             $endcell = new html_table_cell();
-            $endcell->colspan = (19 - $level);
+            $endcell->colspan = (19 - $level + 1);
             $endcell->attributes['class'] = 'colspan ' . $levelclass;
 
             $returnrows[] = new html_table_row(array($endcell));
@@ -621,7 +621,7 @@ class grade_edit_tree_column_name extends grade_edit_tree_column {
         $moveaction = isset($params['moveaction']) ? $params['moveaction'] : '';
         $categorycell = clone($this->categorycell);
         $categorycell->attributes['class'] .= ' name ' . $levelclass;
-        $categorycell->colspan = ($this->deepest_level +1) - $params['level'];
+        $categorycell->colspan = ($this->deepest_level +2) - $params['level'];
         $categorycell->text = $OUTPUT->heading($moveaction . $params['name'], 4);
         return $categorycell;
     }
