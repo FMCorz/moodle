@@ -285,7 +285,7 @@ class grade_report_user extends grade_report {
             $count += $this->inject_rowspans($element['children'][$key]);
         }
 
-        $element['rowspan'] = $count;
+        $element['rowspan'] = $count - 1;
         return $count;
     }
 
@@ -364,7 +364,7 @@ class grade_report_user extends grade_report {
      *
      * @param $element - An array containing the table data for the current row.
      */
-    private function fill_table_recursive(&$element) {
+    private function fill_table_recursive(&$element, $rowspan = 0) {
         global $DB, $CFG;
 
         $type = $element['type'];
@@ -455,7 +455,7 @@ class grade_report_user extends grade_report {
                 /// Name
                 $data['itemname']['content'] = $fullname;
                 $data['itemname']['class'] = $class;
-                $data['itemname']['colspan'] = ($this->maxdepth - $depth);
+                $data['itemname']['colspan'] = ($this->maxdepth - $depth + 1);
                 $data['itemname']['celltype'] = 'th';
                 $data['itemname']['id'] = $header_row;
 
@@ -650,18 +650,24 @@ class grade_report_user extends grade_report {
 
         /// Category
         if ($type == 'category') {
-            $data['leader']['class'] = $class.' '.$alter."d$depth b1t b2b b1l";
-            $data['leader']['rowspan'] = $element['rowspan'];
+            // $data['leader']['class'] = $class.' '.$alter."d$depth b1t b2b b1l";
+            // $data['leader']['rowspan'] = 1;
 
             if ($this->switch) { // alter style based on whether aggregation is first or last
                $data['itemname']['class'] = $class.' '.$alter."d$depth b1b b1t";
             } else {
                $data['itemname']['class'] = $class.' '.$alter."d$depth b2t";
             }
-            $data['itemname']['colspan'] = ($this->maxdepth - $depth + count($this->tablecolumns) - 1);
+            $data['itemname']['colspan'] = ($this->maxdepth - $depth + count($this->tablecolumns) + 1);
             $data['itemname']['content'] = $fullname;
             $data['itemname']['celltype'] = 'th';
             $data['itemname']['id'] = "cat_{$grade_object->id}_{$this->user->id}";
+        }
+
+        if ($rowspan !== 0) {
+            $data['leader']['content'] = '';
+            $data['leader']['rowspan'] = $rowspan;
+            $data['leader']['class'] = '';
         }
 
         /// Add this row to the overall system
@@ -669,8 +675,10 @@ class grade_report_user extends grade_report {
 
         /// Recursively iterate through all child elements
         if (isset($element['children'])) {
+            $i = 0;
             foreach ($element['children'] as $key=>$child) {
-                $this->fill_table_recursive($element['children'][$key]);
+                $rs = ($i++ == 0 ? $element['rowspan'] : 0);
+                $this->fill_table_recursive($element['children'][$key], $rs);
             }
         }
 
@@ -751,7 +759,7 @@ class grade_report_user extends grade_report {
      * @return string
      */
     public function print_table($return=false) {
-         $maxspan = $this->maxdepth;
+         $maxspan = $this->maxdepth + 1;
 
         /// Build table structure
         $html = "
