@@ -3002,7 +3002,7 @@ EOD;
         }
 
         $returnstr .= html_writer::span(
-            html_writer::span($avatarcontents, $avatarclasses) . html_writer::span($usertextcontents, 'usertext'),
+            html_writer::span($usertextcontents, 'usertext') . html_writer::span($avatarcontents, $avatarclasses),
             'userbutton'
         );
 
