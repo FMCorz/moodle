@@ -68,5 +68,30 @@ function xmldb_block_badges_upgrade($oldversion, $block) {
         upgrade_block_savepoint(true, 2014062600, $blockname);
     }
 
+    if ($oldversion < 2014100600) {
+        // Update the previously added entries so that they belong to the right subpage.
+        $blockname = 'badges';
+
+        // Get the system sub page, if we do not find it then it is to leave the subpage to null.
+        // Private => 1 is a reference to the constant MY_PAGE_PRIVATE.
+        if ($systempage = $DB->get_record('my_pages', array('userid' => null, 'private' => 1))) {
+
+            // Check to see if this block is already on the default /my page.
+            $criteria = array(
+                'blockname' => $blockname,
+                'parentcontextid' => context_system::instance()->id,
+                'pagetypepattern' => 'my-index',
+                'subpagepattern' => null,
+            );
+
+            if ($record = $DB->get_record('block_instances', $criteria)) {
+                $record->subpagepattern = $systempage->id;
+                $DB->update_record('block_instances', $record);
+            }
+        }
+
+        upgrade_block_savepoint(true, 2014100600, $blockname);
+    }
+
     return true;
 }

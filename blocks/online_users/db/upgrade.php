@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file keeps track of upgrades to the calendar_month block
+ * This file keeps track of upgrades to the online_users block.
  *
  * Sometimes, changes between versions involve alterations to database structures
  * and other major things that may break installations.
@@ -32,45 +32,22 @@
  * before any action that may take longer time to finish.
  *
  * @since Moodle 2.8
- * @package block_calendar_month
- * @copyright 2014 Andrew Davis
+ * @package online_users
+ * @copyright  2014 Frédéric Massart - FMCorz.net
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Upgrade the calendar_month block
+ * Upgrade the online_users block
  * @param int $oldversion
  * @param object $block
  */
-function xmldb_block_calendar_month_upgrade($oldversion, $block) {
+function xmldb_block_online_users_upgrade($oldversion, $block) {
     global $DB;
-
-    if ($oldversion < 2014062600) {
-        // Add this block the default blocks on /my.
-        $blockname = 'calendar_month';
-
-        $page = new moodle_page();
-        $page->set_context(context_system::instance());
-
-        // Check to see if this block is already on the default /my page.
-        $criteria = array(
-            'blockname' => $blockname,
-            'parentcontextid' => $page->context->id,
-            'pagetypepattern' => 'my-index'
-        );
-
-        if (!$DB->record_exists('block_instances', $criteria)) {
-            // Add the block to the default /my.
-            $page->blocks->add_region(BLOCK_POS_RIGHT);
-            $page->blocks->add_block($blockname, BLOCK_POS_RIGHT, 0, false, 'my-index');
-        }
-
-        upgrade_block_savepoint(true, 2014062600, $blockname);
-    }
 
     if ($oldversion < 2014100600) {
         // Update the previously added entries so that they belong to the right subpage.
-        $blockname = 'calendar_month';
+        $blockname = 'online_users';
 
         // Get the system sub page, if we do not find it then it is to leave the subpage to null.
         // Private => 1 is a reference to the constant MY_PAGE_PRIVATE.
