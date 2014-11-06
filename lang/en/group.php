@@ -136,7 +136,7 @@ $string['importgroups_help'] = 'Groups may be imported via text file. The format
 * Each record is a series of data separated by commas
 * The first record contains a list of fieldnames defining the format of the rest of the file
 * Required fieldname is groupname
-* Optional fieldnames are description, enrolmentkey, picture, hidepicture';
+* Optional fieldnames are description, enrolmentkey, picture';
 $string['importgroups_link'] = 'group/import';
 $string['javascriptrequired'] = 'This page requires JavaScript to be enabled.';
 $string['members'] = 'Members per group';

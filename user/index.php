@@ -303,7 +303,7 @@ echo html_writer::table($controlstable);
 if ($currentgroup and (!$isseparategroups or has_capability('moodle/site:accessallgroups', $context))) {
     // Display info about the group.
     if ($group = groups_get_group($currentgroup)) {
-        if (!empty($group->description) or (!empty($group->picture) and empty($group->hidepicture))) {
+        if (!empty($group->description) or (!empty($group->picture))) {
             $groupinfotable = new html_table();
             $groupinfotable->attributes['class'] = 'groupinfobox';
             $picturecell = new html_table_cell();

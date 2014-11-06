@@ -2246,11 +2246,6 @@ function print_group_picture($group, $courseid, $large=false, $return=false, $li
         return '';
     }
 
-    // If picture is hidden, only show to those with course:managegroups.
-    if ($group->hidepicture and !has_capability('moodle/course:managegroups', $context)) {
-        return '';
-    }
-
     if ($link or has_capability('moodle/site:accessallgroups', $context)) {
         $output = '<a href="'. $CFG->wwwroot .'/user/index.php?id='. $courseid .'&amp;group='. $group->id .'">';
     } else {
