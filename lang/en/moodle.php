@@ -913,7 +913,6 @@ $string['hiddensectionscollapsed'] = 'Hidden sections are shown in collapsed for
 $string['hiddensectionsinvisible'] = 'Hidden sections are completely invisible';
 $string['hide'] = 'Hide';
 $string['hideadvancedsettings'] = 'Hide advanced settings';
-$string['hidepicture'] = 'Hide picture';
 $string['hidesection'] = 'Hide section {$a}';
 $string['hidesettings'] = 'Hide settings';
 $string['hideshowblocks'] = 'Hide or show blocks';
@@ -2022,3 +2021,6 @@ $string['yourself'] = 'yourself';
 $string['yourteacher'] = 'your {$a}';
 $string['yourwordforx'] = 'Your word for \'{$a}\'';
 $string['zippingbackup'] = 'Zipping backup';
+
+// Deprecated since Moodle 2.9.
+$string['hidepicture'] = 'Hide picture';

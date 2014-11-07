@@ -7,3 +7,5 @@ hidden,core_role
 simpleview,core_grades
 fullview,core_grades
 categoriesedit,core_grades
+hidepicture,core_group
+hidepicture,core_moodle

@@ -128,7 +128,6 @@ $string['groupspreview'] = 'Groups preview';
 $string['groupsseparate'] = 'Separate groups';
 $string['groupsvisible'] = 'Visible groups';
 $string['grouptemplate'] = 'Group @';
-$string['hidepicture'] = 'Hide picture';
 $string['importgroups'] = 'Import groups';
 $string['importgroups_help'] = 'Groups may be imported via text file. The format of the file should be as follows:
 
@@ -180,3 +179,6 @@ $string['toomanygroups'] = 'Insufficient users to populate this number of groups
 $string['usercount'] = 'User count';
 $string['usercounttotal'] = 'User count ({$a})';
 $string['usergroupmembership'] = 'Selected user\'s membership:';
+
+// Deprecated since Moodle 2.9.
+$string['hidepicture'] = 'Hide picture';
