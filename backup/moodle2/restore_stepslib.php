@@ -1379,6 +1379,14 @@ class restore_enrolments_structure_step extends restore_structure_step {
         $data = (object)$data;
         $oldid = $data->id; // We'll need this later
 
+        if (empty($data->enrol)) {
+            // It could happen that some broken data was saved in the backup files, so in the case
+            // where the name of the plugin was not set we skip the entry or plugin_supports() will complain.
+            debugging("Skipping empty enrol entry (oldid: $oldid)", DEBUG_DEVELOPER);
+            $this->set_mapping('enrol', $oldid, 0);
+            return;
+        }
+
         $restoretype = plugin_supports('enrol', $data->enrol, ENROL_RESTORE_TYPE, null);
 
         if ($restoretype !== ENROL_RESTORE_EXACT and $restoretype !== ENROL_RESTORE_NOUSERS) {
