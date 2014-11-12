@@ -3004,7 +3004,21 @@ class restore_block_instance_structure_step extends restore_structure_step {
                                           FROM {block_instances} bi
                                           JOIN {block} b ON b.name = bi.blockname
                                          WHERE bi.parentcontextid = ?
-                                           AND bi.blockname = ?", array($data->parentcontextid, $data->blockname))) {
+                                           AND bi.blockname = ?
+                                           AND bi.showinsubcontexts = ?
+                                           AND bi.pagetypepattern = ?
+                                           AND bi.subpagepattern = ?", array(
+                                                $data->parentcontextid,
+                                                $data->blockname,
+                                                $data->showinsubcontexts,
+                                                $data->pagetypepattern,
+                                                $data->subpagepattern,
+                                            ))) {
+                // The block already exists with similar settings, so let's not duplicate it.
+                // Because if there is a similar block, but with different parameters, that
+                // is safer for us to continue and duplicate it on the course. Especially if the
+                // block that is restored is meant to be displayed on subpages where as the
+                // existing one might not.
                 return false;
             }
         }
