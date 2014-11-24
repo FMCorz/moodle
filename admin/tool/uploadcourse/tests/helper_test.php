@@ -75,30 +75,36 @@ class tool_uploadcourse_helper_testcase extends advanced_testcase {
             'enrolment_4' => 'database',
             'enrolment_4_foo' => 'x',
             'enrolment_4_bar' => '3',
+            'enrolment_5_name' => 'the name of the instance',
             'enrolment_5_test3' => 'test3',
             'enrolment_5_test2' => 'test2',
             'enrolment_5_test1' => 'test1',
             'enrolment_5' => 'flatfile',
         );
         $expected = array(
-            'self' => array(
+            '2' => array(
                 'delete' => '1',
                 'foo' => 'a',
                 'bar' => '1',
+                'enrol' => 'self',
             ),
-            'manual' => array(
+            '3' => array(
                 'disable' => '2',
                 'foo' => 'b',
                 'bar' => '2',
+                'enrol' => 'manual',
             ),
-            'database' => array(
+            '4' => array(
                 'foo' => 'x',
                 'bar' => '3',
+                'enrol' => 'database',
             ),
-            'flatfile' => array(
+            '5' => array(
+                'name' => 'the name of the instance',
                 'test3' => 'test3',
                 'test2' => 'test2',
                 'test1' => 'test1',
+                'enrol' => 'flatfile',
             )
         );
         $errors = array();
