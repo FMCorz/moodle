@@ -109,7 +109,7 @@ class tool_uploadcourse_course {
         'reset' => false, 'restoredir' => null, 'shortnametemplate' => null);
 
     /** @var array special fields used when processing the enrolment methods. */
-    static protected $enrolmentspecialfields = array('delete', 'disable', 'startdate', 'enddate', 'enrolperiod', 'role');
+    static protected $enrolmentspecialfields = array('delete', 'disable', 'startdate', 'enddate', 'enrolperiod', 'role', 'enrol');
 
     /**
      * Constructor
@@ -784,8 +784,9 @@ class tool_uploadcourse_course {
         $cannotaddmethods = array();
         $enrolmentplugins = tool_uploadcourse_helper::get_enrolment_plugins();
         $instances = enrol_get_instances($course->id, false);
-        foreach ($enrolmentdata as $enrolmethod => $method) {
+        foreach ($enrolmentdata as $key => $method) {
 
+            $enrolmethod = $method['enrol'];
             $plugin = $enrolmentplugins[$enrolmethod];
 
             // TODO MDL-48362 Abstract the logic to prevent it to be tied to the
@@ -793,11 +794,23 @@ class tool_uploadcourse_course {
             // whether or not a new instance can be added to the course rather than
             // using enrol_plugin::get_newinstance_link() to figure that out.
             $canadd = $plugin->get_newinstance_link($course->id);
-
-            // TODO MDL-43820 Handle multiple instances of the same type.
+            $name = !empty($method['name']) || is_numeric($method['name']) ? $method['name'] : null;
             $instance = null;
+
+            // Extracting all the instances for this method.
+            $candidates = array();
             foreach ($instances as $i) {
                 if ($i->enrol == $enrolmethod) {
+                    $candidates[] = $i;
+                }
+            }
+
+            // Matching one of the instances with the data we were passed.
+            foreach ($candidates as $i) {
+                if ($name !== null && $i->name == $name) {
+                    $instance = $i;
+                    break;
+                } else if ($name === null) {
                     $instance = $i;
                     break;
                 }
@@ -807,6 +820,7 @@ class tool_uploadcourse_course {
             $todisable = isset($method['disable']) && $method['disable'];
             unset($method['delete']);
             unset($method['disable']);
+            unset($method['enrol']);
 
             if (!empty($instance) && $todelete) {
                 // Remove the enrolment method.

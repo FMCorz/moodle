@@ -169,7 +169,8 @@ class tool_uploadcourse_helper {
                     $unknownmethods[] = $method;
                     continue;
                 }
-                $enrolmentdata[$enrolmethods[$key]] = $enroloptions[$key];
+                $enrolmentdata[$key] = $enroloptions[$key];
+                $enrolmentdata[$key]['enrol'] = $method;
             }
         }
 
