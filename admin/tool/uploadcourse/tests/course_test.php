@@ -1040,6 +1040,7 @@ class tool_uploadcourse_course_testcase extends advanced_testcase {
         $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
         $data = array('shortname' => 'c2');
         $data['enrolment_1'] = 'cohort';
+        $data['enrolment_1_name'] = 'My cohort enrolment';
         $data['enrolment_1_customint1'] = $cohort->id;
         $co = new tool_uploadcourse_course($mode, $updatemode, $data);
         $this->assertTrue($co->prepare());
@@ -1053,6 +1054,182 @@ class tool_uploadcourse_course_testcase extends advanced_testcase {
         $this->assertFalse($co->has_errors());
         $this->assertArrayHasKey('cohort', $enroldata);
         $this->assertEquals($cohort->id, $enroldata['cohort']->customint1);
+    }
+
+    public function test_enrolment_data_with_names() {
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $c1 = $this->getDataGenerator()->create_course(array('shortname' => 'c1'));
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+        $cohort2 = $this->getDataGenerator()->create_cohort();
+        $cohort3 = $this->getDataGenerator()->create_cohort();
+
+        // Trying to match the enrolment method using the name.
+        $mode = tool_uploadcourse_processor::MODE_CREATE_ALL;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'c1');
+        $data['enrolment_1'] = 'cohort';
+        $data['enrolment_1_name'] = 'My cohort enrolment';
+        $data['enrolment_1_customint1'] = $cohort1->id;
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+
+        $enroldata = array();
+        $instances = enrol_get_instances($co->get_id(), false);
+        foreach ($instances as $instance) {
+            if ($instance->enrol == 'cohort') {
+                $enroldata[$instance->id] = $instance;
+            }
+        }
+        $this->assertFalse($co->has_errors());
+        $this->assertCount(1, $enroldata);
+        $cohortinstance = reset($enroldata);
+        $this->assertEquals($cohort1->id, $cohortinstance->customint1);
+        $this->assertEquals($data['enrolment_1_name'], $cohortinstance->name);
+
+        // Trying to match the enrolment method using the name.
+        $mode = tool_uploadcourse_processor::MODE_UPDATE_ONLY;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'c1');
+        $data['enrolment_1'] = 'cohort';
+        $data['enrolment_1_name'] = 'My cohort enrolment';
+        $data['enrolment_1_customint1'] = $cohort2->id;
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+
+        $enroldata = array();
+        $instances = enrol_get_instances($co->get_id(), false);
+        foreach ($instances as $instance) {
+            if ($instance->enrol == 'cohort') {
+                $enroldata[$instance->id] = $instance;
+            }
+        }
+        $this->assertFalse($co->has_errors());
+        $this->assertCount(1, $enroldata);
+        $cohortinstance = reset($enroldata);
+        $this->assertEquals($cohort2->id, $cohortinstance->customint1);
+
+        // Trying to create an enrolment method with another name.
+        $mode = tool_uploadcourse_processor::MODE_UPDATE_ONLY;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'c1');
+        $data['enrolment_1'] = 'cohort';
+        $data['enrolment_1_name'] = 'My second cohort enrolment';
+        $data['enrolment_1_customint1'] = $cohort1->id;
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+
+        $enroldata = array();
+        $instances = enrol_get_instances($co->get_id(), false);
+        foreach ($instances as $instance) {
+            if ($instance->enrol == 'cohort') {
+                $enroldata[$instance->id] = $instance;
+            }
+        }
+        $this->assertFalse($co->has_errors());
+        $this->assertCount(2, $enroldata);
+        ksort($enroldata);
+        $existinginstance = reset($enroldata);
+        $newinstance = end($enroldata);
+        $this->assertEquals($cohort2->id, $existinginstance->customint1);
+        $this->assertEquals($cohort1->id, $newinstance->customint1);
+        $this->assertEquals($data['enrolment_1_name'], $newinstance->name);
+
+        // Trying to create one more enrolment method but without specifying a name.
+        $mode = tool_uploadcourse_processor::MODE_UPDATE_ONLY;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'c1');
+        $data['enrolment_1'] = 'cohort';
+        $data['enrolment_1_customint1'] = $cohort3->id;
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+
+        $enroldata = array();
+        $instances = enrol_get_instances($co->get_id(), false);
+        foreach ($instances as $instance) {
+            if ($instance->enrol == 'cohort') {
+                $enroldata[$instance->id] = $instance;
+            }
+        }
+        $this->assertFalse($co->has_errors());
+        $this->assertCount(3, $enroldata);
+        ksort($enroldata);
+        $newinstance = end($enroldata);
+        $this->assertEquals($cohort3->id, $newinstance->customint1);
+
+        // Trying to create one more enrolment method but without specifying a name.
+        $mode = tool_uploadcourse_processor::MODE_UPDATE_ONLY;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'c1');
+        $data['enrolment_1'] = 'cohort';
+        $data['enrolment_1_customint1'] = $cohort3->id;
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+
+        $enroldata = array();
+        $instances = enrol_get_instances($co->get_id(), false);
+        foreach ($instances as $instance) {
+            if ($instance->enrol == 'cohort') {
+                $enroldata[$instance->id] = $instance;
+            }
+        }
+        $this->assertFalse($co->has_errors());
+        $this->assertCount(3, $enroldata);
+        ksort($enroldata);
+        $newinstance = end($enroldata);
+        $this->assertEquals($cohort3->id, $newinstance->customint1);
+
+        // Trying to create another instance of a type that does not support it.
+        $mode = tool_uploadcourse_processor::MODE_UPDATE_ONLY;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'c1');
+        $data['enrolment_1'] = 'manual';
+        $data['enrolment_1_name'] = 'This name does not exist';
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+
+        $this->assertTrue($co->has_errors());
+        $this->assertArrayHasKey('cannotaddenrolmentmethods', $co->get_errors());
+
+        // Trying to create an instance of a type that only supports one instance.
+        $mode = tool_uploadcourse_processor::MODE_UPDATE_ONLY;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'c1');
+        $data['enrolment_1'] = 'manual';
+        $data['enrolment_1_name'] = 'This name does not exist';
+
+        // Delete the method from the course first.
+        $plugins = enrol_get_plugins(false);
+        $plugin = $plugins['manual'];
+        $instances = enrol_get_instances($co->get_id(), false);
+        foreach ($instances as $instance) {
+            if ($instance->enrol != 'manual') {
+                continue;
+            }
+            $plugin->delete_instance($instance);
+        }
+
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+        $this->assertFalse($co->has_errors());
+
+        $instances = enrol_get_instances($co->get_id(), false);
+        foreach ($instances as $instance) {
+            if ($instance->enrol != 'manual') {
+                $enroldata[$instance->id] = $instance;
+            }
+        }
+        $this->assertCount(1, $enroldata);
+        $instance = reset($enroldata);
+        $this->assertEquals($data['enrolment_1_name'], $instance->name);
     }
 
     public function test_idnumber_problems() {
