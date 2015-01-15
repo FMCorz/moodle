@@ -3,7 +3,8 @@
     "builds": {
         "moodle-core_message-dialog": {
             "jsfiles": [
-                "dialog.js"
+                "dialog.js",
+                "manager.js"
             ]
         }
     }

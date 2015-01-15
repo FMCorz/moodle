@@ -24,8 +24,11 @@
 
 var CSS = {
     CANNOTSEND: 'message-cannot-send',
+    FROMME: 'message-from-me',
+    ISFLOATING: 'floating-dialog',
     PREFIX: 'core_message_dialog',
-    TITLE: 'dialog-title'
+    TITLE: 'dialog-title',
+    WRAPPER: 'core_message_dialog-wrapper'
 };
 
 var SELECTORS = {
@@ -46,29 +49,15 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
     _bb: null,
     _ioFetch: null,
-    _lastUserId: null,
+    _loaded: false,
     _messageTemplate: null,
     _sendLocked: false,
 
     initializer: function() {
-        Y.delegate('click', function(e) {
-            var target = e.currentTarget,
-                fullname = target.getData('core_message-dialog-fullname'),
-                userid = parseInt(target.getData('core_message-dialog-userid'), 10);
-
-            if (!fullname || !userid) {
-                return;
-            }
-
-            this.set('fullname', fullname);
-            this.set('userid', userid);
-            this.display();
-
-        }, 'body', '[data-core_message-dialog]', this);
 
         // Prepare the content area.
         tpl = Y.Handlebars.compile(
-            '<div class="wrapper {{#cannotSend}}{{CSS.CANNOTSEND}}{{/cannotSend}}">' +
+            '<div class="{{CSS.WRAPPER}}">' +
                 '<div class="messages-area">' +
                     '<div class="loading hidden" style="text-align: center;">' +
                         '<img alt="" role="presentation" src="{{{loadingIcon}}}">' +
@@ -114,11 +103,11 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
         if (!this._messageTemplate) {
             this._messageTemplate = Y.Handlebars.compile(
-                '<div class="message {{mine}}">' +
+                '<div class="message {{fromMe}}">' +
                     '<div class="content">' +
                     '{{{content}}}' +
                     '</div>' +
-                    '<div class="time">' +
+                    '<div class="message-time">' +
                     '{{time}}' +
                     '</div>' +
                 '</div>'
@@ -127,34 +116,13 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
         container = this.getBB().one('.messages');
         content = Y.Node.create(this._messageTemplate({
-            mine: parseInt(message.useridfrom, 10) === this.get('userid') ? 'mine' : '',
+            fromMe: parseInt(message.useridfrom, 10) !== this.get('userid') ? CSS.FROMME : '',
             content: message.text,
             time: message.time
         }));
         container.append(content);
 
         return content;
-    },
-
-    display: function() {
-        // Should we reload the data?
-        if (this._lastUserId !== this.get('userid')) {
-
-            // Reset to the defaults.
-            this.reset();
-
-            // Launch the loading of the messages.
-            this.loadMessages();
-        }
-
-        // Visual updates.
-        this.getBB().one(SELECTORS.TITLE).setHTML(this.get('fullname'));
-
-        // Record the user that we are looking at.
-        this._lastUserId = this.get('userid');
-
-        // Show the dialog.
-        this.show();
     },
 
     displayMessages: function(messages) {
@@ -165,7 +133,6 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         }, this);
 
         this.scrollToBottom();
-        this.centerDialogue();
     },
 
     fetchMessages: function(success, failure) {
@@ -213,6 +180,11 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         });
     },
 
+    hide: function() {
+        this.get('manager').notifyHide(this);
+        return DIALOG.superclass.hide.apply(this, arguments);
+    },
+
     getBB: function() {
         if (!this._bb) {
             this._bb = this.get('boundingBox');
@@ -235,10 +207,10 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         this.fetchMessages(success, failure);
     },
 
-
-    reset: function() {
-        this.getBB().one('.loading').removeClass('hidden');
-        this.getBB().one('.messages').empty();
+    positionAdvised: function(right, bottom) {
+        console.log(right, bottom);
+        this.set('position', [right, bottom]);
+        this.updatePosition();
     },
 
     scrollToBottom: function() {
@@ -318,6 +290,39 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         }
     },
 
+    show: function() {
+        // Should we reload the data?
+        if (!this._loaded) {
+
+            // Notify for the loading of the new messages.
+            this.getBB().one('.loading').removeClass('hidden');
+
+            // Launch the loading of the messages.
+            this.loadMessages();
+
+            // Visual updates.
+            this.getBB().one(SELECTORS.TITLE).setHTML(this.get('fullname'));
+        }
+        this._loaded = true;
+        DIALOG.superclass.show.apply(this, arguments);
+        this.getBB().set('tabIndex', '0').focus();
+    },
+
+    updatePosition: function() {
+        if (this.shouldResizeFullscreen() || !this.get('position')) {
+            // Do not interfere with the fullscreen positioning.
+            this.getBB().removeClass(CSS.ISFLOATING);
+            return;
+        }
+        this.getBB().addClass(CSS.ISFLOATING);
+        this.getBB().setStyles({
+            'right' : this.get('position')[0],
+            'bottom' : this.get('position')[1],
+            'left': '',
+            'top': ''
+        });
+    },
+
     _setEvents: function() {
         if (this.get('canSend')) {
             this.getBB().one('.message-send-form form').on('submit', function(e) {
@@ -339,6 +344,12 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         fullname: {
             validator: Y.Lang.isString,
             value: ''
+        },
+        manager: {
+            value: null
+        },
+        position: {
+            value: []
         },
         url: {
             validator: Y.Lang.isString,
@@ -362,9 +373,13 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
      * @type Array
      */
     extraClasses: {
-        value: [
-            'core_message_dialog'
-        ]
+        valueFn: function() {
+            var classes = ['core_message_dialog'];
+            if (!this.get('canSend')) {
+                classes.push(CSS.CANNOTSEND);
+            }
+            return classes;
+        }
     },
 
     /**
@@ -387,7 +402,7 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
      * @type String|Number
      */
     width: {
-        value: '500px'
+        value: '220px'
     },
 
     /**
@@ -406,10 +421,10 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
     *
     * @attribute modal
     * @type Boolean
-    * @default true
+    * @default false
     */
     modal: {
-        value: true
+        value: false
     },
 
    /**
@@ -417,14 +432,21 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
     *
     * @attribute draggable
     * @type Boolean
-    * @default true
+    * @default false
     */
     draggable: {
-        value: true
-    }
+        value: false
+    },
+
+    /**
+     * Whether to display the dialogue centrally on the screen.
+     *
+     * @attribute center
+     * @type Boolean
+     * @default false
+     */
+    center: {
+        value : false
+    },
 
 });
-
-Y.namespace('M.core_message.Dialog').init = function(config) {
-    return new DIALOG(config);
-};
