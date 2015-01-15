@@ -1,0 +1,12 @@
+{
+    "moodle-core_message-dialog": {
+        "requires": [
+            "escape",
+            "handlebars",
+            "io-base",
+            "json-parse",
+            "moodle-core-notification-dialogue",
+            "moodle-core-notification-dialogue-alert"
+        ]
+    }
+}
