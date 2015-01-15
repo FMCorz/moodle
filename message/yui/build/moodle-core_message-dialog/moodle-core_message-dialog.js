@@ -25,8 +25,12 @@ YUI.add('moodle-core_message-dialog', function (Y, NAME) {
  */
 
 var CSS = {
+    CANNOTSEND: 'message-cannot-send',
+    FROMME: 'message-from-me',
+    ISFLOATING: 'fixed-dialog',
     PREFIX: 'core_message_dialog',
-    TITLE: 'dialog-title'
+    TITLE: 'dialog-title',
+    WRAPPER: 'core_message_dialog-wrapper'
 };
 
 var SELECTORS = {
@@ -47,45 +51,40 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
     _bb: null,
     _ioFetch: null,
-    _lastUserId: null,
+    _lastDate: null,
+    _loaded: false,
     _messageTemplate: null,
+    _sendLocked: false,
 
     initializer: function() {
-        Y.delegate('click', function(e) {
-            var target = e.currentTarget,
-                fullname = target.getData('core_message-dialog-fullname'),
-                userid = parseInt(target.getData('core_message-dialog-userid'), 10);
-
-            if (!fullname || !userid) {
-                return;
-            }
-
-            this.set('fullname', fullname);
-            this.set('userid', userid);
-            this.display();
-
-        }, 'body', '[data-core_message-dialog]', this);
 
         // Prepare the content area.
         tpl = Y.Handlebars.compile(
-            '<div class="wrapper">' +
+            '<div class="{{CSS.WRAPPER}}">' +
                 '<div class="messages-area">' +
                     '<div class="loading hidden" style="text-align: center;">' +
                         '<img alt="" role="presentation" src="{{{loadingIcon}}}">' +
                     '</div>' +
-                    '<div class="messages">' +
+                    '<div class="messages clearfix">' +
+                    '</div>' +
+                    '<div class="message-sending hidden" aria-live="polite" style="text-align: right;">' +
+                        '<img alt="" role="presentation" src="{{{smallLoadingIcon}}}"> Sending message...' +
                     '</div>' +
                 '</div>' +
-                '<div class="form">' +
-                    '<input type="text" id="new-message">' +
-                    '<input type="submit" value="Send" id="send-message">' +
+                '<div class="message-send-form">' +
+                    '<form>' +
+                        '<input type="text" class="message-input">' +
+                        '<input type="submit" value="Send" class="message-send">' +
+                    '</form>' +
                 '</div>' +
             '</div>');
         content = Y.Node.create(
             tpl({
                 // COMPONENT: COMPONENT,
-                // CSS: CSS,
-                loadingIcon: M.util.image_url('i/loading', 'moodle')
+                cannotSend: !this.get('canSend'),
+                CSS: CSS,
+                loadingIcon: M.util.image_url('i/loading', 'moodle'),
+                smallLoadingIcon: M.util.image_url('i/loading_small', 'moodle')
             })
         );
         this.setStdModContent(Y.WidgetStdMod.BODY, content, Y.WidgetStdMod.REPLACE);
@@ -95,63 +94,59 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
             .prepend(Y.Node.create('<h1 class="' + CSS.TITLE + '"></h1>'));
 
         // Use standard dialogue class name. This removes the default styling of the footer.
-        this.get('boundingBox').one('.moodle-dialogue-wrap').addClass('moodle-dialogue-content');
+        this.getBB().one('.moodle-dialogue-wrap').addClass('moodle-dialogue-content');
+
+        // Set the events listeners.
+        this._setEvents();
     },
 
-    display: function() {
-        // Should we reload the data?
-        if (this._lastUserId !== this.get('userid')) {
-
-            // Reset to the defaults.
-            this.reset();
-
-            // Launch the loading of the messages.
-            this.loadMessages();
-        }
-
-        // Visual updates.
-        this.getBB().one(SELECTORS.TITLE).setHTML(this.get('fullname'));
-
-        // Record the user that we are looking at.
-        this._lastUserId = this.get('userid');
-
-        // Show the dialog.
-        this.show();
+    addDate: function(date) {
+        var container = this.getBB().one('.messages');
+        container.append(Y.Node.create('<div class="message-date"><span>' + date + '</span></div>'));
     },
 
-    displayMessages: function(messages) {
+    addMessage: function(message) {
         var container,
-            messagearea;
+            content;
 
         if (!this._messageTemplate) {
             this._messageTemplate = Y.Handlebars.compile(
-                '<div class="message {{mine}}">' +
-                    '<div class="content">' +
+                '<div class="message {{fromMe}}">' +
+                    '<div class="message-content">' +
                     '{{{content}}}' +
                     '</div>' +
-                    '<div class="time">' +
+                    '<div class="message-time">' +
                     '{{time}}' +
                     '</div>' +
                 '</div>'
             );
         }
 
-        this.getBB().one('.loading').addClass('hidden');
-        messagesarea = this.getBB().one('.messages-area');
         container = this.getBB().one('.messages');
+        content = Y.Node.create(this._messageTemplate({
+            fromMe: parseInt(message.useridfrom, 10) !== this.get('userid') ? CSS.FROMME : '',
+            content: message.text,
+            time: message.time
+        }));
+        container.append(content);
 
-        Y.each(messages, function(message, id) {
-            var content = Y.Node.create(this._messageTemplate({
-                mine: parseInt(message.useridfrom, 10) === this.get('userid') ? 'mine' : '',
-                content: message.text,
-                time: Y.Date.format(Y.Date.parse(message.timecreated * 1000), {format: '%a, %d %b %y %r'})
-            }));
-            container.append(content)
+        return content;
+    },
+
+    displayMessages: function(messages) {
+        this.getBB().one('.loading').addClass('hidden');
+
+        Y.each(messages, function(message) {
+            console.log(this._lastDate, message.date);
+            if (this._lastDate != message.date) {
+                this.addDate(message.date);
+                this._lastDate = message.date;
+                console.log('adding');
+            }
+            this.addMessage(message);
         }, this);
 
-        // Scroll to the bottom of the area.
-        messagesarea.set('scrollTop', messagesarea.get('scrollHeight'));
-        this.centerDialogue();
+        this.scrollToBottom();
     },
 
     fetchMessages: function(success, failure) {
@@ -167,13 +162,15 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                 userid: this.get('userid')
             }),
             on: {
+                start: function() {
+                  this.setLockSend(true);
+                },
                 success: function(id, response) {
                     var data = null,
                         error = false;
 
                     try {
                         data = Y.JSON.parse(response.responseText);
-
                         if (data.error) {
                             error = true;
                         }
@@ -182,16 +179,24 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                     }
 
                     if (error) {
-                        failure.apply(this, [id, response, data]);
+                        failure.apply(this, [id, response]);
                         return;
                     }
 
                     success.apply(this, [id, response, data]);
                 },
-                failure: failure
+                failure: failure,
+                complete: function() {
+                    this.setLockSend(false);
+                }
             },
-            context:this
+            context: this
         });
+    },
+
+    hide: function() {
+        this.get('manager').notifyHide(this);
+        return DIALOG.superclass.hide.apply(this, arguments);
     },
 
     getBB: function() {
@@ -209,29 +214,160 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
             this.displayMessages(data);
         };
 
-        failure = function(id, response, data) {
+        failure = function() {
         };
 
         this.fetchMessages(success, failure);
     },
 
-    reset: function() {
-        this.getBB().one('.loading').removeClass('hidden');
-        this.getBB().one('.messages').empty();
+    positionAdvised: function(right, bottom) {
+        console.log(right, bottom);
+        this.set('position', [right, bottom]);
+        this.updatePosition();
+    },
+
+    scrollToBottom: function() {
+        var messagesarea = this.getBB().one('.messages-area');
+        messagesarea.set('scrollTop', messagesarea.get('scrollHeight'));
+    },
+
+    sendMessage: function(message) {
+        if (!message) {
+            // Do not send falsy messages.
+            return;
+        }
+
+        if (this._sendLocked) {
+            // Cannot send.
+            return;
+        }
+
+        this._ioSend = Y.io(this.get('url'), {
+            method: 'POST',
+            data: build_querystring({
+                sesskey: M.cfg.sesskey,
+                action: 'sendmessage',
+                userid: this.get('userid'),
+                message: message
+            }),
+            on: {
+                start: function() {
+                    this.getBB().one('.message-sending').removeClass('hidden');
+                    this.scrollToBottom();
+                },
+                success: function(id, response) {
+                    var data = null,
+                        error = false;
+
+                    try {
+                        data = Y.JSON.parse(response.responseText);
+                        if (data.error || !data.id) {
+                            error = true;
+                        }
+                    } catch (e) {
+                        error = true;
+                    }
+
+                    if (error) {
+                        failure.apply(this, [id, response]);
+                        return;
+                    }
+
+                    this.addMessage(data);
+                    this.getBB().one('.message-input').set('value', '');
+                    this.scrollToBottom();
+                },
+                failure: function() {
+
+                },
+                complete: function() {
+                    this.getBB().one('.message-sending').addClass('hidden');
+                }
+            },
+            context:this
+        });
+    },
+
+    setLockSend: function(lock) {
+        var btn = this.getBB().one('.message-send'),
+            input = this.getBB().one('.message-input');
+
+        if (lock) {
+            this._sendLocked = true;
+            btn.set('disabled', true);
+            input.set('disabled', true);
+        } else {
+            this._sendLocked = false;
+            btn.set('disabled', false);
+            input.set('disabled', false);
+        }
+    },
+
+    show: function() {
+        // Should we reload the data?
+        if (!this._loaded) {
+
+            // Notify for the loading of the new messages.
+            this.getBB().one('.loading').removeClass('hidden');
+
+            // Launch the loading of the messages.
+            this.loadMessages();
+
+            // Visual updates.
+            this.getBB().one(SELECTORS.TITLE).setHTML(this.get('fullname'));
+        }
+        this._loaded = true;
+        DIALOG.superclass.show.apply(this, arguments);
+        this.getBB().set('tabIndex', '0').focus();
+    },
+
+    updatePosition: function() {
+        if (this.shouldResizeFullscreen() || !this.get('position')) {
+            // Do not interfere with the fullscreen positioning.
+            this.getBB().removeClass(CSS.ISFLOATING);
+            return;
+        }
+        this.getBB().addClass(CSS.ISFLOATING);
+        this.getBB().setStyles({
+            'right' : this.get('position')[0],
+            'bottom' : this.get('position')[1],
+            'left': '',
+            'top': ''
+        });
+    },
+
+    _setEvents: function() {
+        if (this.get('canSend')) {
+            this.getBB().one('.message-send-form form').on('submit', function(e) {
+                var message = this.getBB().one('.message-input').get('value');
+                this.sendMessage(message);
+                e.preventDefault();
+            }, this);
+        }
     }
 
 }, {
     NAME: 'core_message_dialog',
     CSS_PREFIX: CSS.PREFIX,
     ATTRS: {
+        canSend: {
+            validator: Y.Lang.isBoolean,
+            value: false
+        },
         fullname: {
             validator: Y.Lang.isString,
             value: ''
         },
+        manager: {
+            value: null
+        },
+        position: {
+            value: []
+        },
         url: {
             validator: Y.Lang.isString,
             valueFn: function() {
-                return M.cfg.wwwroot + '/message/ajax.php'
+                return M.cfg.wwwroot + '/message/ajax.php';
             }
         },
         userid: {
@@ -250,9 +386,13 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
      * @type Array
      */
     extraClasses: {
-        value: [
-            'core_message_dialog'
-        ]
+        valueFn: function() {
+            var classes = ['core_message_dialog'];
+            if (!this.get('canSend')) {
+                classes.push(CSS.CANNOTSEND);
+            }
+            return classes;
+        }
     },
 
     /**
@@ -275,7 +415,7 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
      * @type String|Number
      */
     width: {
-        value: '500px'
+        value: '220px'
     },
 
     /**
@@ -294,10 +434,10 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
     *
     * @attribute modal
     * @type Boolean
-    * @default true
+    * @default false
     */
     modal: {
-        value: true
+        value: false
     },
 
    /**
@@ -305,26 +445,153 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
     *
     * @attribute draggable
     * @type Boolean
-    * @default true
+    * @default false
     */
     draggable: {
-        value: true
+        value: false
+    },
+
+    /**
+     * Whether to display the dialogue centrally on the screen.
+     *
+     * @attribute center
+     * @type Boolean
+     * @default false
+     */
+    center: {
+        value : false
+    },
+
+});
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Message dialog manager.
+ *
+ * @module     moodle-core_message-dialog
+ * @package    core_message
+ * @copyright  2015 Frédéric Massart - FMCorz.net
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
+ * Manager.
+ *
+ * @namespace M.core_message
+ * @class Manager
+ * @constructor
+ */
+var MANAGER = function() {
+    MANAGER.superclass.constructor.apply(this, arguments);
+};
+Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
+
+    _dialogs: {},
+    _slots: [],
+
+    initializer: function() {
+        Y.delegate('click', function(e) {
+            var target = e.currentTarget,
+                fullname = target.getData('core_message-dialog-fullname'),
+                dialog = null,
+                userid = parseInt(target.getData('core_message-dialog-userid'), 10);
+
+            if (!fullname || !userid) {
+                return;
+            }
+
+            dialog = this.getDialog(userid, fullname);
+            if (!dialog) {
+                return;
+            }
+
+            e.preventDefault();
+
+            if (dialog.get('visible')) {
+                dialog.hide(e)
+                this.releaseSlot(dialog);
+                this.notifyPositions();
+            } else {
+                this.assignSlot(dialog);
+                dialog.show(e);
+                this.notifyPositions();
+            }
+
+        }, 'body', '[data-core_message-dialog]', this);
+    },
+
+    assignSlot: function(dialog) {
+        var index = Y.Array.indexOf(this._slots, dialog);
+        if (index < 0) {
+            this._slots.push(dialog);
+        }
+    },
+
+    getDialog: function(userid, fullname) {
+        if (!this._dialogs[userid]) {
+
+            var dialog = new DIALOG({
+                manager: this,
+                userid: userid,
+                fullname: fullname,
+                canSend: this.get('canSend')
+            });
+
+            this._dialogs[userid] = dialog;
+        }
+        return this._dialogs[userid];
+    },
+
+    getSlotPosition: function(slot) {
+        return slot * 220 + 20 + (slot * 10);
+    },
+
+    notifyPositions: function() {
+        var self = this;
+        Y.each(this._slots, function(dialog, i) {
+            dialog.positionAdvised(self.getSlotPosition(i), 0);
+        }, this);
+    },
+
+    notifyHide: function(dialog) {
+        this.releaseSlot(dialog);
+        this.notifyPositions();
+    },
+
+    releaseSlot: function(dialog) {
+        var index = Y.Array.indexOf(this._slots, dialog),
+            reorder;
+        if (index < 0) {
+            return;
+        }
+        this._slots.splice(index, 1);
     }
 
+}, {
+    ATTRS: {
+        canSend: {
+            validator: Y.Lang.isBoolean,
+            value: false
+        }
+    }
 });
 
 Y.namespace('M.core_message.Dialog').init = function(config) {
-    return new DIALOG(config);
+    return new MANAGER(config);
 };
 
 
-}, '@VERSION@', {
-    "requires": [
-        "datatype-date",
-        "escape",
-        "handlebars",
-        "io-base",
-        "json-parse",
-        "moodle-core-notification-dialogue"
-    ]
-});
+}, '@VERSION@', {"requires": ["escape", "handlebars", "io-base", "json-parse", "moodle-core-notification-dialogue"]});

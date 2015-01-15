@@ -19,3 +19,145 @@ div.logo {
 /* Custom CSS Settings
 -------------------------*/
 [[setting:customcss]]
+
+
+/* Message dialog */
+.core_message_dialog {
+    height: 320px;
+}
+.core_message_dialog.fixed-dialog {
+    position: fixed;
+}
+.core_message_dialog.moodle-dialogue-fullscreen {
+    height: 100%;
+}
+.core_message_dialog-content {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+}
+.core_message_dialog-hidden {
+    display:none;
+}
+.moodle-dialogue-base .core_message_dialog .moodle-dialogue-wrap {
+    position: relative;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+}
+.core_message_dialog .moodle-dialogue-wrap .moodle-dialogue-hd .yui3-widget-buttons {
+    padding: 3px;
+}
+.moodle-dialogue-base .core_message_dialog .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd,
+.core_message_dialog .core_message_dialog-content .moodle-dialogue-hd {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    border-radius: 0;
+    background: #F5F5F5;
+    letter-spacing: .5px;
+}
+.core_message_dialog h1 {
+    line-height: 22px;
+    text-shadow: none;
+}
+.core_message_dialog .core_message_dialog-content .moodle-dialogue-bd {
+    position: absolute;
+    top: 23px;
+    bottom: 0;
+    padding: 0;
+    width: 100%;
+}
+.core_message_dialog-wrapper {
+    position: relative;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+}
+
+.core_message_dialog .messages-area {
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
+    overflow: auto;
+}
+.core_message_dialog.message-cannot-send .messages-area {
+    bottom: 0;
+}
+
+.core_message_dialog .message {
+    max-width: 70%;
+    padding: 3px 8px;
+    border: 1px solid #08c;
+    border-radius: 4px;
+    margin: 3px 6px;
+    font-size: 13px;
+    clear: both;
+    float: left;
+    line-height: 18px;
+}
+.core_message_dialog .message-date {
+    text-align: center;
+    clear: both;
+    padding: 10px 0;
+}
+.core_message_dialog .message-date span {
+    font-size: 10px;
+    font-weight: bold;
+    background-color: #eee;
+    border-radius: 10px;
+    padding: 2px 8px;
+}
+
+.core_message_dialog .message-send-form {
+    position: absolute;
+    height: 40px;
+    bottom: 0;
+    width: 100%;
+    border-top: 1px solid #ccc;
+}
+.core_message_dialog .message-send-form form {
+    padding: 3px 50px 3px 5px;
+}
+.core_message_dialog.message-cannot-send .message-send-form {
+    display: none;
+}
+
+.core_message_dialog .message-content {
+    display: inline;
+}
+.core_message_dialog .message-from-me {
+    border-color: #f5f5f5;
+    float: right;
+}
+.core_message_dialog .message-time {
+    text-align: right;
+    font-size: 10px;
+    display: inline-block;
+    float: right;
+    padding-left: 10px;
+    color: #bbb;
+}
+
+.core_message_dialog .message-input,
+.core_message_dialog .message-input:focus {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    border: 0;
+    height: 100%;
+    box-shadow: none;
+    transition: none;
+    border: none;
+    line-height: 30px;
+    border-radius: 0;
+}
+.core_message_dialog .message-send {
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    width: 50px;
+}

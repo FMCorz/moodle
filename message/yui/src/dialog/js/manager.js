@@ -70,11 +70,8 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
 
     assignSlot: function(dialog) {
         var index = Y.Array.indexOf(this._slots, dialog);
-        console.log('INDEX FOUND', index);
         if (index < 0) {
-            
             this._slots.push(dialog);
-            console.log('SLOTS AFTER PUSH', this._slots);
         }
     },
 
@@ -94,14 +91,12 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
     },
 
     getSlotPosition: function(slot) {
-        return slot * 220 + 20 + (slot * 20);
+        return slot * 220 + 20 + (slot * 10);
     },
 
     notifyPositions: function() {
         var self = this;
-        console.log(this._slots);
         Y.each(this._slots, function(dialog, i) {
-            console.log(dialog, i);
             dialog.positionAdvised(self.getSlotPosition(i), 0);
         }, this);
     },
@@ -109,19 +104,15 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
     notifyHide: function(dialog) {
         this.releaseSlot(dialog);
         this.notifyPositions();
-        console.log(this._slots);
     },
 
     releaseSlot: function(dialog) {
         var index = Y.Array.indexOf(this._slots, dialog),
             reorder;
-
         if (index < 0) {
             return;
         }
-
         this._slots.splice(index, 1);
-        console.log('SLOTS AFTER REORDER', this._slots);
     }
 
 }, {
@@ -129,7 +120,7 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
         canSend: {
             validator: Y.Lang.isBoolean,
             value: false
-        },
+        }
     }
 });
 

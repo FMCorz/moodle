@@ -57,8 +57,9 @@ switch ($action) {
 
         $messages = message_get_history($user1, $user2, 25);
         foreach ($messages as $key => $message) {
-            $messages[$key]->text = message_format_message_text($message, true);
-            $messages[$key]->time = userdate($message->timecreated);
+            $message->text = message_format_message_text($message, true);
+            $message->date = userdate($message->timecreated, get_string('strftimedaydate'));
+            $message->time = userdate($message->timecreated, get_string('strftimetime'));
         }
 
         // Reset the keys.
@@ -82,7 +83,8 @@ switch ($action) {
         if ($messageid) {
             $message = $DB->get_record('message', array('id' => $messageid), '*', MUST_EXIST);
             $message->text = message_format_message_text($message, true);
-            $message->time = userdate($message->timecreated);
+            $message->date = userdate($message->timecreated, get_string('strftimedaydate'));
+            $message->time = userdate($message->timecreated, get_string('strftimetime'));
             $response = $message;
         }
 

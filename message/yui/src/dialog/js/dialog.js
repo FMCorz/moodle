@@ -25,7 +25,7 @@
 var CSS = {
     CANNOTSEND: 'message-cannot-send',
     FROMME: 'message-from-me',
-    ISFLOATING: 'floating-dialog',
+    ISFLOATING: 'fixed-dialog',
     PREFIX: 'core_message_dialog',
     TITLE: 'dialog-title',
     WRAPPER: 'core_message_dialog-wrapper'
@@ -49,6 +49,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
     _bb: null,
     _ioFetch: null,
+    _lastDate: null,
     _loaded: false,
     _messageTemplate: null,
     _sendLocked: false,
@@ -97,6 +98,11 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         this._setEvents();
     },
 
+    addDate: function(date) {
+        var container = this.getBB().one('.messages');
+        container.append(Y.Node.create('<div class="message-date"><span>' + date + '</span></div>'));
+    },
+
     addMessage: function(message) {
         var container,
             content;
@@ -104,7 +110,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         if (!this._messageTemplate) {
             this._messageTemplate = Y.Handlebars.compile(
                 '<div class="message {{fromMe}}">' +
-                    '<div class="content">' +
+                    '<div class="message-content">' +
                     '{{{content}}}' +
                     '</div>' +
                     '<div class="message-time">' +
@@ -129,6 +135,12 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         this.getBB().one('.loading').addClass('hidden');
 
         Y.each(messages, function(message) {
+            console.log(this._lastDate, message.date);
+            if (this._lastDate != message.date) {
+                this.addDate(message.date);
+                this._lastDate = message.date;
+                console.log('adding');
+            }
             this.addMessage(message);
         }, this);
 
