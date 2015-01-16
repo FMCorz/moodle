@@ -191,8 +191,10 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
     },
 
     hide: function() {
-        this.get('manager').notifyHide(this);
-        return DIALOG.superclass.hide.apply(this, arguments);
+        DIALOG.superclass.hide.apply(this, arguments);
+        Y.fire(EVENTS.DIALOGCLOSED, {
+            dialog: this
+        });
     },
 
     getBB: function() {
@@ -218,7 +220,6 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
     },
 
     positionAdvised: function(right, bottom) {
-        console.log(right, bottom);
         this.set('position', [right, bottom]);
         this.updatePosition();
     },
@@ -256,6 +257,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
             }),
             on: {
                 start: function() {
+                    this.getBB().one('.message-input').setHTML('');
                     this.getBB().one('.message-sending').removeClass('hidden');
                     this.scrollToBottom();
                 },
@@ -278,18 +280,23 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                     }
 
                     this.addMessage(data);
-                    this.getBB().one('.message-input').setHTML('');
                     this.scrollToBottom();
                 },
-                failure: function() {
-
-                },
+                failure: failure,
                 complete: function() {
                     this.getBB().one('.message-sending').addClass('hidden');
                 }
             },
             context:this
         });
+
+        function failure() {
+            var alert = new M.core.alert({
+                title: 'Message not sent',
+                message: 'An error occured while trying to send the message, please try again later.'
+            });
+            alert.show();
+        }
     },
 
     setLockSend: function(lock) {
@@ -412,11 +419,11 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
      * Whether to focus on the target that caused the Widget to be shown.
      *
      * @attribute focusOnPreviousTargetAfterHide
-     * @default true
+     * @default false
      * @type Node
      */
     focusOnPreviousTargetAfterHide: {
-        value: true
+        value: false
     },
 
     /**
@@ -473,6 +480,6 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
      */
     center: {
         value : false
-    },
+    }
 
 });

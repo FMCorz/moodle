@@ -22,6 +22,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+var EVENTS = {
+    DIALOGCLOSED: 'core_message:dialog-closed'
+}
+
 /**
  * Manager.
  *
@@ -38,34 +42,9 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
     _slots: [],
 
     initializer: function() {
-        Y.delegate('click', function(e) {
-            var target = e.currentTarget,
-                fullname = target.getData('core_message-dialog-fullname'),
-                dialog = null,
-                userid = parseInt(target.getData('core_message-dialog-userid'), 10);
-
-            if (!fullname || !userid) {
-                return;
-            }
-
-            dialog = this.getDialog(userid, fullname);
-            if (!dialog) {
-                return;
-            }
-
-            e.preventDefault();
-
-            if (dialog.get('visible')) {
-                dialog.hide(e)
-                this.releaseSlot(dialog);
-                this.notifyPositions();
-            } else {
-                this.assignSlot(dialog);
-                dialog.show(e);
-                this.notifyPositions();
-            }
-
-        }, 'body', '[data-core_message-dialog]', this);
+        this.publishEvents();
+        this.setListeners();
+        console.log(this.get('defaultSlots'));
     },
 
     assignSlot: function(dialog) {
@@ -101,9 +80,10 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
         }, this);
     },
 
-    notifyHide: function(dialog) {
-        this.releaseSlot(dialog);
-        this.notifyPositions();
+    publishEvents: function() {
+        Y.publish(EVENTS.DIALOGCLOSED, {
+            emitFacade: true
+        });
     },
 
     releaseSlot: function(dialog) {
@@ -113,6 +93,62 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
             return;
         }
         this._slots.splice(index, 1);
+    },
+
+    saveSlots: function() {
+        var slots = [];
+
+        Y.each(this._slots, function(dialog) {
+            slots.push({
+                userid: dialog.get('userid'),
+                status: 'open'
+            });
+        }, this);
+
+        Y.io(this.get('url'), {
+            method: 'POST',
+            data: build_querystring({
+                sesskey: M.cfg.sesskey,
+                action: 'saveslots',
+                slots: slots
+            })
+        });
+    },
+
+    setListeners: function() {
+        Y.delegate('click', function(e) {
+            var target = e.currentTarget,
+                fullname = target.getData('core_message-dialog-fullname'),
+                dialog = null,
+                userid = parseInt(target.getData('core_message-dialog-userid'), 10);
+
+            if (!fullname || !userid) {
+                return;
+            }
+
+            dialog = this.getDialog(userid, fullname);
+            if (!dialog) {
+                return;
+            }
+
+            e.preventDefault();
+
+            if (dialog.get('visible')) {
+                dialog.hide(e)
+                this.releaseSlot(dialog);
+                this.notifyPositions();
+            } else {
+                this.assignSlot(dialog);
+                dialog.show(e);
+                this.notifyPositions();
+            }
+
+        }, 'body', '[data-core_message-dialog]', this);
+
+        Y.on(EVENTS.DIALOGCLOSED, function(e) {
+            this.releaseSlot(e.dialog);
+            this.notifyPositions();
+        }, this);
     }
 
 }, {
@@ -120,6 +156,9 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
         canSend: {
             validator: Y.Lang.isBoolean,
             value: false
+        },
+        defaultSlots: {
+            value: null
         }
     }
 });

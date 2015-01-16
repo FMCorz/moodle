@@ -66,6 +66,18 @@ switch ($action) {
         $response = array_values($messages);
         break;
 
+    case 'saveslots':
+
+        $slots = required_param('slots', PARAM_RAW);
+        $slots = json_decode($slots, true);
+        if (!$slots) {
+            core_message_invalid_request();
+        }
+
+        $SESSION->core_message_slots = $slots;
+        $response = array('success' => true);
+        break;
+
     case 'sendmessage':
 
         require_capability('moodle/site:sendmessage', context_system::instance());
