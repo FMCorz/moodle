@@ -98,7 +98,7 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
     },
 
     getSlotPosition: function(slot) {
-        return slot * 220 + 20 + (slot * 10);
+        return slot * 280 + 20 + (slot * 10);
     },
 
     notifyPositions: function() {

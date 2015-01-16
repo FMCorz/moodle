@@ -1915,7 +1915,7 @@ function message_get_fragment($message, $keywords) {
  * @param int $limitnum the maximum number of messages to retrieve
  * @param bool $viewingnewmessages are we currently viewing new messages?
  */
-function message_get_history($user1, $user2, $limitnum=0, $viewingnewmessages=false) {
+function message_get_history($user1, $user2, $limitnum=0, $viewingnewmessages=false, $since=null) {
     global $DB, $CFG;
 
     $messages = array();
@@ -1936,17 +1936,23 @@ function message_get_history($user1, $user2, $limitnum=0, $viewingnewmessages=fa
     //prevent notifications of your own actions appearing in your own message history
     $ownnotificationwhere = ' AND NOT (useridfrom=? AND notification=1)';
 
+    $sincesql = '';
+    if ($since) {
+        $sincesql = ' AND timecreated > ?';
+    }
+
     if ($messages_read = $DB->get_records_select('message_read', "((useridto = ? AND useridfrom = ?) OR
-                                                    (useridto = ? AND useridfrom = ?)) $notificationswhere $ownnotificationwhere",
-                                                    array($user1->id, $user2->id, $user2->id, $user1->id, $user1->id),
+                                                    (useridto = ? AND useridfrom = ?)) $notificationswhere " .
+                                                    "$ownnotificationwhere $sincesql",
+                                                    array($user1->id, $user2->id, $user2->id, $user1->id, $user1->id, $since),
                                                     "timecreated $sort", '*', 0, $limitnum)) {
         foreach ($messages_read as $message) {
             $messages[] = $message;
         }
     }
     if ($messages_new =  $DB->get_records_select('message', "((useridto = ? AND useridfrom = ?) OR
-                                                    (useridto = ? AND useridfrom = ?)) $ownnotificationwhere",
-                                                    array($user1->id, $user2->id, $user2->id, $user1->id, $user1->id),
+                                                    (useridto = ? AND useridfrom = ?)) $ownnotificationwhere $sincesql",
+                                                    array($user1->id, $user2->id, $user2->id, $user1->id, $user1->id, $since),
                                                     "timecreated $sort", '*', 0, $limitnum)) {
         foreach ($messages_new as $message) {
             $messages[] = $message;

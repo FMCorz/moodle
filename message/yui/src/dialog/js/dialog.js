@@ -49,9 +49,12 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
     _bb: null,
     _ioFetch: null,
+    _ioMessagePoll: null,
     _lastDate: null,
     _loaded: false,
+    _messagePollInterval: null,
     _messageTemplate: null,
+    _latestMessageDate: null,
     _sendLocked: false,
 
     initializer: function() {
@@ -96,6 +99,9 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
         // Set the events listeners.
         this._setEvents();
+
+        // Set the polls.
+        this._setMessagePoll();
     },
 
     addDate: function(date) {
@@ -105,11 +111,19 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
     addMessage: function(message) {
         var container,
-            content;
+            content,
+            messageId;
+
+        // Create a unique identifier for the message and check if we have it already.
+        messageId = (message.timeread ? 'read:' : 'unread:') + message.id;
+        if (this.getBB().one('div[data-message-id="' + messageId + '"]')) {
+            // We already have that message, skip.
+            return;
+        }
 
         if (!this._messageTemplate) {
             this._messageTemplate = Y.Handlebars.compile(
-                '<div class="message {{fromMe}}">' +
+                '<div data-message-id="{{messageId}}" class="message {{fromMe}}">' +
                     '<div class="message-content">' +
                     '{{{content}}}' +
                     '</div>' +
@@ -124,39 +138,49 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         content = Y.Node.create(this._messageTemplate({
             fromMe: parseInt(message.useridfrom, 10) !== this.get('userid') ? CSS.FROMME : '',
             content: message.text,
-            time: message.time
+            time: message.time,
+            messageId: messageId
         }));
         container.append(content);
+
+        // Record the time of the latest message.
+        if (parseInt(message.timecreated, 10) > this._latestMessageDate) {
+            this._latestMessageDate = parseInt(message.timecreated, 10);
+        }
 
         return content;
     },
 
     displayMessages: function(messages) {
+        var wasAdded = 0;
         this.getBB().one('.loading').addClass('hidden');
 
         Y.each(messages, function(message) {
-            if (this._lastDate != message.date) {
+            if (this._lastDate !== message.date) {
                 this.addDate(message.date);
                 this._lastDate = message.date;
             }
             this.addMessage(message);
+            wasAdded++;
         }, this);
 
-        this.scrollToBottom();
+        if (wasAdded > 0) {
+            this.scrollToBottom();
+        }
     },
 
-    fetchMessages: function(success, failure) {
+    fetchMessages: function(success, failure, params) {
         if (this._ioFetch && this._ioFetch.isInProgress()) {
             this._ioFetch.abort();
         }
 
         this._ioFetch = Y.io(this.get('url'), {
             method: 'GET',
-            data: build_querystring({
+            data: build_querystring(Y.merge(params || {}, {
                 sesskey: M.cfg.sesskey,
                 action: 'getmessages',
                 userid: this.get('userid')
-            }),
+            })),
             on: {
                 start: function() {
                   this.setLockSend(true);
@@ -329,8 +353,6 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
             // Launch the loading of the messages.
             if (this.get('defaultMessages')) {
-                // Add a little delay so that the popup comes visible before we load the messages.
-                // Y.later(100, this, this.displayMessages, [this.get('defaultMessages')]);
                 this.displayMessages(this.get('defaultMessages'));
             } else {
                 this.loadMessages();
@@ -374,6 +396,33 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                 e.preventDefault();
             }, 'down:enter', this);
         }
+    },
+
+    _setMessagePoll: function() {
+        var delay = this.get('messagePollDelay'),
+            fn;
+        if (delay > 0) {
+            fn = Y.bind(function() {
+                if (!this._loaded) {
+                    return;
+                } else if (this._ioFetch && this._ioFetch.isInProgress()) {
+                    return;
+                } else if (!this.get('visible')) {
+                    return;
+                }
+
+                this.fetchMessages(function(id, response, data) {
+                    this.displayMessages(data);
+                }, function() {
+                    // Error, nothing to do...
+                }, {
+                    since: this._latestMessageDate
+                });
+
+            }, this);
+
+            this._messagePollInterval = setInterval(fn, delay);
+        }
     }
 
 }, {
@@ -393,6 +442,11 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         },
         manager: {
             value: null
+        },
+        messagePollDelay: {
+            validator: Y.Lang.isNumber,
+            // Milliseconds, 0 for never.
+            value: 1000
         },
         position: {
             value: []
@@ -442,11 +496,11 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
      * Width.
      *
      * @attribute width
-     * @default '500px'
+     * @default '280px'
      * @type String|Number
      */
     width: {
-        value: '220px'
+        value: '280px'
     },
 
     /**

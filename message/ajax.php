@@ -49,13 +49,15 @@ switch ($action) {
 
         $userid = required_param('userid', PARAM_INT);
         if (empty($userid) || isguestuser($userid) || $userid == $USER->id) {
-            core_message_invalid_request();
+            // core_message_invalid_request();
         }
+
+        $since = optional_param('since', null, PARAM_INT);
 
         $user1 = (object) array('id' => $USER->id);
         $user2 = (object) array('id' => $userid);
 
-        $messages = message_get_history($user1, $user2, 25);
+        $messages = message_get_history($user1, $user2, 25, false, $since);
         foreach ($messages as $key => $message) {
             $message->text = message_format_message_text($message, true);
             $message->date = userdate($message->timecreated, get_string('strftimedaydate'));
@@ -103,7 +105,7 @@ switch ($action) {
         break;
 }
 
-if ($response) {
+if ($response !== null) {
     echo json_encode($response);
     exit();
 }

@@ -5,6 +5,7 @@
             "handlebars",
             "io-base",
             "json",
+            "yui-throttle",
             "moodle-core-notification-dialogue",
             "moodle-core-notification-dialogue-alert"
         ]

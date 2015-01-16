@@ -8828,7 +8828,7 @@ function message_popup_window() {
         }
 
         $slots[$key]['fullname'] = fullname($user2);
-        $slots[$key]['messages'] = $messages;
+        $slots[$key]['messages'] = array_values($messages);
     }
 
     // Core message hack.
