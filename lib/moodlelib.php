@@ -8803,7 +8803,7 @@ function fullclone($thing) {
   * @return void
   */
 function message_popup_window() {
-    global $USER, $DB, $PAGE, $CFG;
+    global $USER, $DB, $PAGE, $CFG, $SESSION;
 
     if (!$PAGE->get_popup_notification_allowed() || empty($CFG->messaging)) {
         return;
@@ -8812,6 +8812,34 @@ function message_popup_window() {
     if (!isloggedin() || isguestuser()) {
         return;
     }
+
+    // Slots thingy.
+    $slots = !empty($SESSION->core_message_slots) ? $SESSION->core_message_slots : array();
+    foreach ($slots as $key => $slot) {
+
+        $user1 = $USER;
+        $user2 = core_user::get_user($slot['userid']);
+
+        $messages = message_get_history($user1, $user2, 25);
+        foreach ($messages as $message) {
+            $message->text = message_format_message_text($message, true);
+            $message->date = userdate($message->timecreated, get_string('strftimedaydate'));
+            $message->time = userdate($message->timecreated, get_string('strftimetime'));
+        }
+
+        $slots[$key]['fullname'] = fullname($user2);
+        $slots[$key]['messages'] = $messages;
+    }
+
+    // Core message hack.
+    $PAGE->requires->yui_module(
+        array('moodle-core_message-dialog'),
+        'Y.M.core_message.Dialog.init',
+        array(array(
+            'canSend' => has_capability('moodle/site:sendmessage', context_system::instance()),
+            'defaultSlots' => $slots
+        ))
+    );
 
     if (!isset($USER->message_lastpopup)) {
         $USER->message_lastpopup = 0;

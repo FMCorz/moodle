@@ -4,7 +4,7 @@
             "escape",
             "handlebars",
             "io-base",
-            "json-parse",
+            "json",
             "moodle-core-notification-dialogue",
             "moodle-core-notification-dialogue-alert"
         ]

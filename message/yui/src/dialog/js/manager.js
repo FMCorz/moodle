@@ -44,24 +44,52 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
     initializer: function() {
         this.publishEvents();
         this.setListeners();
-        console.log(this.get('defaultSlots'));
+
+        // Load the default dialogs.
+        var defaults = this.get('defaultSlots');
+        if (defaults) {
+            Y.each(defaults, function(data) {
+                var dialog;
+                if (!data.userid) {
+                    return;
+                }
+
+                dialog = this.getDialog(data.userid, data.fullname, data.messages);
+                this.assignSlot(dialog, false);
+            }, this);
+
+            this.notifyPositions();
+            Y.each(this._dialogs, function(dialog) {
+                dialog.show();
+            }, this);
+        }
     },
 
-    assignSlot: function(dialog) {
+    assignSlot: function(dialog, save) {
         var index = Y.Array.indexOf(this._slots, dialog);
         if (index < 0) {
             this._slots.push(dialog);
         }
+
+        if (typeof save === 'undefined') {
+            save = true;
+        }
+
+        if (save) {
+            this.saveSlots();
+        }
     },
 
-    getDialog: function(userid, fullname) {
+    getDialog: function(userid, fullname, messages) {
         if (!this._dialogs[userid]) {
 
             var dialog = new DIALOG({
                 manager: this,
                 userid: userid,
                 fullname: fullname,
-                sendAllowed: this.get('canSend')
+                sendAllowed: this.get('canSend'),
+                url: this.get('url'),
+                defaultMessages: messages
             });
 
             this._dialogs[userid] = dialog;
@@ -93,6 +121,7 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
             return;
         }
         this._slots.splice(index, 1);
+        this.saveSlots();
     },
 
     saveSlots: function() {
@@ -110,12 +139,14 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
             data: build_querystring({
                 sesskey: M.cfg.sesskey,
                 action: 'saveslots',
-                slots: slots
+                slots: Y.JSON.stringify(slots)
             })
         });
     },
 
     setListeners: function() {
+
+        // Listen to clicks on the links opening the dialogs.
         Y.delegate('click', function(e) {
             var target = e.currentTarget,
                 fullname = target.getData('core_message-dialog-fullname'),
@@ -145,6 +176,7 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
 
         }, 'body', '[data-core_message-dialog]', this);
 
+        // Listen to when a dialog is closed.
         Y.on(EVENTS.DIALOGCLOSED, function(e) {
             this.releaseSlot(e.dialog);
             this.notifyPositions();
@@ -159,7 +191,13 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
         },
         defaultSlots: {
             value: null
-        }
+        },
+        url: {
+            validator: Y.Lang.isString,
+            valueFn: function() {
+                return M.cfg.wwwroot + '/message/ajax.php';
+            }
+        },
     }
 });
 
