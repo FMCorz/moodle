@@ -55,7 +55,6 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
     _messagePollInterval: null,
     _messageTemplate: null,
     _latestMessageDate: null,
-    _sendLocked: false,
 
     initializer: function() {
 
@@ -182,9 +181,6 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                 userid: this.get('userid')
             })),
             on: {
-                start: function() {
-                  this.setLockSend(true);
-                },
                 success: function(id, response) {
                     var data = null,
                         error = false;
@@ -205,10 +201,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
 
                     success.apply(this, [id, response, data]);
                 },
-                failure: failure,
-                complete: function() {
-                    this.setLockSend(false);
-                }
+                failure: failure
             },
             context: this
         });
@@ -266,7 +259,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
             return;
         }
 
-        if (this._sendLocked || !this.get('sendAllowed')) {
+        if (!this.get('sendAllowed')) {
             // Cannot send.
             return;
         }
@@ -320,21 +313,6 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                 message: 'An error occured while trying to send the message, please try again later.'
             });
             alert.show();
-        }
-    },
-
-    setLockSend: function(lock) {
-        var btn = this.getBB().one('.message-send'),
-            input = this.getBB().one('.message-input');
-
-        if (lock) {
-            this._sendLocked = true;
-            btn.set('disabled', true);
-            input.set('disabled', true);
-        } else {
-            this._sendLocked = false;
-            btn.set('disabled', false);
-            input.set('disabled', false);
         }
     },
 
