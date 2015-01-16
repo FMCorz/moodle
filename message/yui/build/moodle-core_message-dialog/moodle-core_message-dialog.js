@@ -73,7 +73,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                 '</div>' +
                 '<div class="message-send-form">' +
                     '<form>' +
-                        '<input type="text" class="message-input">' +
+                        '<div contenteditable="true" class="message-input"></div>' +
                         '<input type="submit" value="Send" class="message-send">' +
                     '</form>' +
                 '</div>' +
@@ -81,7 +81,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         content = Y.Node.create(
             tpl({
                 // COMPONENT: COMPONENT,
-                cannotSend: !this.get('canSend'),
+                cannotSend: !this.get('sendAllowed'),
                 CSS: CSS,
                 loadingIcon: M.util.image_url('i/loading', 'moodle'),
                 smallLoadingIcon: M.util.image_url('i/loading_small', 'moodle')
@@ -137,11 +137,9 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
         this.getBB().one('.loading').addClass('hidden');
 
         Y.each(messages, function(message) {
-            console.log(this._lastDate, message.date);
             if (this._lastDate != message.date) {
                 this.addDate(message.date);
                 this._lastDate = message.date;
-                console.log('adding');
             }
             this.addMessage(message);
         }, this);
@@ -232,12 +230,19 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
     },
 
     sendMessage: function(message) {
+        var pure;
         if (!message) {
             // Do not send falsy messages.
             return;
         }
 
-        if (this._sendLocked) {
+        // Basic validation.
+        if (message.replace(' ', '').replace('&nbsp;', '').trim().length < 1) {
+            // The message is too short for our liking.
+            return;
+        }
+
+        if (this._sendLocked || !this.get('sendAllowed')) {
             // Cannot send.
             return;
         }
@@ -274,7 +279,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
                     }
 
                     this.addMessage(data);
-                    this.getBB().one('.message-input').set('value', '');
+                    this.getBB().one('.message-input').setHTML('');
                     this.scrollToBottom();
                 },
                 failure: function() {
@@ -337,12 +342,21 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
     },
 
     _setEvents: function() {
-        if (this.get('canSend')) {
+        if (this.get('sendAllowed')) {
             this.getBB().one('.message-send-form form').on('submit', function(e) {
                 var message = this.getBB().one('.message-input').get('value');
                 this.sendMessage(message);
                 e.preventDefault();
             }, this);
+
+            this.getBB().one('.message-input').on('key', function(e) {
+                if (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey) {
+                    // Only pure 'Enter' key is used.
+                    return;
+                }
+                this.sendMessage(e.currentTarget.getHTML());
+                e.preventDefault();
+            }, 'down:enter', this);
         }
     }
 
@@ -350,7 +364,7 @@ Y.namespace('M.core_message').Dialog = Y.extend(DIALOG, M.core.dialogue, {
     NAME: 'core_message_dialog',
     CSS_PREFIX: CSS.PREFIX,
     ATTRS: {
-        canSend: {
+        sendAllowed: {
             validator: Y.Lang.isBoolean,
             value: false
         },
@@ -388,7 +402,7 @@ Y.Base.modifyAttrs(Y.namespace('M.core_message.Dialog'), {
     extraClasses: {
         valueFn: function() {
             var classes = ['core_message_dialog'];
-            if (!this.get('canSend')) {
+            if (!this.get('sendAllowed')) {
                 classes.push(CSS.CANNOTSEND);
             }
             return classes;
@@ -547,7 +561,7 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
                 manager: this,
                 userid: userid,
                 fullname: fullname,
-                canSend: this.get('canSend')
+                sendAllowed: this.get('canSend')
             });
 
             this._dialogs[userid] = dialog;

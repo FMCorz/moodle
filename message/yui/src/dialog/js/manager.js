@@ -82,7 +82,7 @@ Y.namespace('M.core_message').Manager = Y.extend(MANAGER, Y.Base, {
                 manager: this,
                 userid: userid,
                 fullname: fullname,
-                canSend: this.get('canSend')
+                sendAllowed: this.get('canSend')
             });
 
             this._dialogs[userid] = dialog;

@@ -44,6 +44,7 @@ div.logo {
     border-radius: 0;
     box-shadow: none;
     margin: 0;
+    border-bottom: 0;
 }
 .core_message_dialog .moodle-dialogue-wrap .moodle-dialogue-hd .yui3-widget-buttons {
     padding: 3px;
@@ -79,7 +80,7 @@ div.logo {
 .core_message_dialog .messages-area {
     position: absolute;
     top: 0;
-    bottom: 40px;
+    bottom: 41px;
     left: 0;
     width: 100%;
     overflow: auto;
@@ -118,9 +119,10 @@ div.logo {
     bottom: 0;
     width: 100%;
     border-top: 1px solid #ccc;
+    /*padding: 3px 5px;*/
 }
 .core_message_dialog .message-send-form form {
-    padding: 3px 50px 3px 5px;
+    /*padding: 3px 50px 3px 5px;*/
 }
 .core_message_dialog.message-cannot-send .message-send-form {
     display: none;
@@ -145,19 +147,19 @@ div.logo {
 .core_message_dialog .message-input,
 .core_message_dialog .message-input:focus {
     margin: 0;
-    padding: 0;
-    width: 100%;
-    border: 0;
-    height: 100%;
-    box-shadow: none;
-    transition: none;
-    border: none;
-    line-height: 30px;
-    border-radius: 0;
+    padding: 3px 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    line-height: 18px;
 }
 .core_message_dialog .message-send {
     position: absolute;
     right: 3px;
     top: 3px;
     width: 50px;
+    display: none;
 }
