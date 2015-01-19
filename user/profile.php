@@ -231,6 +231,11 @@ echo $OUTPUT->header();
 echo '<div class="userprofile">';
 
 
+// echo '<p><a href="#" data-core_message-dialog="true" data-core_message-dialog-fullname="Eric Cartman" data-core_message-dialog-userid="3">Send to Eric</a>';
+// echo '<p><a href="#" data-core_message-dialog="true" data-core_message-dialog-fullname="Stan March" data-core_message-dialog-userid="4">Send to Stan</a>';
+// echo '<p><a href="#" data-core_message-dialog="true" data-core_message-dialog-fullname="Kenny McCormick" data-core_message-dialog-userid="6">Send to Kenny</a>';
+
+
 // Print the standard content of this page, the basic profile info.
 echo $OUTPUT->heading(fullname($user));
 
@@ -465,7 +470,11 @@ echo $OUTPUT->custom_block_region('content');
 if (isloggedin() && has_capability('moodle/site:sendmessage', $context)
     && !empty($CFG->messaging) && !isguestuser() && !isguestuser($user) && ($USER->id != $user->id)) {
     echo '<div class="messagebox">';
-    echo '<a href="'.$CFG->wwwroot.'/message/index.php?id='.$user->id.'">'.get_string('messageselectadd').'</a>';
+    echo '<a
+        data-core_message-dialog="true"
+        data-core_message-dialog-fullname="' . s(fullname($user)). '"
+        data-core_message-dialog-userid="' . $user->id . '"
+        href="'.$CFG->wwwroot.'/message/index.php?id='.$user->id.'">'.get_string('messageselectadd').'</a>';
     echo '</div>';
 }
 
