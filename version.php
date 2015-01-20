@@ -33,6 +33,8 @@ $version  = 2015010800.00;              // YYYYMMDD      = weekly release date o
                                         //         RR    = release increments - 00 in DEV branches.
                                         //           .XX = incremental changes.
 
+
+// bad comment
 $release  = '2.9dev (Build: 20150108)'; // Human-friendly version name
 
 $branch   = '29';                       // This version's branch.
