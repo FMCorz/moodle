@@ -6,6 +6,7 @@ require_once('../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 $query = trim(optional_param('query', '', PARAM_NOTAGS));  // Search string
+$success = optional_param('success', false, PARAM_BOOL);
 
 $PAGE->set_context(context_system::instance());
 
@@ -20,7 +21,10 @@ $focus = '';
 // now we'll deal with the case that the admin has submitted the form with changed settings
 if ($data = data_submitted() and confirm_sesskey()) {
     if (admin_write_settings($data)) {
-        $statusmsg = get_string('changessaved');
+        // Redirect to prevent form resubmission, but notify of success on reload.
+        $url = new moodle_url($PAGE->url);
+        $url->param('success', true);
+        redirect($url);
     }
     $adminroot = admin_get_root(true); //reload tree
 
@@ -28,7 +32,13 @@ if ($data = data_submitted() and confirm_sesskey()) {
         $errormsg = get_string('errorwithsettings', 'admin');
         $firsterror = reset($adminroot->errors);
         $focus = $firsterror->id;
+    } else {
+        // Submission did not have error or new data, we redirect to prevent form re-submission.
+        redirect($PAGE->url);
     }
+} else if ($success) {
+    // The form was submitted in the previous request, and was saved.
+    $statusmsg = get_string('changessaved');
 }
 
 // and finally, if we get here, then there are matching settings and we have to print a form
