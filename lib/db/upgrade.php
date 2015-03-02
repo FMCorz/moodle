@@ -4210,5 +4210,15 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2015022500.00);
     }
 
+    if ($oldversion < 2015022500.02) {
+        // Fixing possible wrong MIME type for Mathcad files.
+        $filetypes = array(
+            '%.mcd' => 'application/x-mathcad',
+            '%.xmcd' => 'application/x-mathcad'
+        );
+        upgrade_mimetypes($filetypes);
+        upgrade_main_savepoint(true, 2015022500.02);
+    }
+
     return true;
 }

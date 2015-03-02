@@ -133,6 +133,7 @@ abstract class core_filetypes {
             'latex' => array('type' => 'application/x-latex', 'icon' => 'text'),
             'm' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
             'mbz' => array('type' => 'application/vnd.moodle.backup', 'icon' => 'moodle'),
+            'mcd' => array('type' => 'application/x-mathcad', 'icon' => 'unknown'),
             'mdb' => array('type' => 'application/x-msaccess', 'icon' => 'base'),
             'mht' => array('type' => 'message/rfc822', 'icon' => 'archive'),
             'mhtml' => array('type' => 'message/rfc822', 'icon' => 'archive'),
@@ -267,6 +268,7 @@ abstract class core_filetypes {
             'xlsb' => array('type' => 'application/vnd.ms-excel.sheet.binary.macroEnabled.12', 'icon' => 'spreadsheet'),
             'xlam' => array('type' => 'application/vnd.ms-excel.addin.macroEnabled.12', 'icon' => 'spreadsheet'),
 
+            'xmcd' => array('type' => 'application/x-mathcad', 'icon' => 'unknown'),
             'xml' => array('type' => 'application/xml', 'icon' => 'markup'),
             'xsl' => array('type' => 'text/xml', 'icon' => 'markup'),
 
