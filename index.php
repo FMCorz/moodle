@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+//bad comment
 if (!file_exists('./config.php')) {
     header('Location: install.php');
     die;
