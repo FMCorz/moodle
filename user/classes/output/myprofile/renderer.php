@@ -41,13 +41,7 @@ class renderer extends \plugin_renderer_base {
      * @return string
      */
     public function render_tree(tree $tree) {
-        $return = \html_writer::start_tag('div', array('class' => 'profile_tree'));
-        $categories = $tree->categories;
-        foreach ($categories as $category) {
-            $return .= $this->render($category);
-        }
-        $return .= \html_writer::end_tag('div');
-        return $return;
+        return $this->render_from_template('core/myprofile_tree', $tree->export_for_template($this));
     }
 
     /**
@@ -58,25 +52,7 @@ class renderer extends \plugin_renderer_base {
      * @return string
      */
     public function render_category(category $category) {
-        $classes = $category->classes;
-        if (empty($classes)) {
-            $return = \html_writer::start_tag('section', array('class' => 'node_category'));
-        } else {
-            $return = \html_writer::start_tag('section', array('class' => 'node_category ' . $classes));
-        }
-        $return .= \html_writer::tag('h3', $category->title);
-        $nodes = $category->nodes;
-        if (empty($nodes)) {
-            // No nodes, nothing to render.
-            return '';
-        }
-        $return .= \html_writer::start_tag('ul');
-        foreach ($nodes as $node) {
-            $return .= $this->render($node);
-        }
-        $return .= \html_writer::end_tag('ul');
-        $return .= \html_writer::end_tag('section');
-        return $return;
+        return $this->render_from_template('core/myprofile_category', $category->export_for_template($this));
     }
 
     /**
@@ -87,34 +63,6 @@ class renderer extends \plugin_renderer_base {
      * @return string
      */
     public function render_node(node $node) {
-        $return = '';
-        if (is_object($node->url)) {
-            $header = \html_writer::link($node->url, $node->title);
-        } else {
-            $header = $node->title;
-        }
-        $icon = $node->icon;
-        if (!empty($icon)) {
-            $header .= $this->render($icon);
-        }
-        $content = $node->content;
-        $classes = $node->classes;
-        if (!empty($content)) {
-            // There is some content to display below this make this a header.
-            $return = \html_writer::tag('dt', $header);
-            $return .= \html_writer::tag('dd', $content);
-
-            $return = \html_writer::tag('dl', $return);
-            if ($classes) {
-                $return = \html_writer::tag('li', $return, array('class' => 'contentnode ' . $classes));
-            } else {
-                $return = \html_writer::tag('li', $return, array('class' => 'contentnode'));
-            }
-        } else {
-            $return = \html_writer::span($header);
-            $return = \html_writer::tag('li', $return, array('class' => $classes));
-        }
-
-        return $return;
+        return $this->render_from_template('core/myprofile_node', $node->export_for_template($this));
     }
 }

@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2015 onwards Ankit Agarwal
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class category implements \renderable {
+class category implements \renderable, \templatable {
 
     /**
      * @var string Name of the category after which this category should appear.
@@ -195,5 +195,27 @@ class category implements \renderable {
             return $this->$prop;
         }
         throw new \coding_exception('Property "' . $prop . '" doesn\'t exist');
+    }
+
+    /**
+     * Function to export the renderer data in a format that is suitable for a
+     * mustache template.
+     *
+     * @param renderer_base $output Renderer.
+     * @return stdClass|array
+     */
+    public function export_for_template(\renderer_base $output) {
+        $nodes = array();
+        $categorynodes = $this->nodes;
+        foreach ($categorynodes as $node) {
+            $nodes[] = $node->export_for_template($output);
+        }
+
+        return array(
+            'title' => $this->title,
+            'classes' => $this->classes,
+            'hasnodes' => !empty($nodes),
+            'nodes' => $nodes
+        );
     }
 }

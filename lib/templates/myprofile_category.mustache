@@ -1,0 +1,58 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/myprofile_category
+
+    Category on my profile.
+
+    The purpose of this template is to render a myprofile_category.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * hasnodes Whether or not there are nodes.
+    * nodes Array of nodes content.
+    * title Title of the category.
+    * classes String containing additional classes.
+
+    Example context (json):
+    {
+        "hasnodes": true,
+        "nodes": [
+            "<li>Something</li>",
+            "<li>Something again</li>",
+            "<li>Something again again</li>"
+        ],
+        "title": "Hello there!",
+        "classes": ""
+    }
+
+}}
+{{#hasnodes}}
+<section class="node_category {{classes}}">
+    <h3>{{title}}</h3>
+    <ul>
+    {{#nodes}}
+        {{> core/myprofile_node}}
+    {{/nodes}}
+    </ul>
+</section>
+{{/hasnodes}}
