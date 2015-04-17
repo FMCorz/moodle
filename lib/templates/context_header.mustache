@@ -1,0 +1,74 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/context_header
+
+    Context header.
+
+    The purpose of this template is to render a context_header.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * categories: Array of category content
+
+    Example context (json):
+    {
+        "imagedata": "",
+        "heading": "Who let the dog out?",
+        "headinglevel": 1,
+        "hasbuttons": true,
+        "additionalbuttons": [
+            {
+                "imagehtml": "",
+                "title": "Message",
+                "url": "http://moodle.org",
+                "linkattributes": [
+                    {
+                        "key": "class",
+                        "value": "btn"
+                    }
+                ]
+            }
+        ]
+    }
+
+}}
+<div class="page-context-header">
+    {{#imagedata}}
+        <div class="page-header-image">{{{.}}}</div>
+    {{/imagedata}}
+    <div class="page-header-headings">
+        <h{{headinglevel}}>{{heading}}</h{{headinglevel}}>
+    </div>
+    {{#hasbuttons}}
+        <div class="btn-group header-button-group">
+        {{#additionalbuttons}}
+            <a href="{{url}}" {{#linkattributes}}{{key}}="{{value}}"{{/linkattributes}}>
+                <span>
+                    {{{imagehtml}}}
+                    <span class="header-button-title">{{title}}</span>
+                </span>
+            </a>
+        {{/additionalbuttons}}
+        </div>
+    {{/hasbuttons}}
+</div>

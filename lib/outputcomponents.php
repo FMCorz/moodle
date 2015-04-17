@@ -3084,7 +3084,7 @@ class tabobject implements renderable {
  * @copyright 2015 Adrian Greeve <adrian@moodle.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class context_header implements renderable {
+class context_header implements renderable, templatable {
 
     /**
      * @var string $heading Main heading.
@@ -3152,6 +3152,56 @@ class context_header implements renderable {
             $this->additionalbuttons[$buttontype]['linkattributes'] = array_merge($button['linkattributes'],
                     array('class' => 'btn'));
         }
+    }
+
+    /**
+     * Function to export the renderer data in a format that is suitable for a mustache template.
+     *
+     * @param renderer_base $output Renderer.
+     * @return stdClass|array
+     */
+    public function export_for_template(renderer_base $output) {
+
+        $additionalbuttons = isset($this->additionalbuttons) ? $this->additionalbuttons : array();
+
+        $buttons = array();
+        foreach ($additionalbuttons as $button) {
+            if (!isset($button->page)) {
+                $image = $output->pix_icon($button['formattedimage'], '', 'moodle', array(
+                    'class' => 'iconsmall',
+                    'role' => 'presentation'
+                ));
+            } else {
+                $image = html_writer::empty_tag('img', array(
+                    'src' => $button['formattedimage'],
+                    'role' => 'presentation',
+                    'alt' => ''
+                ));
+            }
+
+            $linkattributes = array();
+            foreach ($button['linkattributes'] as $key => $value) {
+                $linkattributes[] = array(
+                    'key' => $key,
+                    'value' => $value
+                );
+            }
+
+            $buttons[] = array(
+                'imagehtml' => $image,
+                'title' => $button['title'],
+                'url' => $button['url'],
+                'linkattributes' => $linkattributes
+            );
+        }
+
+        return array(
+            'imagedata' => $this->imagedata,
+            'heading' => $this->heading,
+            'headinglevel' => $this->headinglevel,
+            'hasbuttons' => !empty($buttons),
+            'additionalbuttons' => $buttons
+        );
     }
 }
 
