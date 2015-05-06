@@ -4500,10 +4500,13 @@ class settings_navigation extends navigation_node {
             }
         }
 
-        // Let admin tools hook into user settings navigation.
-        $tools = get_plugin_list_with_function('tool', 'extend_navigation_user_settings', 'lib.php');
-        foreach ($tools as $toolfunction) {
-            $toolfunction($usersetting, $user, $usercontext, $course, $coursecontext);
+        // Let any plugin hook into user navigation.
+        $plugintypes = core_component::get_plugin_types();
+        foreach ($plugintypes as $plugintype => $dir) {
+            $plugins = get_plugin_list_with_function($plugin, 'extend_navigation_user_settings');
+            foreach ($plugins as $function) {
+                $function($usersetting, $user, $usercontext, $course, $coursecontext);
+            }
         }
 
         return $usersetting;
