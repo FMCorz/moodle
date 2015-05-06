@@ -49,7 +49,7 @@ class data_field_radiobutton extends data_field_base {
             $str .= '&nbsp;' . get_string('requiredelement', 'form') . '</span></legend>';
             $image = html_writer::img($OUTPUT->pix_url('req'), get_string('requiredelement', 'form'),
                                       array('class' => 'req', 'title' => get_string('requiredelement', 'form')));
-            $str .= html_writer::div($image);
+            $str .= html_writer::div($image, 'inline-req');
         } else {
             $str .= '</span></legend>';
         }

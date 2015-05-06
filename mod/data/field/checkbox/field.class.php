@@ -46,10 +46,9 @@ class data_field_checkbox extends data_field_base {
         if ($this->field->required) {
             $str .= '$nbsp;' . get_string('requiredelement', 'form');
             $str .= '</span></legend>';
-            $str .= '<div>';
-            $str .= html_writer::img($OUTPUT->pix_url('req'), get_string('requiredelement', 'form'),
+            $image = html_writer::img($OUTPUT->pix_url('req'), get_string('requiredelement', 'form'),
                                      array('class' => 'req', 'title' => get_string('requiredelement', 'form')));
-            $str .= '</div>';
+            $str .= html_writer::div($image, 'inline-req');
         } else {
             $str .= '</span></legend>';
         }

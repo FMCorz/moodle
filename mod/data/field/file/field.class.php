@@ -73,7 +73,7 @@ class data_field_file extends data_field_base {
             $html .= '&nbsp;' . get_string('requiredelement', 'form') . '</span></legend>';
             $image = html_writer::img($OUTPUT->pix_url('req'), get_string('requiredelement', 'form'),
                                      array('class' => 'req', 'title' => get_string('requiredelement', 'form')));
-            $html .= html_writer::div($image);
+            $html .= html_writer::div($image, 'inline-req');
         } else {
             $html .= '</span></legend>';
         }

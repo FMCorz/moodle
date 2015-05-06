@@ -49,7 +49,7 @@ class data_field_multimenu extends data_field_base {
         $str .= '<label for="field_' . $this->field->id . '">';
         $str .= html_writer::span($this->field->name, 'accesshide');
         if ($this->field->required) {
-            $str .= '<div>';
+            $str .= '<div class="inline-req">';
             $str .= html_writer::img($OUTPUT->pix_url('req'), get_string('requiredelement', 'form'),
                                      array('class' => 'req', 'title' => get_string('requiredelement', 'form')));
             $str .= '</div>';
