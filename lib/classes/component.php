@@ -688,6 +688,7 @@ $cache = '.var_export($cache, true).';
 
         $psrsystems = array(
             'Horde' => 'horde/framework',
+            'Google' => 'google/src'
         );
         self::$psrclassmap = array();
 
