@@ -24,8 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// All Google API classes support autoload with this.
-require_once($CFG->libdir . '/google/autoload.php');
 // To be able to use our custom IO class.
 require_once($CFG->libdir . '/google/curlio.php');
 
