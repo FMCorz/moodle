@@ -23,8 +23,10 @@
  */
 namespace tool_lp;
 
-use external_function_parameters;
-use external_value;
+use coding_exception;
+use invalid_parameter_exception;
+use lang_string;
+use stdClass;
 
 /**
  * Abstract class for tool_lp objects saved to the DB.
@@ -34,24 +36,17 @@ use external_value;
  */
 abstract class persistent {
 
-    /** @var int|null $id Database id for this framework */
-    private $id = null;
+    /** The table name. */
+    const TABLE = null;
 
-    /** @var int $timecreated Creation timestamp */
-    private $timecreated = 0;
+    /** The model data. */
+    private $data = array();
 
-    /** @var int $timemodified Modification timestamp */
-    private $timemodified = 0;
+    /** @var boolean The list of validation errors. */
+    private $errors = array();
 
-    /** @var int $usermodified The user who last modified this framework */
-    private $usermodified = 0;
-
-    /**
-     * Abstract method that provides the table name matching this class.
-     *
-     * @return string
-     */
-    abstract public function get_table_name();
+    /** @var boolean If the data was already validated. */
+    private $validated = false;
 
     /**
      * Create an instance of this class.
@@ -69,75 +64,169 @@ abstract class persistent {
     }
 
     /**
-     * Get the record id
+     * Magic method to capture getters and setters.
      *
-     * @return int
+     * @param  string $name Callee.
+     * @param  array $arguments List of arguments.
+     * @return mixed
      */
-    public function get_id() {
-        return $this->id;
+    public function __call($method, $arguments) {
+        if (strpos($method, 'get_') === 0) {
+            return $this->get(substr($method, 4));
+        } else if (strpos($method, 'set_') === 0) {
+            return $this->set(substr($method, 4), $arguments[0]);
+        }
+        throw new coding_exception('Unexpected method call');
     }
 
     /**
-     * Set the record id
+     * Data getter.
      *
-     * @param int $id The record id
+     * This is protected and final to force developers to call this method
+     * if they want to implement their own getter.
+     *
+     * @param  string $property The property name.
+     * @return mixed
      */
-    public function set_id($id) {
-        $this->id = $id;
+    final protected function get($property) {
+        if (!static::has_property($property)) {
+            throw new coding_exception('Unexpected property \'' . s($property) .'\' requested.');
+        }
+        if (!isset($this->data[$property])) {
+            $this->set($property, static::get_property_default_value($property));
+        }
+        return $this->data[$property];
     }
 
     /**
-     * Get the time the record was created.
+     * Data setter.
      *
-     * @return string The time the record was created.
+     * This is protected and final to force developers to call this method
+     * if they want to implement their own setter.
+     *
+     * @param  string $property The property name.
+     * @return mixed
      */
-    public function get_timecreated() {
-        return $this->timecreated;
+    final protected function set($property, $value) {
+        if (!static::has_property($property)) {
+            throw new coding_exception('Unexpected property \'' . s($property) .'\' requested.');
+        }
+        if (!isset($this->data[$property]) || $this->data[$property] != $value) {
+            // If the value is changing, we invalidate the model.
+            $this->validated = false;
+        }
+        $this->data[$property] = $value;
     }
 
     /**
-     * Set the time created timestamp
+     * Return the definition of the properties of this model.
      *
-     * @param int $timecreated The timestamp
+     * Each property MUST be listed here.
+     *
+     * Example:
+     *
+     * array(
+     *     'property_name' => array(
+     *         'default' => 'Default value',        // Defaults to null.
+     *         'message' => new lang_string(...)    // Defaults to invalid data error message.
+     *         'type' => PARAM_TYPE                 // Mandatory.
+     *     )
+     * )
+     *
+     * @return array Where keys are the property names.
      */
-    public function set_timecreated($timecreated) {
-        $this->timecreated = $timecreated;
+    public static function properties_definition() {
+        return array();
     }
 
     /**
-     * Get the last time the record was modified.
+     * Private validation definition.
      *
-     * @return string The last time the record was modified
+     * @return array
      */
-    public function get_timemodified() {
-        return $this->timemodified;
+    final private static function _properties_definition() {
+        global $CFG;
+
+        static $def = null;
+        if ($def !== null) {
+            return $def;
+        }
+
+        $def = static::properties_definition();
+        $def['id'] = array(
+            'default' => 0,
+            'type' => PARAM_INT,
+        );
+        $def['timecreated'] = array(
+            'default' => 0,
+            'type' => PARAM_INT,
+        );
+        $def['timemodified'] = array(
+            'default' => 0,
+            'type' => PARAM_INT
+        );
+        $def['usermodified'] = array(
+            'default' => 0,
+            'type' => PARAM_INT
+        );
+
+        // Warn the developers when they are doing something wrong.
+        if ($CFG->debugdeveloper) {
+            foreach ($def as $property => $definition) {
+                if (!array_key_exists('type', $definition)) {
+                    throw new coding_exception('Missing type for: ' . $property);
+
+                } else if (array_key_exists('message', $definition) && !($definition['message'] instanceof lang_string)) {
+                    throw new coding_exception('Invalid error message for: ' . $property);
+
+                }
+            }
+        }
+
+        return $def;
     }
 
     /**
-     * Set the last modified timestamp
+     * Gets the default value for a property.
      *
-     * @param int $timemodified The timestamp
+     * This assumes that the property exists.
+     *
+     * @param string $property The property name.
+     * @return mixed
      */
-    public function set_timemodified($timemodified) {
-        $this->timemodified = $timemodified;
+    final protected static function get_property_default_value($property) {
+        $properties = static::_properties_definition();
+        if (!isset($properties[$property]['default'])) {
+            return null;
+        }
+        return $properties[$property]['default'];
     }
 
     /**
-     * Get the user who last modified the record.
+     * Gets the error message for a property.
      *
-     * @return string The user who last modified the record
+     * This assumes that the property exists.
+     *
+     * @param string $property The property name.
+     * @return lang_string
      */
-    public function get_usermodified() {
-        return $this->usermodified;
+    final protected static function get_property_error_message($property) {
+        $properties = static::_properties_definition();
+        if (!isset($properties[$property]['message'])) {
+            return new lang_string('invaliddata', 'error');
+        }
+        return $properties[$property]['message'];
     }
 
     /**
-     * Set the user id that last modified the record.
+     * Returns whether or not a property was defined.
      *
-     * @param int $usermodified The user id
+     * @param  string $property The property name.
+     * @return boolean
      */
-    public function set_usermodified($usermodified) {
-        $this->usermodified = $usermodified;
+    final public static function has_property($property) {
+        $properties = static::_properties_definition();
+        return isset($properties[$property]);
     }
 
     /**
@@ -146,14 +235,27 @@ abstract class persistent {
      * @param \stdClass $record A DB record.
      * @return persistent
      */
-    abstract public function from_record($record);
+    final public function from_record($record) {
+        $record = (array) $record;
+        foreach ($record as $property => $value) {
+            $this->set($property, $value);
+        }
+        return $this;
+    }
 
     /**
      * Create a DB record from this class.
      *
      * @return \stdClass
      */
-    abstract public function to_record();
+    final public function to_record() {
+        $data = new stdClass();
+        $properties = static::_properties_definition();
+        foreach ($properties as $property => $definition) {
+            $data->$property = $this->get($property);
+        }
+        return $data;
+    }
 
     /**
      * Reload the data for this class from the DB.
@@ -161,13 +263,30 @@ abstract class persistent {
      * @return persistent
      */
     public function read() {
+        return $this->_read();
+    }
+
+    /**
+     * Internal method to fetch the model's data.
+     *
+     * This is made private and final to force developers to call the parent of
+     * {@link self::read()} if they desire to override it.
+     *
+     * @return persistent
+     */
+    final private function _read() {
         global $DB;
 
         if ($this->id <= 0) {
             throw new \coding_exception('id is required to load');
         }
-        $record = $DB->get_record($this->get_table_name(), array('id' => $this->id), '*', MUST_EXIST);
-        return $this->from_record($record);
+        $record = $DB->get_record(static::TABLE, array('id' => $this->id), '*', MUST_EXIST);
+        $this->from_record($record);
+
+        // Validate the data as it comes from the database.
+        $this->validated = true;
+
+        return $this;
     }
 
     /**
@@ -176,49 +295,185 @@ abstract class persistent {
      * @return persistent
      */
     public function create() {
+        return $this->_create();
+    }
+
+    /**
+     * Internal method to create a new entry in the database.
+     *
+     * This is made private and final to force developers to call the parent of
+     * {@link self::create()} if they desire to override it.
+     *
+     * @return persistent
+     */
+    final private function _create() {
         global $DB, $USER;
 
-        $this->id = 0;
-        $this->timecreated = $this->timemodified = time();
-        $this->usermodified = $USER->id;
+        if (!$this->is_valid()) {
+            throw new invalid_persistent_exception();
+        }
+
+        // We can safely set those values bypassing the validation because we know what we're doing.
+        $now = time();
+        $this->set('id', 0);
+        $this->set('timecreated', $now);
+        $this->set('timemodified', $now);
+        $this->set('usermodified', $USER->id);
+
         $record = $this->to_record();
 
-        $id = $DB->insert_record($this->get_table_name(), $record);
-        $this->set_id($id);
+        $id = $DB->insert_record(static::TABLE, $record);
+        $this->set('id', $id);
+
+        // We ensure that this is validated because the above call to set() would have invalidated the model.
+        $this->validated = true;
+
         return $this;
     }
 
     /**
      * Update the existing record in the DB.
      *
-     * @return bool Success
+     * @return bool True on success.
      */
     public function update() {
+        return $this->_update();
+    }
+
+    /**
+     * Internal method to update an existing entry in the database.
+     *
+     * This is made private and final to force developers to call the parent of
+     * {@link self::update()} if they desire to override it.
+     *
+     * @return bool True on success.
+     */
+    final private function _update() {
         global $DB, $USER;
 
         if ($this->id <= 0) {
             throw new \coding_exception('id is required to update');
+        } else if (!$this->is_valid()) {
+            throw new invalid_persistent_exception();
         }
+
+        // We can safely set those values bypassing the validation because we know what we're doing.
+        $this->set('timemodified', time());
+        $this->set('usermodified', $USER->id);
+
         $record = $this->to_record();
         unset($record->timecreated);
-        $record->timemodified = time();
-        $record->usermodified = $USER->id;
         $record = (array) $record;
-        return $DB->update_record($this->get_table_name(), $record);
+
+        $result = $DB->update_record(static::TABLE, $record);
+
+        // We ensure that this is validated because the above call to set() would have invalidated the model.
+        $this->validated = true;
+
+        return $result;
     }
 
     /**
      * Delete the existing record in the DB.
      *
-     * @return bool Success
+     * @return bool True on success.
      */
     public function delete() {
+        return $this->_delete();
+    }
+
+    /**
+     * Internal method to delete an existing entry from the database.
+     *
+     * This is made private and final to force developers to call the parent of
+     * {@link self::delete()} if they desire to override it.
+     *
+     * @return bool True on success.
+     */
+    final private function _delete() {
         global $DB;
 
         if ($this->id <= 0) {
             throw new \coding_exception('id is required to delete');
         }
-        return $DB->delete_records($this->get_table_name(), array('id' => $this->id));
+        return $DB->delete_records(static::TABLE, array('id' => $this->id));
+    }
+
+    /**
+     * Validates the data.
+     *
+     * Developers can implement their own validation method by defining a method as follows. Note that
+     * the method MUST return a lang_string() when there is an error, or true otherwise.
+     *
+     * public function validate_propertyname($value) {
+     *     if ($value !== 'My expected value') {
+     *         return new lang_string('invaliddata', 'error');
+     *     }
+     *     return true
+     * }
+     *
+     * @return array|true Returns true when the validation passed, or an array of properties with errors.
+     */
+    final public function validate() {
+        if ($this->validated === true) {
+            return empty($this->errors) ? true : $this->errors;
+        }
+
+        $errors = array();
+        $properties = static::_properties_definition();
+        foreach ($properties as $property => $definition) {
+            $value = $this->get($property);
+
+            // Check that type of value is respected.
+            try {
+                validate_param($value, $definition['type']);
+            } catch (invalid_parameter_exception $e) {
+                $errors[$property] = static::get_property_error_message($property);
+                continue;
+            }
+
+            // Check that the value is part of a list of allowed values.
+            if (isset($definition['choices']) && !in_array($value, $definition['choices'])) {
+                $errors[$property] = static::get_property_error_message($property);
+                continue;
+            }
+
+            // Call custom validation method.
+            $method = 'validate_' . $property;
+            if (method_exists($this, $method)) {
+                $valid = $this->{$method}($value);
+                if ($valid !== true) {
+                    if (!($valid instanceof lang_string)) {
+                        throw new coding_exception('Unexpected error message.');
+                    }
+                    $errors[$property] = $valid;
+                    continue;
+                }
+            }
+        }
+
+        $this->validated = true;
+        $this->errors = $errors;
+        return empty($this->errors) ? true : $this->errors;
+    }
+
+    /**
+     * Returns whether or not the model is valid.
+     *
+     * @return boolean True when it is.
+     */
+    final public function is_valid() {
+        return $this->validate() === true;
+    }
+
+    /**
+     * Returns the validation errors.
+     *
+     * @return array
+     */
+    final public function geterrors() {
+        $this->validate();
+        return $this->errors;
     }
 
     /**
@@ -232,7 +487,7 @@ abstract class persistent {
      *
      * @return persistent[]
      */
-    public function get_records($filters = array(), $sort = '', $order = 'ASC', $skip = 0, $limit = 0) {
+    public static function get_records($filters = array(), $sort = '', $order = 'ASC', $skip = 0, $limit = 0) {
         global $DB;
 
         $orderby = '';
@@ -240,7 +495,7 @@ abstract class persistent {
             $orderby = $sort . ' ' . $order;
         }
 
-        $records = $DB->get_records($this->get_table_name(), $filters, $orderby, '*', $skip, $limit);
+        $records = $DB->get_records(static::TABLE, $filters, $orderby, '*', $skip, $limit);
         $instances = array();
 
         foreach ($records as $record) {
@@ -261,10 +516,10 @@ abstract class persistent {
      * @param int $limitnum
      * @return \tool_lp\plan[]
      */
-    public function get_records_select($select, $params = null, $sort = '', $fields = '*', $limitfrom = 0, $limitnum = 0) {
+    public static function get_records_select($select, $params = null, $sort = '', $fields = '*', $limitfrom = 0, $limitnum = 0) {
         global $DB;
 
-        $records = $DB->get_records_select($this->get_table_name(), $select, $params, $sort, $fields, $limitfrom, $limitnum);
+        $records = $DB->get_records_select(static::TABLE, $select, $params, $sort, $fields, $limitfrom, $limitnum);
 
         // We return class instances.
         $instances = array();
@@ -281,10 +536,10 @@ abstract class persistent {
      *
      * @return int
      */
-    public function count_records() {
+    public static function count_records() {
         global $DB;
 
-        $count = $DB->count_records($this->get_table_name());
+        $count = $DB->count_records(static::TABLE);
         return $count;
     }
 
@@ -295,10 +550,10 @@ abstract class persistent {
      * @param array $params
      * @return int
      */
-    public function count_records_select($select, $params = null) {
+    public static function count_records_select($select, $params = null) {
         global $DB;
 
-        $count = $DB->count_records_select($this->get_table_name(), $select, $params);
+        $count = $DB->count_records_select(static::TABLE, $select, $params);
         return $count;
     }
 }
