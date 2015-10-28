@@ -55,11 +55,8 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pagetitle);
 $output = $PAGE->get_renderer('tool_lp');
 
-$manageplans = has_capability('tool/lp:planmanage', $context);
-$owncapabilities = array('tool/lp:plancreateown', 'tool/lp:planmanageown');
-if ($USER->id === $userid && !has_any_capability($owncapabilities, $context) && !$manageplans) {
-    throw new required_capability_exception($context, 'tool/lp:planmanageown', 'nopermissions', '');
-} else if (!$manageplans) {
+// TODO Handle case where plan is a draft.
+if (!\tool_lp\plan::can_manage($userid)) {
     throw new required_capability_exception($context, 'tool/lp:planmanage', 'nopermissions', '');
 }
 
