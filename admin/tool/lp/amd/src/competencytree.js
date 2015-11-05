@@ -26,7 +26,7 @@ define(['core/ajax', 'core/notification', 'core/templates', 'tool_lp/tree', 'jqu
 
     // Private variables and functions.
     /** @var {Object[]} competencies - Cached list of competencies */
-    var competencies = [];
+    var competencies = {};
 
     /** @var {Number} competencyFrameworkId - The current framework id */
     var competencyFrameworkId = 0;
@@ -73,7 +73,7 @@ define(['core/ajax', 'core/notification', 'core/templates', 'tool_lp/tree', 'jqu
             }
         }]);
         promises[0].done(function(result) {
-            competencies = [];
+            competencies = {};
             var i = 0;
             for (i = 0; i < result.length; i++) {
                 competencies[result[i].id] = result[i];
@@ -136,6 +136,23 @@ define(['core/ajax', 'core/notification', 'core/templates', 'tool_lp/tree', 'jqu
         },
 
         /**
+         * Get the children of a competency.
+         *
+         * @param  {Number} id The competency ID.
+         * @return {Array}
+         * @method getChildren
+         */
+        getChildren: function(id) {
+            var children = [];
+            $.each(competencies, function(index, competency) {
+                if (competency.parentid == id) {
+                    children.push(competency);
+                }
+            });
+            return children;
+        },
+
+        /**
          * Get the competency framework id this model was initiliased with.
          *
          * @return {Number}
@@ -164,6 +181,17 @@ define(['core/ajax', 'core/notification', 'core/templates', 'tool_lp/tree', 'jqu
             var competency = this.getCompetency(id),
                 level = competency.path.replace(/^\/|\/$/g, '').split('/').length;
             return level;
+        },
+
+        /**
+         * Whether a competency has children.
+         *
+         * @param  {Number} id The competency ID.
+         * @return {Boolean}
+         * @method hasChildren
+         */
+        hasChildren: function(id) {
+            return this.getChildren(id).length > 0;
         },
 
         /**
