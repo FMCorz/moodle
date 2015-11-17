@@ -30,6 +30,7 @@ $string['addnewplan'] = 'Add new learning plan';
 $string['addnewtemplate'] = 'Add new learning plan template';
 $string['addrelatedcompetency'] = 'Add related competency';
 $string['allchildrenarecomplete'] = 'All children are complete';
+$string['assignusers'] = 'Assign users';
 $string['cannotaddrules'] = 'This competency cannot be configured.';
 $string['competencies'] = 'Competencies';
 $string['competenciesforframework'] = 'Competencies for {$a}';

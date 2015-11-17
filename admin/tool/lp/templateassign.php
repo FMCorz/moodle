@@ -15,35 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page lets users to manage template competencies.
+ * Create plans from a template.
  *
  * @package    tool_lp
- * @copyright  2015 Mark Nelson <markn@moodle.com>
+ * @copyright  2015 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(__DIR__ . '/../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require(__DIR__ . '/../../../config.php');
 
-$templateid = required_param('templateid', PARAM_INT);
+$id = required_param('id', PARAM_INT);
 $pagecontextid = required_param('pagecontextid', PARAM_INT);  // Reference to the context we came from.
 
-require_login();
+require_login(0, false);
+if (isguestuser()) {
+    throw new require_login_exception('Guests are not allowed here.');
+}
 
 $pagecontext = context::instance_by_id($pagecontextid);
-$template = \tool_lp\api::read_template($templateid);
+$template = \tool_lp\api::read_template($id);
 $context = $template->get_context();
 require_capability('tool/lp:templatemanage', $context);
 
 // Set up the page.
-$url = new moodle_url('/admin/tool/lp/templatecompetencies.php', array('templateid' => $template->get_id(),
-    'pagecontextid' => $pagecontextid));
+$url = new moodle_url('/admin/tool/lp/templateassign.php', array('id' => $id, 'pagecontextid' => $pagecontextid));
 $templatesurl = new moodle_url('/admin/tool/lp/learningplans.php', array('pagecontextid' => $pagecontextid));
 
 $PAGE->navigation->override_active_url($templatesurl);
 $PAGE->set_context($pagecontext);
 
-$title = get_string('templatecompetencies', 'tool_lp');
+$title = get_string('assignusers', 'tool_lp');
 $templatename = format_string($template->get_shortname(), true, array('context' => $context));
 
 $PAGE->set_pagelayout('admin');
@@ -52,10 +53,19 @@ $PAGE->set_title($title);
 $PAGE->set_heading($templatename);
 $PAGE->navbar->add($templatename, $url);
 
+$form = new \tool_lp\form\templateassign(null, array('template' => $template, 'context' => $context));
+if ($form->is_cancelled()) {
+    redirect($templatesurl);
+}
+
 // Display the page.
 $output = $PAGE->get_renderer('tool_lp');
 echo $output->header();
 echo $output->heading($title);
-$page = new \tool_lp\output\template_competencies_page($template->get_id(), $pagecontext);
-echo $output->render($page);
+
+$form->display();
+
+// $page = new \tool_lp\output\template_competencies_page($template->get_id(), $pagecontext);
+
+// echo $output->render($page);
 echo $output->footer();
