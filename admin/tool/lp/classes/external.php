@@ -4207,4 +4207,125 @@ class external extends external_api {
             'showdeleterelatedaction' => new external_value(PARAM_BOOL, 'Whether to show the delete relation link or not')
         ));
     }
+
+    /**
+     * Returns the description of external function parameters.
+     *
+     * @return external_function_parameters.
+     */
+    public static function search_users_parameters() {
+        $query = new external_value(
+            PARAM_RAW,
+            'Query string'
+        );
+        $limitfrom = new external_value(
+            PARAM_INT,
+            'Number of records to skip',
+            VALUE_DEFAULT,
+            0
+        );
+        $limitnum = new external_value(
+            PARAM_RAW,
+            'Number of records to fetch',
+            VALUE_DEFAULT,
+            100
+        );
+        return new external_function_parameters(array('query' => $query, 'limitfrom' => $limitfrom, 'limitnum' => $limitnum));
+    }
+
+    /**
+     * Search users.
+     *
+     * @param string $query
+     * @return array
+     */
+    public static function search_users($query, $limitfrom = 0, $limitnum = 100) {
+        global $DB, $CFG, $PAGE;
+
+        $params = self::validate_parameters(self::search_users_parameters(),
+                                            array(
+                                                'query' => $query,
+                                                'limitfrom' => $limitfrom,
+                                                'limitnum' => $limitnum,
+                                            ));
+        $query = $params['query'];
+        $limitfrom = $params['limitfrom'];
+        $limitnum = $params['limitnum'];
+
+        $context = context_system::instance();
+        self::validate_context($context);
+
+        $extrasearchfields = array();
+        if (!empty($CFG->showuseridentity) && has_capability('moodle/site:viewuseridentity', $context)) {
+            $extrasearchfields = explode(',', $CFG->showuseridentity);
+        }
+        $fields = \user_picture::fields('u', $extrasearchfields);
+
+        list($wheresql, $whereparams) = users_search_sql($query, 'u', true, $extrasearchfields);
+        list($sortsql, $sortparams) = users_order_by_sql('u', $query, $context);
+
+        $countsql = "SELECT COUNT('x') FROM {user} u WHERE $wheresql";
+        $countparams = $whereparams;
+        $sql = "SELECT $fields FROM {user} u WHERE $wheresql ORDER BY $sortsql";
+        $params = $whereparams + $sortparams;
+
+        $count = $DB->count_records_sql($countsql, $countparams);
+        $result = $DB->get_recordset_sql($sql, $params, $limitfrom, $limitnum);
+
+        $users = array();
+        foreach ($result as $key => $user) {
+            $newuser = array(
+                'id' => $user->id,
+                'fullname' => fullname($user)
+            );
+
+            // Add user picture.
+            $userpicture = new \user_picture($user);
+            $userpicture->size = 1; // Size f1.
+            $newuser['profileimageurl'] = $userpicture->get_url($PAGE)->out(false);
+            $userpicture->size = 0; // Size f2.
+            $newuser['profileimageurlsmall'] = $userpicture->get_url($PAGE)->out(false);
+
+            // Add identity fields.
+            foreach ($extrasearchfields as $field) {
+                $newuser[$field] = $user->$field;
+            }
+
+            $users[$key] = $newuser;
+        }
+        $result->close();
+
+        return array(
+            'users' => $users,
+            'count' => $count
+        );
+    }
+
+    /**
+     * Returns description of external function result value.
+     *
+     * @return external_description
+     */
+    public static function search_users_returns() {
+        global $CFG;
+        require_once($CFG->dirroot . '/user/externallib.php');
+        return new external_single_structure(array(
+            'users' => new external_multiple_structure(new external_single_structure(array(
+                'id' => new external_value(PARAM_INT, 'User ID'),
+                'fullname' => new external_value(PARAM_NOTAGS, 'User full name'),
+
+                'profileimageurl' => new external_value(PARAM_URL, 'User picture URL', VALUE_OPTIONAL),
+                'profileimageurlsmall' => new external_value(PARAM_URL, 'Small user picture URL', VALUE_OPTIONAL),
+
+                'idnumber' => new external_value(PARAM_NOTAGS, 'ID number', VALUE_OPTIONAL),
+                'email' => new external_value(PARAM_TEXT, 'Email', VALUE_OPTIONAL),
+                'phone1' => new external_value(PARAM_NOTAGS, 'Phone 1', VALUE_OPTIONAL),
+                'phone2' => new external_value(PARAM_NOTAGS, 'Phone 2', VALUE_OPTIONAL),
+                'department' => new external_value(PARAM_TEXT, 'Department', VALUE_OPTIONAL),
+                'institution' => new external_value(PARAM_TEXT, 'Institution', VALUE_OPTIONAL),
+            ))),
+            'count' => new external_value(PARAM_INT, 'Total number of results.')
+        ));
+    }
+
 }
