@@ -1317,10 +1317,13 @@ class api {
         if (!$plan->can_manage()) {
             $context = context_user::instance($plan->get_userid());
             throw new required_capability_exception($context, 'tool/lp:planmanage', 'nopermissions', '');
-        }
+
+        // Prevent a plan based on a template to be edited.
+        } else if ($plan->is_based_on_template()) {
+            throw new coding_exception('Cannot update a plan that is based on a template.');
 
         // Prevent change of ownership as the capabilities are checked against that.
-        if (isset($record->userid) && $plan->get_userid() != $record->userid) {
+        } else if (isset($record->userid) && $plan->get_userid() != $record->userid) {
             throw new coding_exception('A plan cannot be transfered to another user');
         }
 
@@ -1331,6 +1334,10 @@ class api {
         if (!$plan->can_manage()) {
             $context = context_user::instance($plan->get_userid());
             throw new required_capability_exception($context, 'tool/lp:planmanage', 'nopermissions', '');
+
+        // Prevent a plan to be updated to use a template.
+        } else if ($plan->is_based_on_template()) {
+            throw new coding_exception('Cannot update a plan to be based on a template.');
         }
 
         // Wrap the updates in a DB transaction.
