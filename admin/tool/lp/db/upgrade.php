@@ -400,6 +400,20 @@ function xmldb_tool_lp_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2015111005, 'tool', 'lp');
     }
 
+    if ($oldversion < 2015111007) {
+
+        // Define field origtemplateid to be added to tool_lp_plan.
+        $table = new xmldb_table('tool_lp_plan');
+        $field = new xmldb_field('origtemplateid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'templateid');
+
+        // Conditionally launch add field origtemplateid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Lp savepoint reached.
+        upgrade_plugin_savepoint(true, 2015111007, 'tool', 'lp');
+    }
 
     return true;
 }
