@@ -211,6 +211,9 @@ class external_api {
             return validate_param($params, $description->type, $description->allownull, $debuginfo);
 
         } else if ($description instanceof external_single_structure) {
+            if ($description->allownull === NULL_ALLOWED && $params === null) {
+                return null;
+            }
             if (!is_array($params)) {
                 throw new invalid_parameter_exception('Only arrays accepted. The bad value is: \''
                         . print_r($params, true) . '\'');
@@ -297,6 +300,10 @@ class external_api {
             }
 
         } else if ($description instanceof external_single_structure) {
+            if ($description->allownull === NULL_ALLOWED && $response === null) {
+                return null;
+            }
+
             if (!is_array($response) && !is_object($response)) {
                 throw new invalid_response_exception('Only arrays/objects accepted. The bad value is: \'' .
                         print_r($response, true) . '\'');
@@ -497,6 +504,9 @@ class external_single_structure extends external_description {
      /** @var array Description of array keys key=>external_description */
     public $keys;
 
+    /** @var bool Allow null values */
+    public $allownull;
+
     /**
      * Constructor
      *
@@ -507,9 +517,10 @@ class external_single_structure extends external_description {
      * @since Moodle 2.0
      */
     public function __construct(array $keys, $desc='',
-            $required=VALUE_REQUIRED, $default=null) {
+            $required=VALUE_REQUIRED, $default=null, $allownull=NULL_NOT_ALLOWED) {
         parent::__construct($desc, $required, $default);
         $this->keys = $keys;
+        $this->allownull = $allownull;
     }
 }
 

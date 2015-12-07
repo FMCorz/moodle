@@ -70,6 +70,44 @@ class core_externallib_testcase extends advanced_testcase {
         $this->assertSame('someid', key($result));
         $this->assertSame(6, $result['someid']);
         $this->assertSame('aaa', $result['text']);
+
+        // Single structure.
+        $params = array('top' => array('text' => 'aaa'));
+        $description = new external_function_parameters(array(
+            'top' => new external_single_structure(array(
+                'someid' => new external_value(PARAM_INT, 'Some int value', VALUE_DEFAULT, 6),
+                'text'   => new external_value(PARAM_ALPHA, 'Some text value')
+            ), '', VALUE_REQUIRED, null, NULL_ALLOWED)
+        ));
+        $result = external_api::validate_parameters($description, $params);
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('top', $result);
+        $this->assertCount(2, $result['top']);
+        $this->assertArrayHasKey('someid', $result['top']);
+        $this->assertArrayHasKey('text', $result['top']);
+        $this->assertSame(6, $result['top']['someid']);
+        $this->assertSame('aaa', $result['top']['text']);
+
+        // Single structure with null.
+        $params = array('top' => null);
+        $result = external_api::validate_parameters($description, $params);
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('top', $result);
+        $this->assertSame(null, $result['top']);
+
+        // Single structure with null not allowed.
+        $params = array('top' => null);
+        $description = new external_function_parameters(array(
+            'top' => new external_single_structure(array(
+                'someid' => new external_value(PARAM_INT, 'Some int value', VALUE_DEFAULT, 6),
+                'text'   => new external_value(PARAM_ALPHA, 'Some text value')
+            ), '', VALUE_REQUIRED, null, NULL_NOT_ALLOWED)
+        ));
+        try {
+            external_api::validate_parameters($description, $params);
+            $this->fail('Null should not be allowed.');
+        } catch (invalid_parameter_exception $e) {
+        }
     }
 
     public function test_external_format_text() {
@@ -179,8 +217,49 @@ class core_externallib_testcase extends advanced_testcase {
         $singlestructure['object'] = $object;
         $singlestructure['value2'] = 'Some text';
         $testdata = array($singlestructure);
-        $this->setExpectedException('invalid_response_exception');
-        $cleanedvalue = external_api::clean_returnvalue($returndesc, $testdata);
+        try {
+            external_api::clean_returnvalue($returndesc, $testdata);
+            $this->fail('Missing required value should throw an exception.');
+        } catch (invalid_response_exception $e) {
+        }
+
+        // Single structure.
+        $testdata = array('top' => array('text' => 'aaa'));
+        $description = new external_function_parameters(array(
+            'top' => new external_single_structure(array(
+                'someid' => new external_value(PARAM_INT, 'Some int value', VALUE_DEFAULT, 6),
+                'text'   => new external_value(PARAM_ALPHA, 'Some text value')
+            ), '', VALUE_REQUIRED, null, NULL_ALLOWED)
+        ));
+        $result = external_api::clean_returnvalue($description, $testdata);
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('top', $result);
+        $this->assertCount(2, $result['top']);
+        $this->assertArrayHasKey('someid', $result['top']);
+        $this->assertArrayHasKey('text', $result['top']);
+        $this->assertSame(6, $result['top']['someid']);
+        $this->assertSame('aaa', $result['top']['text']);
+
+        // Single structure with null.
+        $testdata = array('top' => null);
+        $result = external_api::clean_returnvalue($description, $testdata);
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('top', $result);
+        $this->assertSame(null, $result['top']);
+
+        // Single structure with null not allowed.
+        $testdata = array('top' => null);
+        $description = new external_function_parameters(array(
+            'top' => new external_single_structure(array(
+                'someid' => new external_value(PARAM_INT, 'Some int value', VALUE_DEFAULT, 6),
+                'text'   => new external_value(PARAM_ALPHA, 'Some text value')
+            ), '', VALUE_REQUIRED, null, NULL_NOT_ALLOWED)
+        ));
+        try {
+            external_api::clean_returnvalue($description, $testdata);
+            $this->fail('Null should not be allowed.');
+        } catch (invalid_response_exception $e) {
+        }
     }
     /*
      * Test external_api::get_context_from_params().
