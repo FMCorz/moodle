@@ -232,6 +232,7 @@ $string['pointsgivenfor'] = 'Points given for \'{$a}\'';
 $string['pointsrequiredaremet'] = 'Points required are met';
 $string['proficient'] = 'Proficient';
 $string['rate'] = 'Rate';
+$string['ratecomment'] = 'Comment';
 $string['rating'] = 'Rating';
 $string['relatedcompetencies'] = 'Related competencies';
 $string['reviewstatus'] = 'Review status';

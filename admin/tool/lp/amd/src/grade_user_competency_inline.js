@@ -21,7 +21,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/notification', 'core/ajax', 'core/log'], function($, notification, ajax, log) {
+define(['jquery', 'core/notification', 'core/ajax', 'core/log', 'tool_lp/grade_dialogue'], function($, notification, ajax, log, Grade) {
 
     /**
      * InlineEditor
@@ -45,6 +45,8 @@ define(['jquery', 'core/notification', 'core/ajax', 'core/log'], function($, not
         this._chooseStr = chooseStr;
         this._buildSelect();
         this._addListeners();
+        g = new Grade();
+        g.display();
 
         if (this._planId) {
             this._methodName = 'tool_lp_grade_competency_in_plan';
