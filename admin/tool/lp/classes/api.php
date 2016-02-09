@@ -3411,6 +3411,7 @@ class api {
      * @param int $actionuserid The ID of the user who took the action of adding the evidence. Null when system.
      *                          This should be used when the action was taken by a real person, this will allow
      *                          to keep track of all the evidence given by a certain person.
+     * @param string $note A note to attach to the evidence.
      * @return evidence
      */
     public static function add_evidence($userid,
@@ -3423,7 +3424,8 @@ class api {
                                         $recommend = false,
                                         $url = null,
                                         $grade = null,
-                                        $actionuserid = null) {
+                                        $actionuserid = null,
+                                        $note = null) {
         global $DB;
 
         // Some clearly important variable assignments right there.
@@ -3526,6 +3528,7 @@ class api {
         $record->desccomponent = $desccomponent;
         $record->grade = $grade;
         $record->actionuserid = $actionuserid;
+        $record->note = $note;
         $evidence = new evidence(0, $record);
         $evidence->set_desca($desca);
         $evidence->set_url($url);
@@ -3697,9 +3700,10 @@ class api {
      * @param int $competencyid
      * @param int $grade
      * @param boolean $override
+     * @param string $note A note to attach to the evidence
      * @return array of \tool_lp\user_competency
      */
-    public static function grade_competency($userid, $competencyid, $grade, $override) {
+    public static function grade_competency($userid, $competencyid, $grade, $override, $note = null) {
         global $USER;
 
         $uc = static::get_user_competency($userid, $competencyid);
@@ -3738,7 +3742,8 @@ class api {
                                   false,
                                   null,
                                   $grade,
-                                  $USER->id);
+                                  $USER->id,
+                                  $note);
     }
 
     /**
@@ -3748,9 +3753,10 @@ class api {
      * @param int $competencyid
      * @param int $grade
      * @param boolean $override
+     * @param string $note A note to attach to the evidence
      * @return array of \tool_lp\user_competency
      */
-    public static function grade_competency_in_plan($planorid, $competencyid, $grade, $override) {
+    public static function grade_competency_in_plan($planorid, $competencyid, $grade, $override, $note = null) {
         global $USER;
 
         $plan = $planorid;
@@ -3793,7 +3799,8 @@ class api {
                                   false,
                                   null,
                                   $grade,
-                                  $USER->id);
+                                  $USER->id,
+                                  $note);
     }
 
     /**
@@ -3804,9 +3811,10 @@ class api {
      * @param int $competencyid
      * @param int $grade
      * @param boolean $override
+     * @param string $note A note to attach to the evidence
      * @return array of \tool_lp\user_competency
      */
-    public static function grade_competency_in_course($courseorid, $userid, $competencyid, $grade, $override) {
+    public static function grade_competency_in_course($courseorid, $userid, $competencyid, $grade, $override, $note = null) {
         global $USER, $DB;
 
         $course = $courseorid;
@@ -3848,7 +3856,8 @@ class api {
                                   false,
                                   null,
                                   $grade,
-                                  $USER->id);
+                                  $USER->id,
+                                  $note);
     }
 
     /**

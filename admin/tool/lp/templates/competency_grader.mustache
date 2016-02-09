@@ -1,10 +1,9 @@
-<div data-region="competency-grader">
+<div class="competency-grader" data-region="competency-grader">
     <form>
         <div class="content">
             <div data-region="rating">
                 <label for="rating_{{uniqid}}">{{#str}}rating, tool_lp{{/str}}</label>
-                <select name="grade" id="rating_{{uniqid}}">
-                    <option value="">{{#str}}choosedots{{/str}}</option>
+                <select name="rating" id="rating_{{uniqid}}">
                     {{#ratings}}
                         <option value="{{value}}" {{#selected}}selected{{/selected}}>{{name}}</option>
                     {{/ratings}}
