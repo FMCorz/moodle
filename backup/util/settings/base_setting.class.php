@@ -206,7 +206,7 @@ abstract class base_setting {
         // want to lock this setting.
         if (count($this->dependenton) > 0 && $status == base_setting::NOT_LOCKED) {
             foreach ($this->dependenton as $dependency) {
-                if ($dependency->is_locked()) {
+                if ($dependency->should_be_locked()) {
                     // It still needs to be locked
                     $status = base_setting::LOCKED_BY_HIERARCHY;
                     break;
