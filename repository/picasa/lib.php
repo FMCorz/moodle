@@ -41,10 +41,7 @@ class repository_picasa extends repository {
     public function __construct($repositoryid, $context = SYSCONTEXTID, $options = array()) {
         parent::__construct($repositoryid, $context, $options);
 
-        $returnurl = new moodle_url('/repository/repository_callback.php');
-        $returnurl->param('callback', 'yes');
-        $returnurl->param('repo_id', $this->id);
-        $returnurl->param('sesskey', sesskey());
+        $returnurl = $this->get_callback_url();
 
         $clientid = get_config('picasa', 'clientid');
         $secret = get_config('picasa', 'secret');

@@ -65,10 +65,7 @@ class repository_boxnet extends repository {
 
         $clientid = get_config('boxnet', 'clientid');
         $clientsecret = get_config('boxnet', 'clientsecret');
-        $returnurl = new moodle_url('/repository/repository_callback.php');
-        $returnurl->param('callback', 'yes');
-        $returnurl->param('repo_id', $this->id);
-        $returnurl->param('sesskey', sesskey());
+        $returnurl = $this->get_callback_url();
 
         $this->boxnetclient = new boxnet_client($clientid, $clientsecret, $returnurl, '');
     }

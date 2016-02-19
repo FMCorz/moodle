@@ -51,10 +51,7 @@ class repository_skydrive extends repository {
 
         $clientid = get_config('skydrive', 'clientid');
         $secret = get_config('skydrive', 'secret');
-        $returnurl = new moodle_url('/repository/repository_callback.php');
-        $returnurl->param('callback', 'yes');
-        $returnurl->param('repo_id', $this->id);
-        $returnurl->param('sesskey', sesskey());
+        $returnurl = $this->get_callback_url();
 
         $this->skydrive = new microsoft_skydrive($clientid, $secret, $returnurl);
         $this->check_login();

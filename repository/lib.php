@@ -2493,6 +2493,33 @@ abstract class repository implements cacheable_object {
     }
 
     /**
+     * Convenience method to create the typical callback URL.
+     *
+     * @param string $httpsguess When true, tries to guess if HTTPS should be used. Else use $CFG->wwwroot.
+     * @return moodle_url
+     */
+    protected function get_callback_url($httpsguess = true) {
+        global $CFG;
+        $root = $CFG->wwwroot;
+
+        if ($httpsguess && strpos($root, 'https:') !== 0) {
+            if (is_https() ||
+                    (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) != 'off') ||
+                    ($_SERVER['SERVER_PORT'] == 443)) {
+
+                $root = preg_replace('/^http:/', 'https:', $root);
+            }
+        }
+
+        $url = new moodle_url($root . '/repository/repository_callback.php');
+        $url->param('repo_id', $this->id);
+        $url->param('callback', 'yes');
+        $url->param('sesskey', sesskey());
+        fb($url->out(false));
+        return $url;
+    }
+
+    /**
      * Create a shorten filename
      *
      * @param string $str filename

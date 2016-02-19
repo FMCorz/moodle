@@ -141,10 +141,7 @@ class repository_googledocs extends repository {
      * @return void|array for ajax.
      */
     public function print_login() {
-        $returnurl = new moodle_url('/repository/repository_callback.php');
-        $returnurl->param('callback', 'yes');
-        $returnurl->param('repo_id', $this->id);
-        $returnurl->param('sesskey', sesskey());
+        $returnurl = $this->get_callback_url();
 
         $url = new moodle_url($this->client->createAuthUrl());
         $url->param('state', $returnurl->out_as_local_url(false));

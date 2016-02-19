@@ -81,10 +81,7 @@ class repository_dropbox extends repository {
             $this->logged = true;
         }
 
-        $callbackurl = new moodle_url($CFG->wwwroot.'/repository/repository_callback.php', array(
-            'callback'=>'yes',
-            'repo_id'=>$repositoryid
-            ));
+        $callbackurl = $this->get_callback_url();
 
         $args = array(
             'oauth_consumer_key'=>$this->dropbox_key,
