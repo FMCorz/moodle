@@ -83,4 +83,26 @@ class MoodleQuickForm_course extends MoodleQuickForm_autocomplete {
 
         parent::__construct($elementName, $elementLabel, array(), $validattributes);
     }
+
+    /**
+     * Set the value of this element. If values can be added or are unknown, we will
+     * make sure they exist in the options array.
+     * @param  mixed string|array $value The value to set.
+     * @return boolean
+     */
+    function setValue($value) {
+        $values = (array) $value;
+
+        foreach ($values as $onevalue) {
+            if (($this->tags || $this->ajax) &&
+                    (!$this->optionExists($onevalue)) &&
+                    ($onevalue !== '_qf__force_multiselect_submission')) {
+                // We need custom behaviour to fetch the course info.
+                $course = get_course($onevalue);
+                $context = context_course::instance($course->id);
+                $this->addOption(format_string($course->fullname, true, array('context' => $context)), $onevalue);
+            }
+        }
+        return $this->setSelected($value);
+    }
 }
