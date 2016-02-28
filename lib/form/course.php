@@ -40,9 +40,9 @@ require_once($CFG->libdir . '/form/autocomplete.php');
 class MoodleQuickForm_course extends MoodleQuickForm_autocomplete {
 
     /**
-     * @var int $excludecourseid Exclude one course from the list (e.g. the current course).
+     * @var array $exclude Exclude a list of courses from the list (e.g. the current course).
      */
-    protected $excludecourseid = -1;
+    protected $exclude = array();
 
     /**
      * @var boolean $allowmultiple Allow selecting more than one course.
@@ -65,8 +65,8 @@ class MoodleQuickForm_course extends MoodleQuickForm_autocomplete {
         if (isset($options['multiple'])) {
             $this->multiple = $options['multiple'];
         }
-        if (isset($options['excludecourseid'])) {
-            $this->excludecourseid = $options['excludecourseid'];
+        if (isset($options['exclude'])) {
+            $this->exclude = $options['exclude'];
         }
         if (isset($options['requiredcapabilities'])) {
             $this->requiredcapabilities = $options['requiredcapabilities'];
@@ -75,7 +75,7 @@ class MoodleQuickForm_course extends MoodleQuickForm_autocomplete {
         $validattributes = array(
             'ajax' => 'core/form-course-selector',
             'data-requiredcapabilities' => implode(',', $this->requiredcapabilities),
-            'data-excludecourseid' => $this->excludecourseid
+            'data-exclude' => implode(',', $this->exclude)
         );
         if ($this->multiple) {
             $validattributes['multiple'] = 'multiple';
