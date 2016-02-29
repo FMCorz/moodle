@@ -2254,9 +2254,11 @@ class core_course_external extends external_api {
             list($summary, $summaryformat) =
                 external_format_text($course->summary, $course->summaryformat, $coursecontext->id, 'course', 'summary', null);
 
+            $displayname = get_course_display_name_for_list($course);
             $coursereturns = array();
             $coursereturns['id']                = $course->id;
             $coursereturns['fullname']          = external_format_string($course->fullname, $coursecontext->id);
+            $coursereturns['displayname']       = external_format_string($displayname, $coursecontext->id);
             $coursereturns['shortname']         = external_format_string($course->shortname, $coursecontext->id);
             $coursereturns['categoryid']        = $course->category;
             $coursereturns['categoryname']      = $category->name;
@@ -2291,6 +2293,7 @@ class core_course_external extends external_api {
                         array(
                             'id' => new external_value(PARAM_INT, 'course id'),
                             'fullname' => new external_value(PARAM_TEXT, 'course full name'),
+                            'displayname' => new external_value(PARAM_TEXT, 'course display name'),
                             'shortname' => new external_value(PARAM_TEXT, 'course short name'),
                             'categoryid' => new external_value(PARAM_INT, 'category id'),
                             'categoryname' => new external_value(PARAM_TEXT, 'category name'),

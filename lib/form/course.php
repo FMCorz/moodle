@@ -91,18 +91,41 @@ class MoodleQuickForm_course extends MoodleQuickForm_autocomplete {
      * @return boolean
      */
     function setValue($value) {
+        global $DB;
         $values = (array) $value;
+        $coursestofetch = array();
 
         foreach ($values as $onevalue) {
-            if (($this->tags || $this->ajax) &&
-                    (!$this->optionExists($onevalue)) &&
+            if ((!$this->optionExists($onevalue)) &&
                     ($onevalue !== '_qf__force_multiselect_submission')) {
-                // We need custom behaviour to fetch the course info.
-                $course = get_course($onevalue);
-                $context = context_course::instance($course->id);
-                $this->addOption(format_string($course->fullname, true, array('context' => $context)), $onevalue);
+                array_push($coursestofetch, $onevalue);
             }
         }
-        return $this->setSelected($value);
+
+        // There is no API function to load a list of course from a list of ids.
+        $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
+        $fields = array('c.id', 'c.category', 'c.sortorder',
+                        'c.shortname', 'c.fullname', 'c.idnumber',
+                        'c.startdate', 'c.visible', 'c.cacherev');
+        list($whereclause, $params) = $DB->get_in_or_equal($coursestofetch, SQL_PARAMS_NAMED, 'id');
+
+        $sql = "SELECT ". join(',', $fields). ", $ctxselect
+                FROM {course} c
+                JOIN {context} ctx ON c.id = ctx.instanceid AND ctx.contextlevel = :contextcourse
+                WHERE c.id ". $whereclause." ORDER BY c.sortorder";
+        $list = $DB->get_records_sql($sql, array('contextcourse' => CONTEXT_COURSE) + $params);
+
+        $coursestoselect = array();
+        foreach ($list as $course) {
+            context_helper::preload_from_record($course);
+            // Make sure we can see the course.
+            if (!$course->visible && !has_capability('moodle/course:viewhiddencourses', context_course::instance($course->id))) {
+                continue;
+            }
+            $label = get_course_display_name_for_list($course);
+            $this->addOption($label, $course->id);
+            array_push($coursestoselect, $course->id);
+        }
+        return $this->setSelected($coursestoselect);
     }
 }

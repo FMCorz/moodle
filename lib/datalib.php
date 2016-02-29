@@ -800,8 +800,7 @@ function get_courses_search($searchterms, $sort, $page, $recordsperpage, &$total
     }
 
     if (empty($searchcond)) {
-        $totalcount = 0;
-        return array();
+        $searchcond = array('1 = 1');
     }
 
     $searchcond = implode(" AND ", $searchcond);

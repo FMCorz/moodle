@@ -1321,10 +1321,10 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
         $preloadcoursecontacts = !empty($options['coursecontacts']);
         unset($options['coursecontacts']);
 
-        if (!empty($search['search'])) {
+        if (empty($search['blocklist']) && empty($search['modulelist']) && empty($search['tagid'])) {
             // Search courses that have specified words in their names/summaries.
             $searchterms = preg_split('|\s+|', trim($search['search']), 0, PREG_SPLIT_NO_EMPTY);
-            $searchterms = array_filter($searchterms, create_function('$v', 'return strlen($v) > 1;'));
+            //$searchterms = array_filter($searchterms, create_function('$v', 'return strlen($v) > 1;'));
 
             $courselist = get_courses_search($searchterms, 'c.sortorder ASC', 0, 9999999, $totalcount, $requiredcapabilities);
             self::sort_records($courselist, $sortfields);
