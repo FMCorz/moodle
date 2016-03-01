@@ -60,6 +60,10 @@ class MoodleQuickForm_course extends MoodleQuickForm_autocomplete {
      * @param string $elementName Element name
      * @param mixed $elementLabel Label(s) for an element
      * @param array $options Options to control the element's display
+     *                       Valid options are:
+     *                       'multiple' - boolean multi select
+     *                       'exclude' - array or int, list of course ids to never show
+     *                       'requiredcapabilities' - array of capabilities. Uses ANY to combine them.
      */
     function __construct($elementName = null, $elementLabel = null, $options = array()) {
         if (isset($options['multiple'])) {
@@ -67,6 +71,9 @@ class MoodleQuickForm_course extends MoodleQuickForm_autocomplete {
         }
         if (isset($options['exclude'])) {
             $this->exclude = $options['exclude'];
+            if (!is_array($this->exclude)) {
+                $this->exclude = array($this->exclude);
+            }
         }
         if (isset($options['requiredcapabilities'])) {
             $this->requiredcapabilities = $options['requiredcapabilities'];
