@@ -76,7 +76,11 @@ class competency_summary_exporter extends exporter {
             ),
             'taxonomyterm' => array(
                 'type' => PARAM_TEXT
-            )
+            ),
+            'pathnodes' => array(
+                'type' => competency_path_node_exporter::read_properties_definition(),
+                'multiple' => true
+            ),
         );
     }
 
@@ -122,6 +126,23 @@ class competency_summary_exporter extends exporter {
         $level = $competency->get_level();
         $taxonomy = $this->related['framework']->get_taxonomy($level);
         $result->taxonomyterm = (string) (competency_framework::get_taxonomies_list()[$taxonomy]);
+
+        $pathnodes = [];
+        $nodescount = count($competency->get_ancestors());
+        $i = 1;
+        foreach ($competency->get_ancestors() as $competency) {
+            $exporter = new competency_path_node_exporter($competency, [
+                    'context' => $this->related['context'],
+                    'pathinfo' => (object) [
+                        'position' => $i,
+                        'max' => $nodescount,
+                    ]
+                ]
+            );
+            $pathnodes[] = $exporter->export($output);
+            $i++;
+        }
+        $result->pathnodes = $pathnodes;
 
         return (array) $result;
     }

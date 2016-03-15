@@ -35,6 +35,7 @@ use tool_lp\api;
 use tool_lp\course_competency;
 use tool_lp\competency;
 use tool_lp\external\competency_exporter;
+use tool_lp\external\competency_path_node_exporter;
 use tool_lp\external\course_competency_exporter;
 use tool_lp\external\course_module_summary_exporter;
 use tool_lp\external\user_competency_exporter;
@@ -140,12 +141,29 @@ class course_competencies_page implements renderable, templatable {
                 $cmexporter = new course_module_summary_exporter(null, array('cm' => $cminfo));
                 $exportedmodules[] = $cmexporter->export($output);
             }
+            // Competency path.
+            $pathnodes = [];
+            $nodescount = count($competency->get_ancestors());
+            $i = 1;
+            foreach ($competency->get_ancestors() as $competency) {
+                $exporter = new competency_path_node_exporter($competency, [
+                        'context' => $competency->get_context(),
+                        'pathinfo' => (object) [
+                            'position' => $i,
+                            'max' => $nodescount,
+                        ]
+                    ]
+                );
+                $pathnodes[] = $exporter->export($output);
+                $i++;
+            }
 
             $onerow = array(
                 'competency' => $compexporter->export($output),
                 'coursecompetency' => $ccexporter->export($output),
                 'ruleoutcomeoptions' => $ccoutcomeoptions,
-                'coursemodules' => $exportedmodules
+                'coursemodules' => $exportedmodules,
+                'pathnodes' => $pathnodes
             );
             if ($gradable) {
                 $foundusercompetency = false;

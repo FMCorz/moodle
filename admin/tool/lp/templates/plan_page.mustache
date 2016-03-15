@@ -112,6 +112,7 @@
                         {{/plan.canbeedited}}
                         <a href="{{pluginbaseurl}}/user_competency_in_plan.php?competencyid={{competency.id}}&amp;userid={{plan.userid}}&amp;planid={{plan.id}}">{{competency.shortname}}</a>
                         <em>{{competency.idnumber}}</em>
+                        {{> tool_lp/competency_path }}
                     </td>
                     {{#plan.iscompleted}}
                         <td>{{usercompetencyplan.gradename}}</td>
@@ -168,7 +169,10 @@
 
 </div>
 {{#js}}
-require(['tool_lp/competencies', 'tool_lp/planactions', 'tool_lp/user_competency_workflow'], function(mod, actionsMod, UserCompWorkflow) {
+require(['tool_lp/competencies',
+    'tool_lp/planactions',
+    'tool_lp/user_competency_workflow',
+    'tool_lp/competencydialogue'], function(mod, actionsMod, UserCompWorkflow, Compdialogue) {
     var planActions = new actionsMod('plan');
 
     (new mod({{plan.id}}, 'plan', {{contextid}}));
@@ -178,12 +182,8 @@ require(['tool_lp/competencies', 'tool_lp/planactions', 'tool_lp/user_competency
     ucw.enhanceMenubar('.user-competency-actions');
     ucw.on('status-changed', planActions.refresh.bind(planActions, '[data-region="plan-summary"]'));
     ucw.on('error-occured', planActions.refresh.bind(planActions, '[data-region="plan-summary"]'));
-});
-{{/js}}
-{{#js}}
-require(['tool_lp/competencydialogue'], function(Compdialogue) {
     var competencydialogue = new Compdialogue({includerelated : true});
     competencydialogue.watch('[data-region="plan-page"]');
-
 });
 {{/js}}
+

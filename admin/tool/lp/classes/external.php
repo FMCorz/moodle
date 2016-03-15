@@ -44,6 +44,7 @@ use required_capability_exception;
 use grade_scale;
 use tool_lp\external\competency_framework_exporter;
 use tool_lp\external\competency_summary_exporter;
+use tool_lp\external\competency_path_node_exporter;
 use tool_lp\external\cohort_summary_exporter;
 use tool_lp\external\template_statistics_exporter;
 use tool_lp\external\user_summary_exporter;
@@ -1878,7 +1879,9 @@ class external extends external_api {
      */
     public static function data_for_course_competencies_page_returns() {
         $uc = user_competency_exporter::get_read_structure();
+        $path = competency_path_node_exporter::get_read_structure();
         $uc->required = VALUE_OPTIONAL;
+        $path->required = VALUE_OPTIONAL;
 
         return new external_single_structure(array (
             'courseid' => new external_value(PARAM_INT, 'The current course id'),
@@ -1896,7 +1899,8 @@ class external extends external_api {
                         'value' => new external_value(PARAM_INT, 'The option value'),
                         'text' => new external_value(PARAM_NOTAGS, 'The name of the option'),
                         'selected' => new external_value(PARAM_BOOL, 'If this is the currently selected option'),
-                )))
+                ))),
+                'pathnodes' => new external_multiple_structure($path)
             ))),
             'manageurl' => new external_value(PARAM_LOCALURL, 'Url to the manage competencies page.'),
         ));
@@ -3259,9 +3263,11 @@ class external extends external_api {
     public static function data_for_plan_page_returns() {
         $uc = user_competency_exporter::get_read_structure();
         $ucp = user_competency_plan_exporter::get_read_structure();
+        $path = competency_path_node_exporter::get_read_structure();
 
         $uc->required = VALUE_OPTIONAL;
         $ucp->required = VALUE_OPTIONAL;
+        $path->required = VALUE_OPTIONAL;
 
         return new external_single_structure(array (
             'plan' => plan_exporter::get_read_structure(),
@@ -3270,6 +3276,7 @@ class external extends external_api {
             'competencies' => new external_multiple_structure(
                 new external_single_structure(array(
                     'competency' => competency_exporter::get_read_structure(),
+                    'pathnodes' => new external_multiple_structure($path),
                     'usercompetency' => $uc,
                     'usercompetencyplan' => $ucp
                 ))
