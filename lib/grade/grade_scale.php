@@ -325,6 +325,14 @@ class grade_scale extends grade_object {
             }
         }
 
+        // Ask the admin tools.
+        $functions = get_plugin_list_with_function('tool', 'scale_used_anywhere');
+        foreach ($functions as $plugin => $functionname) {
+            if ($functionname($this->id)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
