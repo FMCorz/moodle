@@ -48,6 +48,7 @@
                         {{#competency}}
                         <a id="competency-info-link-{{competency.idnumber}}"></a>
                             {{> tool_lp/competency_summary }}
+                            {{> tool_lp/competency_path }}
                         {{/competency}}
                         <strong>{{#str}}linkedcourseslist, tool_lp{{/str}}</strong>
                         {{#hascourses}}
@@ -73,7 +74,9 @@
     </div>
 </div>
 {{#js}}
-require(['tool_lp/competencies'], function(mod) {
+require(['tool_lp/competencies', 'tool_lp/competencydialogue'], function(mod, Compdialogue) {
     (new mod({{templateid}}, 'template', {{pagecontextid}}));
+    var competencydialogue = new Compdialogue({includerelated : true});
+    competencydialogue.watch('[data-region="templatecompetenciespage"]');
 });
 {{/js}}

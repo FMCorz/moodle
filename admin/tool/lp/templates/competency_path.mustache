@@ -1,0 +1,10 @@
+<nav>
+    <strong>{{#str}}path, tool_lp{{/str}}</strong>
+     / 
+    {{#pathnodes}}
+        <small>
+            <a data-action="competency-dialogue" href="#" data-id="{{id}}">{{shortname}}</a>
+            {{^last}}<span>/</span>{{/last}}
+        </small>
+    {{/pathnodes}}
+</nav>
