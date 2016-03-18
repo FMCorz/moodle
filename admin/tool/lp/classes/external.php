@@ -44,7 +44,7 @@ use required_capability_exception;
 use grade_scale;
 use tool_lp\external\competency_framework_exporter;
 use tool_lp\external\competency_summary_exporter;
-use tool_lp\external\competency_path_node_exporter;
+use tool_lp\external\competency_path_exporter;
 use tool_lp\external\cohort_summary_exporter;
 use tool_lp\external\template_statistics_exporter;
 use tool_lp\external\user_summary_exporter;
@@ -3251,6 +3251,7 @@ class external extends external_api {
         $renderer = $PAGE->get_renderer('tool_lp');
 
         $data = $renderable->export_for_template($renderer);
+        fb($data);
 
         return $data;
     }
@@ -3263,11 +3264,9 @@ class external extends external_api {
     public static function data_for_plan_page_returns() {
         $uc = user_competency_exporter::get_read_structure();
         $ucp = user_competency_plan_exporter::get_read_structure();
-        $path = competency_path_node_exporter::get_read_structure();
 
         $uc->required = VALUE_OPTIONAL;
         $ucp->required = VALUE_OPTIONAL;
-        $path->required = VALUE_OPTIONAL;
 
         return new external_single_structure(array (
             'plan' => plan_exporter::get_read_structure(),
@@ -3276,7 +3275,7 @@ class external extends external_api {
             'competencies' => new external_multiple_structure(
                 new external_single_structure(array(
                     'competency' => competency_exporter::get_read_structure(),
-                    'pathnodes' => new external_multiple_structure($path),
+                    'comppath' => competency_path_exporter::get_read_structure(),
                     'usercompetency' => $uc,
                     'usercompetencyplan' => $ucp
                 ))

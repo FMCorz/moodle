@@ -844,7 +844,7 @@ class competency extends persistent {
     public function get_ancestors() {
         global $DB;
         $ancestors = array();
-        $ancestorsids = explode('/', $this->get_path());
+        $ancestorsids = explode('/', trim($this->get_path(), '/'));
         // Drop the root item from the array /0/.
         array_shift($ancestorsids);
         if (!empty($ancestorsids)) {

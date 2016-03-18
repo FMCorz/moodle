@@ -112,7 +112,9 @@
                         {{/plan.canbeedited}}
                         <a href="{{pluginbaseurl}}/user_competency_in_plan.php?competencyid={{competency.id}}&amp;userid={{plan.userid}}&amp;planid={{plan.id}}">{{competency.shortname}}</a>
                         <em>{{competency.idnumber}}</em>
-                        {{> tool_lp/competency_path }}
+                        {{#comppath}}
+                            {{> tool_lp/competency_path }}
+                        {{/comppath}}
                     </td>
                     {{#plan.iscompleted}}
                         <td>{{usercompetencyplan.gradename}}</td>
