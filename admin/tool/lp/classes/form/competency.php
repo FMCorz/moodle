@@ -26,6 +26,11 @@ namespace tool_lp\form;
 defined('MOODLE_INTERNAL') || die();
 
 use stdClass;
+use moodle_url;
+require_once($CFG->libdir . '/formslib.php');
+\MoodleQuickForm::registerElementType('competency_autocomplete',
+    $CFG->dirroot . '/admin/tool/lp/classes/form/competency_autocomplete.php',
+    '\\tool_lp\\form\\competency_autocomplete');
 
 /**
  * Competency framework form.
@@ -36,6 +41,7 @@ use stdClass;
  */
 class competency extends persistent {
 
+    /** @var tool_lp\competency persistent class for form */
     protected static $persistentclass = 'tool_lp\\competency';
 
     /**
@@ -59,15 +65,32 @@ class competency extends persistent {
                            'frameworkdesc',
                            get_string('competencyframework', 'tool_lp'),
                            s($framework->get_shortname()));
-        if ($parent) {
-            $mform->addElement('hidden', 'parentid');
-            $mform->setType('parentid', PARAM_INT);
-            $mform->setConstant('parentid', $parent->get_id());
+        if ($competency->get_id()) {
+            if ($parent) {
+                $mform->addElement('hidden', 'parentid');
+                $mform->setType('parentid', PARAM_INT);
+                $mform->setConstant('parentid', $parent->get_id());
 
-            $mform->addElement('static',
-                               'parentdesc',
-                               get_string('taxonomy_parent_' . $framework->get_taxonomy($parent->get_level()), 'tool_lp'),
-                               s($parent->get_shortname()));
+                $mform->addElement('static',
+                                    'parentdesc',
+                                    get_string('taxonomy_parent_' . $framework->get_taxonomy($parent->get_level()), 'tool_lp'),
+                                    s($parent->get_shortname())
+                );
+            }
+        } else {
+            $selected = ($parent) ? array($parent->get_id()) : array();
+            $label = get_string('parentcompetency', 'tool_lp');
+            if ($parent) {
+                $label = get_string('taxonomy_parent_' . $framework->get_taxonomy($parent->get_level()), 'tool_lp');
+            }
+            // When parent is not defined the default parent will be the competency framework.
+            $default = array(get_string('competencyframeworkroot', 'tool_lp'));
+            $mform->addElement('competency_autocomplete', 'parentid', $label, $selected, $default, array(
+                'competencyframeworkid' => $framework->get_id(),
+                'potentialparentsonly' => '1',
+                'multiple' => false
+            ));
+            $mform->addHelpButton('parentid', 'parentcompetency', 'tool_lp');
         }
 
         $mform->addElement('text', 'shortname',
