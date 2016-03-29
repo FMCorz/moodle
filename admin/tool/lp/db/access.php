@@ -63,7 +63,7 @@ $capabilities = array(
     // Course competencies.
     'tool/lp:coursecompetencymanage' => array(
         'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
