@@ -26,8 +26,6 @@
 namespace tool_lp\form;
 
 use MoodleQuickForm_autocomplete;
-use \tool_lp\competency;
-use tool_lp\competency_framework;
 
 global $CFG;
 require_once($CFG->libdir . '/form/autocomplete.php');
@@ -74,7 +72,7 @@ class competency_autocomplete extends MoodleQuickForm_autocomplete {
             $validattributes['multiple'] = 'multiple';
         }
         if (!empty($options['potentialparentsonly'])) {
-            $validattributes['data-frameworkmaxdepth'] = competency_framework::get_taxonomies_max_level();
+            $validattributes['data-frameworkmaxdepth'] = \tool_lp\competency_framework::get_taxonomies_max_level();
         }
 
         parent::__construct($elementname, $elementlabel, array(), $validattributes);
@@ -82,7 +80,7 @@ class competency_autocomplete extends MoodleQuickForm_autocomplete {
         // Select the competencies in the autocomplete element.
         if (!empty($selected)) {
             $competencies = $this->get_competencies($selected);
-            $taxonomiesmaxlevel = competency_framework::get_taxonomies_max_level();
+            $taxonomiesmaxlevel = \tool_lp\competency_framework::get_taxonomies_max_level();
 
             $selctedcompetenciesids = [];
             foreach ($competencies as $competency) {
@@ -96,9 +94,9 @@ class competency_autocomplete extends MoodleQuickForm_autocomplete {
                 $this->setSelected($selctedcompetenciesids);
             }
         } else if (!empty($default)) {
-            // When we want a default value diffrent from a competency eg: framework.
+            // When we want a default value different from a competency eg: framework.
             foreach ($default as $key => $value) {
-                    $this->addOption($value, $key);
+                $this->addOption($value, $key);
             }
             $this->setSelected(array_keys($default));
         }
@@ -129,7 +127,7 @@ class competency_autocomplete extends MoodleQuickForm_autocomplete {
         }
 
         // Logic here is simulating API.
-        $taxonomiesmaxlevel = competency_framework::get_taxonomies_max_level();
+        $taxonomiesmaxlevel = \tool_lp\competency_framework::get_taxonomies_max_level();
         $competencies = $this->get_competencies($ids);
         foreach ($competencies as $competency) {
             if (!$this->potentialparentsonly || ($competency->get_level() < $taxonomiesmaxlevel)) {
@@ -153,7 +151,7 @@ class competency_autocomplete extends MoodleQuickForm_autocomplete {
         $competencies = [];
         if (!empty($selected)) {
             list($insql, $inparams) = $DB->get_in_or_equal($selected, SQL_PARAMS_NAMED, 'param');
-            $competencies = competency::get_records_select("id $insql", $inparams, 'shortname');
+            $competencies = \tool_lp\competency::get_records_select("id $insql", $inparams, 'shortname');
         }
         return $competencies;
     }

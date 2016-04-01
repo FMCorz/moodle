@@ -80,9 +80,7 @@ class competency extends persistent {
         } else {
             $selected = ($parent) ? array($parent->get_id()) : array();
             $label = get_string('parentcompetency', 'tool_lp');
-            if ($parent) {
-                $label = get_string('taxonomy_parent_' . $framework->get_taxonomy($parent->get_level()), 'tool_lp');
-            }
+
             // When parent is not defined the default parent will be the competency framework.
             $default = array(get_string('competencyframeworkroot', 'tool_lp'));
             $mform->addElement('competency_autocomplete', 'parentid', $label, $selected, $default, array(
@@ -90,6 +88,7 @@ class competency extends persistent {
                 'potentialparentsonly' => '1',
                 'multiple' => false
             ));
+
             $mform->addHelpButton('parentid', 'parentcompetency', 'tool_lp');
         }
 

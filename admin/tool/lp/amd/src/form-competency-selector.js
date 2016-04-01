@@ -25,21 +25,23 @@
 
 define(['jquery', 'core/ajax', 'core/str'], function($, Ajax, str) {
 
+    var noSelectionLabel;
+
     return /** @alias module:tool_lp/form-competency-selector */ {
 
         processResults: function(selector, results) {
             var competencies = [],
                 potentialparentsonly = $(selector).data('potentialparentsonly'),
                 frameworkmaxdepth = $(selector).data('frameworkmaxdepth');
+
             // Enable selecting empty option when mulitple is set to false.
             if (!$(selector).attr('multiple') && potentialparentsonly) {
-                str.get_string('competencyframeworkroot', 'tool_lp').then(function(noselectionlabel) {
-                    competencies.push({
-                        value: 0,
-                        label: noselectionlabel
-                    });
+                competencies.push({
+                    value: 0,
+                    label: noSelectionLabel
                 });
             }
+
             $.each(results, function(index, competency) {
                 var path = String(competency.path),
                     level = path.split('/').length - 2;
@@ -66,8 +68,16 @@ define(['jquery', 'core/ajax', 'core/str'], function($, Ajax, str) {
                 }
             }]);
 
-            promise[0].done(success);
-            promise[0].fail(failure);
+            if (typeof noSelectionLabel === 'undefined') {
+                str.get_string('competencyframeworkroot', 'tool_lp').then(function(txt) {
+                    noSelectionLabel = txt;
+                    promise[0].done(success);
+                    promise[0].fail(failure);
+                }).fail(failure);
+            } else {
+                promise[0].done(success);
+                promise[0].fail(success);
+            }
 
             return promise;
         }
