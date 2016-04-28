@@ -26,11 +26,7 @@
     background-image: url('[[pix:t/collapsed_empty]]');
 }
 
-.block_navigation .block_tree .tree_item.loadingbranch {
-    background-image: url('[[pix:i/loading_small]]');
-}
-
-.block_navigation .block_tree .loading .tree_item.branch {
+.block_navigation .block_tree .loading.tree_item.branch {
     background-image: url('[[pix:i/loading_small]]');
 }
 
@@ -71,11 +67,22 @@
     list-style: none;
 }
 
+.jsenabled .block_navigation [role="treeitem"][aria-expanded="true"] > [role="group"],
+.jsenabled .block_navigation [role="treeitem"][aria-expanded="true"] + [role="group"] {
+    display: block;
+}
+
+.jsenabled .block_navigation [role="treeitem"][aria-expanded="false"] > [role="group"],
+.jsenabled .block_navigation [role="treeitem"][aria-expanded="false"] + [role="group"] {
+    display: none;
+}
+
 .jsenabled .block_navigation .block_tree [aria-expanded="false"] ul {
     display: none;
 }
 
-.jsenabled .block_navigation .block_tree [aria-expanded="false"] .tree_item.branch {
+.jsenabled .block_navigation .block_tree [aria-expanded="false"] .tree_item.branch,
+.jsenabled .block_navigation .block_tree [aria-expanded="false"].tree_item.branch {
     background-image: url('[[pix:t/collapsed]]');
 }
 
