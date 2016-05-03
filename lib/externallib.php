@@ -761,8 +761,7 @@ function external_validate_format($format) {
  *      trusted     :   If true the string won't be cleaned. Default false.
  *      noclean     :   If true the string won't be cleaned only if trusted is also true. Default false.
  *      nocache     :   If true the string will not be cached and will be formatted every call. Default false.
- *      filter      :   If true the string will be run through applicable filters as well. Default (different from format_text)
- *                      got form settings.
+ *      filter      :   Can be set to false to force filters off, else observes {@link external_settings}.
  *      para        :   If true then the returned string will be wrapped in div tags. Default (different from format_text) false.
  *                      Default changed because div tags are not commonly needed.
  *      newlines    :   If true then lines newline breaks will be converted to HTML newline breaks. Default true.
@@ -806,7 +805,7 @@ function external_format_text($text, $textformat, $contextid, $component, $filea
             }
         }
 
-        $options['filter'] = isset($options['filter']) ? $options['filter'] : $settings->get_filter();
+        $options['filter'] = isset($options['filter']) && !$options['filter'] ? false : $settings->get_filter();
         $options['para'] = isset($options['para']) ? $options['para'] : false;
         $options['context'] = context::instance_by_id($contextid);
         $options['allowid'] = isset($options['allowid']) ? $options['allowid'] : true;

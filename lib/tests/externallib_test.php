@@ -96,6 +96,13 @@ class core_externallib_testcase extends advanced_testcase {
 </span></span>', FORMAT_HTML);
         $this->assertSame(external_format_text($test, $testformat, $context->id, 'core', '', 0), $correct);
 
+        // Filters can be opted out from by the developer.
+        $test = '$$ \pi $$';
+        $testformat = FORMAT_MARKDOWN;
+        $correct = array('<p>$$ \pi $$</p>
+', FORMAT_HTML);
+        $this->assertSame(external_format_text($test, $testformat, $context->id, 'core', '', 0, ['filter' => false]), $correct);
+
         $test = '<p><a id="test"></a><a href="#test">Text</a></p>';
         $testformat = FORMAT_HTML;
         $correct = array($test, FORMAT_HTML);
