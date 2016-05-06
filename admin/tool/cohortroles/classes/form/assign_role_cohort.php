@@ -43,14 +43,13 @@ class assign_role_cohort extends moodleform {
      * Form definition.
      */
     public function definition() {
-        global $PAGE;
+        global $OUTPUT, $PAGE;
 
         $mform = $this->_form;
         $roles = get_roles_for_contextlevels(CONTEXT_USER);
 
         if (empty($roles)) {
-            $output = $PAGE->get_renderer('tool_cohortroles');
-            $warning = $output->notify_problem(get_string('noassignableroles', 'tool_cohortroles'));
+            $warning = $OUTPUT->notify_problem(get_string('noassignableroles', 'tool_cohortroles'));
             $mform->addElement('html', $warning);
             return;
         }

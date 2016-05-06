@@ -33,26 +33,22 @@ $context = context_system::instance();
 
 $pageurl = new moodle_url('/admin/tool/cohortroles/index.php');
 
-$output = $PAGE->get_renderer('tool_cohortroles');
-
-echo $output->header();
-$title = get_string('assignroletocohort', 'tool_cohortroles');
-echo $output->heading($title);
+$output = $OUTPUT;
 
 $form = new tool_cohortroles\form\assign_role_cohort();
-
 if ($removeid) {
     require_sesskey();
 
     $result = \tool_cohortroles\api::delete_cohort_role_assignment($removeid);
     if ($result) {
         $notification = get_string('cohortroleassignmentremoved', 'tool_cohortroles');
-        echo $output->notify_success($notification);
+        $type = \core\output\notification::NOTIFY_SUCCESS;
     } else {
         $notification = get_string('cohortroleassignmentnotremoved', 'tool_cohortroles');
-        echo $output->notify_problem($notification);
+        $type = \core\output\notification::NOTIFY_ERROR;
     }
-    echo $output->continue_button(new moodle_url($pageurl));
+    redirect($pageurl, $notification, 0, $type);
+
 } else if ($data = $form->get_data()) {
     require_sesskey();
     // We must create them all or none.
@@ -71,28 +67,30 @@ if ($removeid) {
     }
     if ($saved == 0) {
         $notification = get_string('nocohortroleassignmentssaved', 'tool_cohortroles');
-        echo $output->notify_problem($notification);
+        $type = \core\output\notification::NOTIFY_ERROR;
     } else if ($saved == 1) {
         $notification = get_string('onecohortroleassignmentsaved', 'tool_cohortroles');
-        echo $output->notify_success($notification);
+        $type = \core\output\notification::NOTIFY_SUCCESS;
     } else {
         $notification = get_string('acohortroleassignmentssaved', 'tool_cohortroles', $saved);
-        echo $output->notify_success($notification);
+        $type = \core\output\notification::NOTIFY_SUCCESS;
     }
-
-    echo $output->continue_button(new moodle_url($pageurl));
-} else {
-    $form->display();
-
-    $title = get_string('existingcohortroles', 'tool_cohortroles');
-    echo $output->heading($title);
-    $url = new moodle_url('/admin/tool/cohortroles/index.php');
-    $table = new tool_cohortroles\output\cohort_role_assignments_table(uniqid(), $url);
-    echo $table->out(50, true);
-
-    echo $output->spacer();
-    echo $output->notify_message(get_string('backgroundsync', 'tool_cohortroles'));
+    redirect($pageurl, $notification, 0, $type);
 }
 
-echo $output->footer();
+echo $output->header();
+$title = get_string('assignroletocohort', 'tool_cohortroles');
+echo $output->heading($title);
 
+$form->display();
+
+$title = get_string('existingcohortroles', 'tool_cohortroles');
+echo $output->heading($title);
+$url = new moodle_url('/admin/tool/cohortroles/index.php');
+$table = new tool_cohortroles\output\cohort_role_assignments_table(uniqid(), $url);
+echo $table->out(50, true);
+
+echo $output->spacer();
+echo $output->notify_message(get_string('backgroundsync', 'tool_cohortroles'));
+
+echo $output->footer();

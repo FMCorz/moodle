@@ -2913,14 +2913,9 @@ EOD;
      *
      * @param string $message the message to print out
      * @return string HTML fragment.
-     * @deprecated since Moodle 3.1 MDL-30811 - please do not use this function any more.
-     * @todo MDL-53113 This will be removed in Moodle 3.5.
      * @see \core\output\notification
      */
     public function notify_problem($message) {
-        debugging(__FUNCTION__ . ' is deprecated.' .
-            'Please use \core\notification::add, or \core\output\notification as required',
-            DEBUG_DEVELOPER);
         $n = new \core\output\notification($message, \core\output\notification::NOTIFY_ERROR);
         return $this->render($n);
     }
@@ -2930,14 +2925,9 @@ EOD;
      *
      * @param string $message the message to print out
      * @return string HTML fragment.
-     * @deprecated since Moodle 3.1 MDL-30811 - please do not use this function any more.
-     * @todo MDL-53113 This will be removed in Moodle 3.5.
      * @see \core\output\notification
      */
     public function notify_success($message) {
-        debugging(__FUNCTION__ . ' is deprecated.' .
-            'Please use \core\notification::add, or \core\output\notification as required',
-            DEBUG_DEVELOPER);
         $n = new \core\output\notification($message, \core\output\notification::NOTIFY_SUCCESS);
         return $this->render($n);
     }
@@ -2947,14 +2937,9 @@ EOD;
      *
      * @param string $message the message to print out
      * @return string HTML fragment.
-     * @deprecated since Moodle 3.1 MDL-30811 - please do not use this function any more.
-     * @todo MDL-53113 This will be removed in Moodle 3.5.
      * @see \core\output\notification
      */
     public function notify_message($message) {
-        debugging(__FUNCTION__ . ' is deprecated.' .
-            'Please use \core\notification::add, or \core\output\notification as required',
-            DEBUG_DEVELOPER);
         $n = new \core\output\notification($message, \core\output\notification::NOTIFY_INFO);
         return $this->render($n);
     }
