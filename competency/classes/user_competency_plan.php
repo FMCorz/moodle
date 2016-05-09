@@ -189,7 +189,8 @@ class user_competency_plan extends persistent {
                     ON ucp.competencyid = c.id
                    AND ucp.userid = :userid
                  WHERE ucp.planid = :planid
-              ORDER BY ucp.sortorder ASC';
+              ORDER BY ucp.sortorder ASC,
+                       ucp.id ASC';
         $params = array('userid' => $userid, 'planid' => $planid);
 
         $results = $DB->get_recordset_sql($sql, $params);

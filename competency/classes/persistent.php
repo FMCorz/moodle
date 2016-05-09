@@ -717,7 +717,7 @@ abstract class persistent {
      *
      * @return \core_competency\persistent[]
      */
-    public static function get_records($filters = array(), $sort = '', $order = 'ASC', $skip = 0, $limit = 0) {
+    public static function get_records($filters = array(), $sort = 'id', $order = 'ASC', $skip = 0, $limit = 0) {
         global $DB;
 
         $orderby = '';
@@ -759,7 +759,7 @@ abstract class persistent {
      * @param int $limitnum
      * @return \core_competency\persistent[]
      */
-    public static function get_records_select($select, $params = null, $sort = '', $fields = '*', $limitfrom = 0, $limitnum = 0) {
+    public static function get_records_select($select, $params = null, $sort = 'id ASC', $fields = '*', $limitfrom = 0, $limitnum = 0) {
         global $DB;
 
         $records = $DB->get_records_select(static::TABLE, $select, $params, $sort, $fields, $limitfrom, $limitnum);
