@@ -286,7 +286,7 @@ class mod_forum_external extends external_api {
                 if ($files = $fs->get_area_files($modcontext->id, 'mod_forum', 'attachment', $post->id, "filename", false)) {
                     foreach ($files as $file) {
                         $filename = $file->get_filename();
-                        $fileurl = moodle_url::make_webservice_pluginfile_url(
+                        $fileurl = external_make_pluginfile_url(
                                         $modcontext->id, 'mod_forum', 'attachment', $post->id, '/', $filename);
 
                         $post->attachments[] = array(

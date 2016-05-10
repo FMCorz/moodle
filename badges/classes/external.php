@@ -122,8 +122,8 @@ class core_badges_external extends external_api {
 
         foreach ($userbadges as $badge) {
             $context = ($badge->type == BADGE_TYPE_SITE) ? context_system::instance() : context_course::instance($badge->courseid);
-            $badge->badgeurl = moodle_url::make_webservice_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/',
-                                                                            'f1')->out(false);
+            $badge->badgeurl = external_make_pluginfile_url($context->id, 'badges', 'badgeimage', $badge->id, '/',
+                'f1')->out(false);
             // Return all the information if we are requesting our own badges.
             // Or, if we have permissions for configuring badges in the badge context.
             if ($USER->id == $user->id or has_capability('moodle/badges:configuredetails', $context)) {

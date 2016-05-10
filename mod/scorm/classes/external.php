@@ -713,7 +713,7 @@ class mod_scorm_external extends external_api {
                         if ($packagefile = $fs->get_file($context->id, 'mod_scorm', 'package', 0, '/', $scorm->reference)) {
                             $module['packagesize'] = $packagefile->get_filesize();
                             // Download URL.
-                            $module['packageurl'] = moodle_url::make_webservice_pluginfile_url(
+                            $module['packageurl'] = external_make_pluginfile_url(
                                                     $context->id, 'mod_scorm', 'package', 0, '/', $scorm->reference)->out(false);
                         }
                     }

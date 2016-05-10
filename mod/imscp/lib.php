@@ -402,7 +402,7 @@ function imscp_export_contents($cm, $baseurl) {
         $file['filename']     = $fileinfo->get_filename();
         $file['filepath']     = $fileinfo->get_filepath();
         $file['filesize']     = $fileinfo->get_filesize();
-        $file['fileurl']      = moodle_url::make_webservice_pluginfile_url(
+        $file['fileurl']      = external_make_pluginfile_url(
                                     $context->id, 'mod_imscp', 'content', $imscp->revision,
                                     $fileinfo->get_filepath(), $fileinfo->get_filename())->out(false);
         $file['timecreated']  = $fileinfo->get_timecreated();

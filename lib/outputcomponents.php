@@ -398,7 +398,7 @@ class user_picture implements renderable {
                 $path .= $page->theme->name.'/';
             }
             // Set the image URL to the URL for the uploaded file and return.
-            $url = moodle_url::make_pluginfile_url($contextid, 'user', 'icon', NULL, $path, $filename);
+            $url = external_make_pluginfile_url($contextid, 'user', 'icon', NULL, $path, $filename);
             $url->param('rev', $this->user->picture);
             return $url;
         }

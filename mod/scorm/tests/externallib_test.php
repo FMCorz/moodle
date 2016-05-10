@@ -698,9 +698,9 @@ class mod_scorm_external_testcase extends externallib_advanced_testcase {
         $packagefile = $fs->get_file($scormcontext1->id, 'mod_scorm', 'package', 0, '/', $scorm1->reference);
         $packagesize = $packagefile->get_filesize();
 
-        $packageurl1 = moodle_url::make_webservice_pluginfile_url(
+        $packageurl1 = external_make_pluginfile_url(
                             $scormcontext1->id, 'mod_scorm', 'package', 0, '/', $scorm1->reference)->out(false);
-        $packageurl2 = moodle_url::make_webservice_pluginfile_url(
+        $packageurl2 = external_make_pluginfile_url(
                             $scormcontext2->id, 'mod_scorm', 'package', 0, '/', $scorm2->reference)->out(false);
 
         $scorm1->packagesize = $packagesize;

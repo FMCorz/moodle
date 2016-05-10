@@ -2686,27 +2686,34 @@ class core_competency_api_testcase extends advanced_testcase {
         $lpg = $this->getDataGenerator()->get_plugin_generator('core_competency');
         $user = $dg->create_user();
 
-        $dg->create_scale(array("id" => "1", "scale" => "value1, value2"));
-        $dg->create_scale(array("id" => "2", "scale" => "value3, value4, value5, value6"));
+        $scale1 = $dg->create_scale(array("scale" => "value1, value2"));
+        $scale2 = $dg->create_scale(array("scale" => "value3, value4, value5, value6"));
 
-        $scaleconfiguration1 = '[{"scaleid":"1"},{"name":"value1","id":1,"scaledefault":1,"proficient":0},' .
-                '{"name":"value2","id":2,"scaledefault":0,"proficient":1}]';
-        $scaleconfiguration2 = '[{"scaleid":"2"},{"name":"value3","id":1,"scaledefault":1,"proficient":0},'
-                . '{"name":"value4","id":2,"scaledefault":0,"proficient":1}]';
+        $scaleconfiguration1 = json_encode([
+            ['scaleid' => $scale1->id],
+            ['id' => 1, 'scaledefault' => 1, 'proficient' => 0],
+            ['id' => 2, 'scaledefault' => 0, 'proficient' => 1],
+        ]);
+        $scaleconfiguration2 = json_encode([
+            ['scaleid' => $scale2->id],
+            ['id' => 1, 'scaledefault' => 1, 'proficient' => 0],
+            ['id' => 2, 'scaledefault' => 0, 'proficient' => 1]
+        ]);
 
         // Create a framework with scale configuration1.
         $frm = array(
-            'scaleid' => 1,
+            'scaleid' => $scale1->id,
             'scaleconfiguration' => $scaleconfiguration1
         );
         $framework = $lpg->create_framework($frm);
         $c1 = $lpg->create_competency(array('competencyframeworkid' => $framework->get_id()));
 
         // Create competency with its own scale configuration.
-        $c2 = $lpg->create_competency(array('competencyframeworkid' => $framework->get_id(),
-                                            'scaleid' => 2,
-                                            'scaleconfiguration' => $scaleconfiguration2
-                                        ));
+        $c2 = $lpg->create_competency(array(
+            'competencyframeworkid' => $framework->get_id(),
+            'scaleid' => $scale2->id,
+            'scaleconfiguration' => $scaleconfiguration2
+        ));
 
         // Detecte invalid grade in competency using its framework competency scale.
         try {

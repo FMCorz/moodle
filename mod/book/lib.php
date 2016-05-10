@@ -554,7 +554,7 @@ function book_export_contents($cm, $baseurl) {
         // Each chapter in a subdirectory.
         $chapterindexfile['filepath']     = "/{$chapter->id}/";
         $chapterindexfile['filesize']     = 0;
-        $chapterindexfile['fileurl']      = moodle_url::make_webservice_pluginfile_url(
+        $chapterindexfile['fileurl']      = external_make_pluginfile_url(
                     $context->id, 'mod_book', 'chapter', $chapter->id, '/', 'index.html')->out(false);
         $chapterindexfile['timecreated']  = $book->timecreated;
         $chapterindexfile['timemodified'] = $book->timemodified;
@@ -573,7 +573,7 @@ function book_export_contents($cm, $baseurl) {
             $file['filename']     = $fileinfo->get_filename();
             $file['filepath']     = "/{$chapter->id}" . $fileinfo->get_filepath();
             $file['filesize']     = $fileinfo->get_filesize();
-            $file['fileurl']      = moodle_url::make_webservice_pluginfile_url(
+            $file['fileurl']      = external_make_pluginfile_url(
                                         $context->id, 'mod_book', 'chapter', $chapter->id,
                                         $fileinfo->get_filepath(), $fileinfo->get_filename())->out(false);
             $file['timecreated']  = $fileinfo->get_timecreated();

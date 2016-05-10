@@ -2240,9 +2240,9 @@ class core_course_external extends external_api {
             // Retrieve course overfiew used files.
             $files = array();
             foreach ($course->get_course_overviewfiles() as $file) {
-                $fileurl = moodle_url::make_webservice_pluginfile_url($file->get_contextid(), $file->get_component(),
-                                                                        $file->get_filearea(), null, $file->get_filepath(),
-                                                                        $file->get_filename())->out(false);
+                $fileurl = external_make_pluginfile_url($file->get_contextid(), $file->get_component(),
+                                                        $file->get_filearea(), null, $file->get_filepath(),
+                                                        $file->get_filename())->out(false);
                 $files[] = array(
                     'filename' => $file->get_filename(),
                     'fileurl' => $fileurl,

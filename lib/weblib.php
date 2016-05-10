@@ -806,10 +806,14 @@ class moodle_url {
      * @param string $filename
      * @param bool $forcedownload
      * @return moodle_url
+     * @deprecated since Moodle 3.1
      */
     public static function make_webservice_pluginfile_url($contextid, $component, $area, $itemid, $pathname, $filename,
                                                $forcedownload = false) {
         global $CFG;
+        debugging('The method moodle_url::make_webservice_pluginfile_url() has been deprecated, please use ' .
+            'external_make_pluginfile_url() instead.', DEBUG_DEVELOPER);
+
         $urlbase = "$CFG->httpswwwroot/webservice/pluginfile.php";
         if ($itemid === null) {
             return self::make_file_url($urlbase, "/$contextid/$component/$area".$pathname.$filename, $forcedownload);

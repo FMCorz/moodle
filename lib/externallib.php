@@ -948,6 +948,32 @@ function external_format_text($text, $textformat, $contextid, $component, $filea
 }
 
 /**
+ * Factory method for creating URLs pointing to plugin file.
+ *
+ * This method should be used to guarantee that the entry point for the file matches
+ * the client request. URLs neded by the Web UI, Ajax calls, or even web services may not match.
+ *
+ * @since 3.1
+ * @param int $contextid The file context ID.
+ * @param string $component The file component.
+ * @param string $area The file area.
+ * @param int $itemid The file iteme ID.
+ * @param string $pathname The file path.
+ * @param string $filename The file name.
+ * @param bool $forcedownload Whether the link should force the download.
+ * @return moodle_url
+ */
+function external_make_pluginfile_url($contextid, $component, $area, $itemid, $pathname, $filename, $forcedownload = false) {
+    global $CFG;
+    $settings = external_settings::get_instance();
+    $urlbase = $CFG->httpswwwroot . '/' . $settings->get_file();
+    if ($itemid === null) {
+        return self::make_file_url($urlbase, "/$contextid/$component/$area" . $pathname . $filename, $forcedownload);
+    }
+    return self::make_file_url($urlbase, "/$contextid/$component/$area/$itemid" . $pathname . $filename, $forcedownload);
+}
+
+/**
  * Singleton to handle the external settings.
  *
  * We use singleton to encapsulate the "logic"
@@ -981,6 +1007,7 @@ class external_settings {
         if (!defined('AJAX_SCRIPT') && !defined('CLI_SCRIPT') && !defined('WS_SERVER')) {
             // For normal pages, the default should match the default for format_text.
             $this->filter = true;
+            $this->file = 'pluginfile.php';
         }
     }
 

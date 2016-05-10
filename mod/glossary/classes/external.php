@@ -152,7 +152,7 @@ class mod_glossary_external extends external_api {
             if ($files = $fs->get_area_files($context->id, 'mod_glossary', 'attachment', $entry->id, 'filename', false)) {
                 foreach ($files as $file) {
                     $filename = $file->get_filename();
-                    $fileurl = moodle_url::make_webservice_pluginfile_url($context->id, 'mod_glossary', 'attachment',
+                    $fileurl = external_make_pluginfile_url($context->id, 'mod_glossary', 'attachment',
                         $entry->id, '/', $filename);
                     $entry->attachments[] = array(
                         'filename' => $filename,

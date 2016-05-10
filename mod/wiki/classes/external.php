@@ -730,7 +730,7 @@ class mod_wiki_external extends external_api {
             if ($files = $fs->get_area_files($context->id, 'mod_wiki', 'attachments', $subwiki->id, 'filename', false)) {
                 foreach ($files as $file) {
                     $filename = $file->get_filename();
-                    $fileurl = moodle_url::make_webservice_pluginfile_url(
+                    $fileurl = external_make_pluginfile_url(
                                     $context->id, 'mod_wiki', 'attachments', $subwiki->id, '/', $filename);
 
                     $returnedfiles[] = array(

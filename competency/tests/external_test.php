@@ -153,13 +153,16 @@ class core_competency_external_testcase extends externallib_advanced_testcase {
         $this->category = $category;
         $this->othercategory = $othercategory;
 
-        $this->getDataGenerator()->create_scale(array("id" => "1", "scale" => "value1, value2"));
-        $this->getDataGenerator()->create_scale(array("id" => "2", "scale" => "value3, value4"));
-        $this->getDataGenerator()->create_scale(array("id" => "3", "scale" => "value5, value6"));
-        $this->getDataGenerator()->create_scale(array("id" => "4", "scale" => "value7, value8"));
+        $scale1 = $this->getDataGenerator()->create_scale(array("scale" => "value1, value2"));
+        $scale2 = $this->getDataGenerator()->create_scale(array("scale" => "value3, value4"));
+        $scale3 = $this->getDataGenerator()->create_scale(array("scale" => "value5, value6"));
+        $scale4 = $this->getDataGenerator()->create_scale(array("scale" => "value7, value8"));
 
-        $this->scaleconfiguration1 = '[{"scaleid":"1"},{"name":"value1","id":1,"scaledefault":1,"proficient":0},' .
-                '{"name":"value2","id":2,"scaledefault":0,"proficient":1}]';
+        $this->scaleconfiguration1 = json_encode([
+            ['scaleid' => $scale1->id],
+            ['id' => 1, 'scaledefault' => 1, 'proficient' => 0],
+            ['id' => 2, 'scaledefault' => 0, 'proficient' => 1],
+        ]);
         $this->scaleconfiguration2 = '[{"scaleid":"2"},{"name":"value3","id":1,"scaledefault":1,"proficient":0},' .
                 '{"name":"value4","id":2,"scaledefault":0,"proficient":1}]';
         $this->scaleconfiguration3 = '[{"scaleid":"3"},{"name":"value5","id":1,"scaledefault":1,"proficient":0},' .

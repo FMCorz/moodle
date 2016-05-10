@@ -148,7 +148,7 @@ class stored_file_exporter extends exporter {
         $icon = $this->file->is_directory() ? file_folder_icon() : file_file_icon($this->file);
         $iconurl = $output->pix_url($icon, 'core');
 
-        $url = moodle_url::make_pluginfile_url(
+        $url = external_make_pluginfile_url(
             $this->file->get_contextid(),
             $this->file->get_component(),
             $this->file->get_filearea(),

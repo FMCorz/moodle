@@ -1055,7 +1055,7 @@ class mod_wiki_external_testcase extends externallib_advanced_testcase {
             'mimetype' => 'image/jpeg',
             'filesize' => strlen($content),
             'timemodified' => $file['timemodified'],
-            'fileurl' => moodle_url::make_webservice_pluginfile_url($file['contextid'], $file['component'],
+            'fileurl' => external_make_pluginfile_url($file['contextid'], $file['component'],
                             $file['filearea'], $file['itemid'], $file['filepath'], $file['filename']),
         );
 
@@ -1074,7 +1074,7 @@ class mod_wiki_external_testcase extends externallib_advanced_testcase {
         $expectedfile['filename'] = $file['filename'];
         $expectedfile['timemodified'] = $file['timemodified'];
         $expectedfile['filesize'] = strlen($content);
-        $expectedfile['fileurl'] = moodle_url::make_webservice_pluginfile_url($file['contextid'], $file['component'],
+        $expectedfile['fileurl'] = external_make_pluginfile_url($file['contextid'], $file['component'],
                             $file['filearea'], $file['itemid'], $file['filepath'], $file['filename']);
 
         // Call the WS and check that it returns both files file.
@@ -1109,7 +1109,7 @@ class mod_wiki_external_testcase extends externallib_advanced_testcase {
             'mimetype' => 'image/jpeg',
             'filesize' => strlen($content),
             'timemodified' => $file['timemodified'],
-            'fileurl' => moodle_url::make_webservice_pluginfile_url($file['contextid'], $file['component'],
+            'fileurl' => external_make_pluginfile_url($file['contextid'], $file['component'],
                             $file['filearea'], $file['itemid'], $file['filepath'], $file['filename']),
         );
 
