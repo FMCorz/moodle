@@ -1474,15 +1474,7 @@ function quiz_print_overview($courses, &$htmlarray) {
     $now = time();
     foreach ($quizzes as $quiz) {
         if ($quiz->timeclose >= $now && $quiz->timeopen < $now) {
-            // Give a link to the quiz, and the deadline.
-            $str = '<div class="quiz overview">' .
-                    '<div class="name">' . $strquiz . ': <a ' .
-                    ($quiz->visible ? '' : ' class="dimmed"') .
-                    ' href="' . $CFG->wwwroot . '/mod/quiz/view.php?id=' .
-                    $quiz->coursemodule . '">' .
-                    $quiz->name . '</a></div>';
-            $str .= '<div class="info">' . get_string('quizcloseson', 'quiz',
-                    userdate($quiz->timeclose)) . '</div>';
+            $str = '';
 
             // Now provide more information depending on the uers's role.
             $context = context_module::instance($quiz->coursemodule);
@@ -1490,30 +1482,68 @@ function quiz_print_overview($courses, &$htmlarray) {
                 // For teacher-like people, show a summary of the number of student attempts.
                 // The $quiz objects returned by get_all_instances_in_course have the necessary $cm
                 // fields set to make the following call work.
-                $str .= '<div class="info">' .
-                        quiz_num_attempt_summary($quiz, $quiz, true) . '</div>';
-            } else if (has_any_capability(array('mod/quiz:reviewmyattempts', 'mod/quiz:attempt'),
-                    $context)) { // Student
+                $str .= '<div class="info">' . quiz_num_attempt_summary($quiz, $quiz, true) . '</div>';
+
+            } else if (has_any_capability(array('mod/quiz:reviewmyattempts', 'mod/quiz:attempt'), $context)) { // Student.
                 // For student-like people, tell them how many attempts they have made.
-                if (isset($USER->id) &&
-                        ($attempts = quiz_get_user_attempts($quiz->id, $USER->id))) {
+
+                if (isset($USER->id)) {
+                    require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
+                    require_once($CFG->dirroot . '/mod/quiz/accessmanager.php');
+
+                    $quizobj = quiz::create($quiz->id, $USER->id);
+                    $accessmanager = new quiz_access_manager($quizobj, $now,
+                        has_capability('mod/quiz:ignoretimelimits', $context, null, false));
+
+                    $attempts = quiz_get_user_attempts($quiz->id, $USER->id, 'finished', true);
+                    $lastfinishedattempt = end($attempts);
+                    $unfinished = false;
+                    if ($unfinishedattempt = quiz_get_user_attempt_unfinished($quiz->id, $USER->id)) {
+                        $attempts[] = $unfinishedattempt;
+                        $quizobj->create_attempt_object($unfinishedattempt)->handle_if_time_expired(time(), false);
+                        $unfinished = in_array($unfinishedattempt->state, [quiz_attempt::IN_PROGRESS, quiz_attempt::OVERDUE]);
+                        if (!$unfinished) {
+                            $lastfinishedattempt = $unfinishedattempt;
+                        }
+                    }
                     $numattempts = count($attempts);
-                    $str .= '<div class="info">' .
-                            get_string('numattemptsmade', 'quiz', $numattempts) . '</div>';
+
+                    if ($accessmanager->is_finished($numattempts, $lastfinishedattempt)) {
+                        // The user cannot attempt the quiz any more.
+                        continue;
+                    }
+
+                    if ($numattempts) {
+                        $str .= '<div class="info">' . get_string('numattemptsmade', 'quiz', $numattempts) . '</div>';
+                    } else {
+                        $str .= '<div class="info">' . $strnoattempts . '</div>';
+                    }
+
                 } else {
                     $str .= '<div class="info">' . $strnoattempts . '</div>';
                 }
+
             } else {
                 // For ayone else, there is no point listing this quiz, so stop processing.
                 continue;
             }
 
-            // Add the output for this quiz to the rest.
-            $str .= '</div>';
+            // Give a link to the quiz, and the deadline.
+            $html = '<div class="quiz overview">' .
+                    '<div class="name">' . $strquiz . ': <a ' .
+                    ($quiz->visible ? '' : ' class="dimmed"') .
+                    ' href="' . $CFG->wwwroot . '/mod/quiz/view.php?id=' .
+                    $quiz->coursemodule . '">' .
+                    $quiz->name . '</a></div>';
+            $html .= '<div class="info">' . get_string('quizcloseson', 'quiz',
+                    userdate($quiz->timeclose)) . '</div>';
+            $html .= $str;
+            $html .= '</div>';
+
             if (empty($htmlarray[$quiz->course]['quiz'])) {
-                $htmlarray[$quiz->course]['quiz'] = $str;
+                $htmlarray[$quiz->course]['quiz'] = $html;
             } else {
-                $htmlarray[$quiz->course]['quiz'] .= $str;
+                $htmlarray[$quiz->course]['quiz'] .= $html;
             }
         }
     }
