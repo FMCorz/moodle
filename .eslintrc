@@ -115,7 +115,7 @@
     'max-params': 'off',
     'max-statements': 'off',
     'max-statements-per-line': 'off',
-    'new-cap': 'warn',
+    'new-cap': ['warn', { 'capIsNewExceptions': ['$.Deferred'] }],
     'new-parens': 'warn',
     'newline-after-var': 'off',
     'newline-before-return': 'off',
