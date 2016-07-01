@@ -4292,6 +4292,16 @@ EOD;
     }
 
     /**
+     * Renders a bubble chart.
+     *
+     * @param \core\chart_bubble $chart The chart.
+     * @return string.
+     */
+    public function render_chart_bubble(\core\chart_bubble $chart) {
+        return $this->render_chart($chart);
+    }
+
+    /**
      * Renders a line chart.
      *
      * @param \core\chart_line $chart The chart.
