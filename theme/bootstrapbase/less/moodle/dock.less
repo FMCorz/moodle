@@ -133,27 +133,3 @@ body.has_dock {
         }
     }
 }
-
-.dir-rtl {
-    &.has_dock #page {
-        padding-left: @gridGutterWidth;
-        padding-right: (@dockWidth + (@dockTitleMargin * 3));
-    }
-    #dock {
-        left: auto;
-        right: 0%;
-        .dockedtitle {
-            h2 {
-                line-height: @dockWidth - @dockTitleFontSize;
-            }
-        }
-    }
-    #dockeditempanel {
-        right: 100%;
-        .dockeditempanel_hd {
-            .commands {
-                text-align: left;
-            }
-        }
-    }
-}
