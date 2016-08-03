@@ -51,6 +51,26 @@ preferences,moodle|/user/preferences.php|preferences',
         }
     }
 
+    // Branding section.
+    $temp = new admin_settingpage('branding', new lang_string('brandingsettings','admin'));
+
+    // Logo file setting.
+    $title = get_string('brandinglogo','admin');
+    $description = get_string('brandinglogo_desc', 'admin');
+    $setting = new admin_setting_configstoredfile('brandinglogo', $title, $description, 'brandinglogo', 0,
+        ['maxfiles' => 1, 'accepted_types' => ['image']]);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $temp->add($setting);
+
+    // Small logo file setting.
+    $title = get_string('brandingsmalllogo', 'admin');
+    $description = get_string('brandingsmalllogo_desc', 'admin');
+    $setting = new admin_setting_configstoredfile('brandingsmalllogo', $title, $description, 'brandingsmalllogo', 0,
+        ['maxfiles' => 1, 'accepted_types' => ['image']]);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $temp->add($setting);
+
+    $ADMIN->add('appearance', $temp);
 
     // Calendar settings.
     $temp = new admin_settingpage('calendar', new lang_string('calendarsettings','admin'));

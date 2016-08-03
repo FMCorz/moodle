@@ -4532,6 +4532,27 @@ function file_pluginfile($relativepath, $forcedownload, $preview = null) {
         send_file_not_found();
 
     // ========================================================================================================================
+    } else if ($component === 'core') {
+        // Rarely we want to serve core files, probably because they were uploaded in an admin setting.
+
+        if (in_array($filearea, ['brandinglogo', 'brandingsmalllogo'])) {
+            $itemid = (int) array_shift($args);
+            $lifetime = $itemid <= 0 ? null : 0; // The itemid is $CFG->themerev, determines caching.
+            $filepath = "/{$context->id}/core/{$filearea}/0/" . implode('/', $args);
+
+            $fs = get_file_storage();
+            if (!$file = $fs->get_file_by_hash(sha1($filepath))) {
+                send_file_not_found();
+            }
+
+            // Anyone, including guests and non-logged in users, can view the logos.
+            $options = ['cacheability' => 'public'];
+            send_stored_file($file, $lifetime, 0, false, $options);
+        }
+
+        send_file_not_found();
+
+    // ========================================================================================================================
     } else if (strpos($component, '_') === false) {
         // all core subsystems have to be specified above, no more guessing here!
         send_file_not_found();

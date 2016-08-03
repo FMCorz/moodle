@@ -261,6 +261,37 @@ class renderer_base {
     public function pix_url($imagename, $component = 'moodle') {
         return $this->page->theme->pix_url($imagename, $component);
     }
+
+    /**
+     * Return the site's logo URL, if any.
+     *
+     * @return moodle_url|false
+     */
+    public function get_logo_url() {
+        global $CFG;
+        if (empty($CFG->brandinglogo)) {
+            return false;
+        }
+        // Use $CFG->themerev to prevent browser caching when the file changes.
+        return moodle_url::make_pluginfile_url(context_system::instance()->id, 'core', 'brandinglogo', '/',
+            $CFG->themerev, $CFG->brandinglogo);
+    }
+
+    /**
+     * Return the site's small logo URL, if any.
+     *
+     * @return moodle_url|false
+     */
+    public function get_small_logo_url() {
+        global $CFG;
+        if (empty($CFG->brandingsmalllogo)) {
+            return false;
+        }
+        // Use $CFG->themerev to prevent browser caching when the file changes.
+        return moodle_url::make_pluginfile_url(context_system::instance()->id,'core', 'brandingsmalllogo', '/',
+            $CFG->themerev, $CFG->brandingsmalllogo);
+    }
+
 }
 
 
