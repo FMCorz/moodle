@@ -447,7 +447,7 @@ class user_picture implements renderable {
  * @package core
  * @category output
  */
-class help_icon implements renderable {
+class help_icon implements renderable, templatable {
 
     /**
      * @var string lang pack identifier (without the "_help" suffix),
@@ -490,6 +490,21 @@ class help_icon implements renderable {
         if (!$sm->string_exists($this->identifier.'_help', $this->component)) {
             debugging("Help contents string does not exist: [{$this->identifier}_help, $this->component]");
         }
+    }
+
+    /**
+     * Export data.
+     *
+     * @param renderer_base $output Renderer.
+     * @return stdClass
+     */
+    public function export_for_template(renderer_base $output) {
+        $title = get_string($this->identifier, $this->component);
+        $data = get_formatted_help_string($this->identifier, $this->component, false);
+        $data->alt = empty($this->linktext)
+            ? get_string('helpprefix2', '', trim($title, ". \t"))
+            : get_string('helpwiththis');
+        return $data;
     }
 }
 
