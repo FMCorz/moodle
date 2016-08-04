@@ -565,7 +565,7 @@ input[size] {
     overflow: auto;
     margin: 0px;
     padding: 0px;
-    margin-top: -0.2em;
+    margin-top: 0.4em;
     z-index: 1;
 }
 .form-autocomplete-suggestions li {
@@ -587,7 +587,7 @@ input[size] {
 .form-autocomplete-downarrow {
     color: $body-color;
     position: relative;
-    top: -0.3em;
+    top: 0.2em;
     left: -1.5em;
     cursor: pointer;
 }

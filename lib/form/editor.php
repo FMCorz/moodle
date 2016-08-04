@@ -30,6 +30,7 @@ global $CFG;
 require_once('HTML/QuickForm/element.php');
 require_once($CFG->dirroot.'/lib/filelib.php');
 require_once($CFG->dirroot.'/repository/lib.php');
+require_once($CFG->libdir.'/outputcomponents.php');
 
 /**
  * Editor element
@@ -43,7 +44,7 @@ require_once($CFG->dirroot.'/repository/lib.php');
  * @todo      MDL-29421 element Freezing
  * @todo      MDL-29426 ajax format conversion
  */
-class MoodleQuickForm_editor extends HTML_QuickForm_element {
+class MoodleQuickForm_editor extends HTML_QuickForm_element implements templatable {
     /** @var string html for help button, if empty then no help will icon will be dispalyed. */
     public $_helpbutton = '';
 
@@ -444,6 +445,16 @@ class MoodleQuickForm_editor extends HTML_QuickForm_element {
         $str .= '</div>';
 
         return $str;
+    }
+
+    public function export_for_template(renderer_base $output) {
+        $context = [];
+        $context['frozen'] = $this->_flagFrozen;
+        foreach ($this->getAttributes() as $name => $value) {
+            $context[$name] = $value;
+        }
+        $context['html'] = $this->toHtml();
+        return $context;
     }
 
     /**
