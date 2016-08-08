@@ -881,6 +881,7 @@ class single_select implements renderable, templatable {
 
         $data = new stdClass();
         $data->name = $this->name;
+        $data->formid = !empty($this->formid) ? $this->formid : html_writer::random_id('single_select_f');
         $data->method = $this->method;
         $data->action = $this->method === 'get' ? $this->url->out_omit_querystring(true) : $this->url->out_omit_querystring();
         $data->classes = 'autosubmit ' . $this->class;
@@ -888,7 +889,12 @@ class single_select implements renderable, templatable {
         $data->disabled = $this->disabled;
         $data->title = $this->tooltip;
         $data->id = !empty($attributes['id']) ? $attributes['id'] : html_writer::random_id('single_select');
+
+        // Remove attributes passed as property directly.
+        unset($attributes['class']);
         unset($attributes['id']);
+        unset($attributes['name']);
+        unset($attributes['title']);
 
         // Form parameters.
         $params = $this->url->params();
@@ -937,6 +943,12 @@ class single_select implements renderable, templatable {
 
         // Help icon.
         $data->helpicon = !empty($this->helpicon) ? $this->helpicon->export_for_template($output) : false;
+
+        // Finally all the remaining attributes.
+        $data->attributes = [];
+        foreach ($this->attributes as $key => $value) {
+            $data->attributes = ['name' => $key, 'value' => $value];
+        }
 
         return $data;
     }
