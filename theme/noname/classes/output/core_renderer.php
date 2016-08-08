@@ -29,6 +29,7 @@ use preferences_groups;
 use action_menu;
 use help_icon;
 use single_select;
+use url_select;
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -282,6 +283,16 @@ class core_renderer extends \core_renderer {
      */
     protected function render_single_select(single_select $select) {
         return $this->render_from_template('core/single_select', $select->export_for_template($this));
+    }
+
+    /**
+     * Renders a url select.
+     *
+     * @param url_select $select The object.
+     * @return string HTML
+     */
+    protected function render_url_select(url_select $select) {
+        return $this->render_from_template('core/url_select', $select->export_for_template($this));
     }
 
 }
