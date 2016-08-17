@@ -1558,15 +1558,19 @@ class theme_config {
             $parser = new core_cssparser($css);
             $csstree = $parser->parse();
             unset($parser);
-        }
 
-        if ($this->rtlmode) {
-            $this->rtlize($csstree);
-        }
+            // RTL mode engaged.
+            if ($this->rtlmode) {
+                $this->rtlize($csstree);
+            }
 
-        if ($hastreeprocessor) {
-            $fn = $this->csstreepostprocessor;
-            $fn($csstree, $this);
+            // Tree processor callback.
+            if ($hastreeprocessor) {
+                $fn = $this->csstreepostprocessor;
+                $fn($csstree, $this);
+            }
+
+            // Render back to pure CSS.
             $css = $csstree->render();
             unset($csstree);
         }
