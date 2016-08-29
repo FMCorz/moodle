@@ -46,9 +46,13 @@
     </div>
 
 </div>
-<footer id="page-footer">
+<footer id="page-footer" class="p-a-1">
     <div id="course-footer">{{{ output.course_footer }}}</div>
-    <p class="helplink">{{{ output.page_doc_link }}}</p>
+
+    {{# output.page_doc_link }}
+        <p class="helplink">{{{ output.page_doc_link }}}</p>
+    {{/ output.page_doc_link }}
+
     {{{ output.login_info }}}
     {{{ output.home_link }}}
     {{{ output.standard_footer_html }}}
