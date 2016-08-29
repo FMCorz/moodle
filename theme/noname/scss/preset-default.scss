@@ -887,6 +887,22 @@ $pre-scrollable-max-height:   340px !default;
     }
 }
 
+#page.container-fluid {
+    padding: 0 (2 * $spacer);
+}
+
+#block-region-side-pre {
+    padding-left: 0;
+}
+#block-region-side-post {
+    padding-right: 0;
+}
+
+#region-main {
+    background-color: #fff;
+    border: 1px solid rgba(238,238,238,1);
+}
+
 #page-header {
     background-color: #fff;
     border: 1px solid rgba(238,238,238,1);
@@ -897,11 +913,6 @@ $pre-scrollable-max-height:   340px !default;
 .breadcrumb {
     background-color: transparent;
     border-radius: 0;
-}
-
-#region-main {
-    background-color: #fff;
-    border: 1px solid rgba(238,238,238,1);
 }
 
 .course-content ul {
@@ -915,24 +926,25 @@ $pre-scrollable-max-height:   340px !default;
 }
 
 .pagelayout-login {
-    #region-main {
+    &.notloggedin {
+      #region-main {
         background-color: transparent;
         border: 0;
-    }
-    .login-page .col-sm-6 {
-        background-color: #fff;
-        border: 1px solid rgba(238,238,238,1);
+        padding: 0 !important;
+      }
+      .login-wrapper {
+          background-color: #fff;
+          border: 1px solid rgba(238,238,238,1);
+      }
     }
 }
 
 .block-region .card-block {
     .card-title {
         padding-bottom: ($spacer/2);
-        small {
-            font-size: 65.3%;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+        font-size: 1.143rem;
+        font-weight: 600;
+        text-transform: uppercase;
     }
 }
 
