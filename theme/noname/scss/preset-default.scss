@@ -887,7 +887,8 @@ $pre-scrollable-max-height:   340px !default;
     }
 }
 
-#page.container-fluid {
+#page.container-fluid,
+footer .container-fluid {
     padding: 0 (2 * $spacer);
 }
 
