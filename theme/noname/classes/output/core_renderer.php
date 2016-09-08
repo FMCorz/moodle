@@ -51,18 +51,6 @@ class core_renderer extends \core_renderer {
     protected $language = null;
 
     /**
-     * Outputs the opening section of a box.
-     *
-     * @param string $classes A space-separated list of CSS classes
-     * @param string $id An optional ID
-     * @param array $attributes An array of other attributes to give the box.
-     * @return string the HTML to output.
-     */
-    public function box_start($classes = 'generalbox', $id = null, $attributes = array()) {
-        return parent::box_start($classes . ' p-a-1', $id, $attributes);
-    }
-
-    /**
      * Wrapper for header elements.
      *
      * @return string HTML to display the main header.
@@ -134,7 +122,7 @@ class core_renderer extends \core_renderer {
      * @return string
      */
     public function get_compact_logo_url($maxwidth = 100, $maxheight = 100) {
-        return parent::get_compact_logo_url(null, 43);
+        return parent::get_compact_logo_url(null, 35);
     }
 
     /**
@@ -282,24 +270,6 @@ class core_renderer extends \core_renderer {
         $bc = clone($bc); // Avoid messing up the object passed in.
         if (empty($bc->blockinstanceid) || !strip_tags($bc->title)) {
             $bc->collapsible = block_contents::NOT_HIDEABLE;
-        }
-        if (!empty($bc->blockinstanceid)) {
-            $bc->attributes['data-instanceid'] = $bc->blockinstanceid;
-        }
-        $skiptitle = strip_tags($bc->title);
-        if ($bc->blockinstanceid && !empty($skiptitle)) {
-            $bc->attributes['aria-labelledby'] = 'instance-'.$bc->blockinstanceid.'-header';
-        } else if (!empty($bc->arialabel)) {
-            $bc->attributes['aria-label'] = $bc->arialabel;
-        }
-        if ($bc->dockable) {
-            $bc->attributes['data-dockable'] = 1;
-        }
-        if ($bc->collapsible == block_contents::HIDDEN) {
-            $bc->add_class('hidden');
-        }
-        if (!empty($bc->controls)) {
-            $bc->add_class('block_with_controls');
         }
 
         $id = !empty($bc->attributes['id']) ? $bc->attributes['id'] : uniqid('block-');
