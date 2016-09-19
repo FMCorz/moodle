@@ -441,4 +441,13 @@ class core_renderer extends \core_renderer {
         }
         return $this->render_from_template('core/pix_icon', $data);
     }
+
+    /**
+     * Secure login info.
+     *
+     * @return string
+     */
+    public function secure_login_info() {
+        return $this->login_info(false);
+    }
 }
