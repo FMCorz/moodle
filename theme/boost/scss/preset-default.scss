@@ -238,3 +238,13 @@ $breadcrumb-divider-rtl: "/" !default;
 .form-inline .form-group {
     margin-top: 0;
 }
+
+/**
+ * Adjust column spacing in small layouts.
+ */
+@include media-breakpoint-down(sm) {
+    #block-region-side-pre {
+        padding-right: 0;
+        margin-top: $spacer;
+    }
+}
