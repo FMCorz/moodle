@@ -104,10 +104,13 @@ fieldset {
     border:none;
 }
 
-fieldset .configphp,
-fieldset .alert {
+fieldset .configphp {
     text-align: left;
     direction: ltr;
+}
+
+fieldset .alert {
+    text-align: left;
 }
 
 .sitelink {
