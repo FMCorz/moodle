@@ -4327,6 +4327,21 @@ EOD;
             return false;
         }
     }
+
+    /**
+     * Renders a progress bar.
+     *
+     * Do not use $OUTPUT->render($bar), instead use progress_bar::create().
+     *
+     * @param  progress_bar $bar The bar.
+     * @return string HTML fragment
+     */
+    public function render_progress_bar(progress_bar $bar) {
+        global $PAGE;
+        $PAGE->requires->string_for_js('secondsleft', 'moodle');
+        $data = $bar->export_for_template($this);
+        return $this->render_from_template('core/progress_bar', $data);
+    }
 }
 
 /**

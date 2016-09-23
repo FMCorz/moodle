@@ -3178,7 +3178,7 @@ function is_in_popup() {
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package core
  */
-class progress_bar {
+class progress_bar implements renderable, templatable {
     /** @var string html id */
     private $html_id;
     /** @var int total width */
@@ -3219,26 +3219,15 @@ class progress_bar {
      * @return void Echo's output
      */
     public function create() {
-        global $PAGE;
+        global $OUTPUT;
 
         $this->time_start = microtime(true);
         if (CLI_SCRIPT) {
             return; // Temporary solution for cli scripts.
         }
 
-        $PAGE->requires->string_for_js('secondsleft', 'moodle');
-
-        $htmlcode = <<<EOT
-        <div class="progressbar_container" style="width: {$this->width}px;" id="{$this->html_id}">
-            <h2></h2>
-            <div class="progress progress-striped active">
-                <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">&nbsp;</div>
-            </div>
-            <p></p>
-        </div>
-EOT;
         flush();
-        echo $htmlcode;
+        echo $OUTPUT->render($this);
         flush();
     }
 
@@ -3272,9 +3261,9 @@ EOT;
             // No significant change, no need to update anything.
             return;
         }
-        if (is_numeric($estimate)) {
-            $estimate = get_string('secondsleft', 'moodle', round($estimate, 2));
-        }
+        // if (is_numeric($estimate)) {
+            // $estimate = get_string('secondsleft', 'moodle', round($estimate, 2));
+        // }
 
         $this->percent = round($percent, 2);
         $this->lastupdate = microtime(true);
@@ -3338,6 +3327,19 @@ EOT;
         $this->percent    = 0;
         $this->lastupdate = 0;
         $this->time_start = 0;
+    }
+
+    /**
+     * Export for template.
+     *
+     * @param  renderer_base $output The renderer.
+     * @return array
+     */
+    public function export_for_template(renderer_base $output) {
+        return [
+            'id' => $this->html_id,
+            'width' => $this->width,
+        ];
     }
 }
 
