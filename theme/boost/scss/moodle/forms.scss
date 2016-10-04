@@ -23,6 +23,13 @@
 }
 
 .mform {
+    .form-inline {
+        .form-control,
+        .custom-select {
+            max-width: 100%;
+        }
+    }
+
     fieldset {
         margin-left: $spacer * 1.5;
         margin-bottom: $spacer / 2;
