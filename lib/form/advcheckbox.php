@@ -139,10 +139,7 @@ class MoodleQuickForm_advcheckbox extends HTML_QuickForm_advcheckbox implements 
 
     public function export_for_template(renderer_base $output) {
         $context = $this->export_for_template_base($output);
-
-        $context['selectedvalue'] = $this->_values[1];
-        $context['deselectedvalue'] = $this->_values[0];
-
+        $context['frozenvalue'] = $this->getValue();
         return $context;
     }
 
