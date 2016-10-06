@@ -4333,6 +4333,18 @@ EOD;
             return false;
         }
     }
+
+    /**
+     * Render the login signup form into a nice template for the theme.
+     *
+     * @param mform $form
+     * @return string
+     */
+    public function render_login_signup_form($form) {
+        $context = $form->export_for_template($this);
+
+        return $this->render_from_template('core/signup_form_layout', $context);
+    }
 }
 
 /**
@@ -5006,4 +5018,5 @@ class core_renderer_maintenance extends core_renderer {
         // debugging('Please do not use $OUTPUT->'.__FUNCTION__.'() when performing maintenance tasks.', DEBUG_DEVELOPER);
         return '';
     }
+
 }

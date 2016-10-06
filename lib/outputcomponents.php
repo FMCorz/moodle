@@ -3900,6 +3900,15 @@ class action_menu implements renderable, templatable {
     }
 
     /**
+     * Return true if there is at least one visible link in the menu.
+     *
+     * @return bool
+     */
+    public function is_empty() {
+        return !count($this->primaryactions) && !count($this->secondaryactions);
+    }
+
+    /**
      * Initialises JS required fore the action menu.
      * The JS is only required once as it manages all action menu's on the page.
      *
@@ -4446,3 +4455,4 @@ class preferences_group implements renderable {
         $this->nodes = $nodes;
     }
 }
+
