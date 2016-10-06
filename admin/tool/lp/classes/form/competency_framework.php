@@ -73,7 +73,7 @@ class competency_framework extends persistent {
         $scaleid = $mform->addElement('select', 'scaleid', get_string('scale', 'tool_lp'), $scales);
         $mform->setType('scaleid', PARAM_INT);
         $mform->addHelpButton('scaleid', 'scale', 'tool_lp');
-        $mform->addRule('scaleid', null, 'required', null, 'client');
+        $mform->addRule('scaleid', null, 'required', null, 'server'); // Marked as required for the asterisk.
         if ($framework && $framework->has_user_competencies()) {
             // The scale is used so we "freeze" the element. Though, the javascript code for the scale
             // configuration requires this field so we only disable it. It is fine as setting the value
