@@ -14,7 +14,9 @@
                 {{/element.frozen}}
                 {{{element.attributes}}} >
         {{^element.frozen}}
-            {{{element.filepickerhtml}}}
+            {{#element.usefilepicker}}
+                {{{element.filepickerhtml}}}
+            {{/element.usefilepicker}}
         {{/element.frozen}}
     {{/element}}
 {{/ core_form/element-template }}
