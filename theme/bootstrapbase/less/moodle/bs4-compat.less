@@ -1,0 +1,134 @@
+
+// Add support for card. We map it to well.
+// This is not meant to be perfect - but at least applies some styles to a bs4 card.
+.card:extend(.well) {
+}
+
+
+// Add support for col-md-(1-12).
+
+.col-to-span(12);
+
+.col-to-span(@n, @i : 1) when (@i =< @n) {
+    .col-md-@{i} {
+        .makeColumn(@i, 0);
+    }
+
+    // Note - we can't support push-md-X and pull-md-X because
+    // bs2 has no equivalent for pull-md-X - if we supported one
+    // and not the other we would get weird layouts - so better
+    // not to support re-ordering columns in this compat file.
+
+    .col-to-span(@n, (@i + 1));
+}
+
+// Padding and margin utitilies.
+.padding-margin(3);
+
+.padding-margin(@n, @i : 1) when (@i =< @n) {
+    @amount: @i * @baseFontSize;
+    .p-l-@{i} {
+        padding-left: @amount !important;
+    }
+    .p-r-@{i} {
+        padding-right: @amount !important;
+    }
+    .p-t-@{i} {
+        padding-top: @amount !important;
+    }
+    .p-b-@{i} {
+        padding-bottom: @amount !important;
+    }
+    .p-x-@{i} {
+        padding-left: @amount !important;
+        padding-right: @amount !important;
+    }
+    .p-y-@{i} {
+        padding-top: @amount !important;
+        padding-bottom: @amount !important;
+    }
+    .p-a-@{i} {
+        padding: @amount !important;
+    }
+
+    .m-l-@{i} {
+        margin-left: @amount !important;
+    }
+    .m-r-@{i} {
+        margin-right: @amount !important;
+    }
+    .m-t-@{i} {
+        margin-top: @amount !important;
+    }
+    .m-b-@{i} {
+        margin-bottom: @amount !important;
+    }
+    .m-x-@{i} {
+        margin-left: @amount !important;
+        margin-right: @amount !important;
+    }
+    .m-y-@{i} {
+        margin-top: @amount !important;
+        margin-bottom: @amount !important;
+    }
+    .m-a-@{i} {
+        margin: @amount !important;
+    }
+    .padding-margin(@n, (@i + 1));
+}
+
+d-inline {
+    display: inline ! important;
+}
+d-block {
+    display: block ! important;
+}
+d-inline-block {
+    display: inline-block ! important;
+}
+
+// Horizontal centering.
+.m-x-auto {
+    margin-left: auto ! important;
+    margin-right: auto ! important;
+}
+
+// Support img-fluid.
+.img-fluid:extend(.img-responsive) {
+}
+
+// Text danger
+.text-danger:extend(.text-error) {
+}
+
+.btn-secondary {
+  background-color: @white;
+  background-image: none;
+  color: @black;
+}
+
+// Tags
+.tag:extend(.label) {
+  // Important (red)
+  &-danger         { background-color: @errorText; }
+  &-danger[href]   { background-color: darken(@errorText, 10%); }
+  // Warnings (orange)
+  &-warning           { background-color: @orange; }
+  &-warning[href]     { background-color: darken(@orange, 10%); }
+  // Success (green)
+  &-success           { background-color: @successText; }
+  &-success[href]     { background-color: darken(@successText, 10%); }
+  // Info (turquoise)
+  &-info              { background-color: @infoText; }
+  &-info[href]        { background-color: darken(@infoText, 10%); }
+  // Primary (blue)
+  &-primary              { background-color: @blue; }
+  &-primary[href]        { background-color: darken(@blue, 10%); }
+}
+
+// Floats
+.pull-xs-left:extend(.pull-left) {
+}
+
+.pull-xs-right:extend(.pull-right) {
+}
