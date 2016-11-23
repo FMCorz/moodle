@@ -1,0 +1,9 @@
+This files describes API changes in /media/* - Media API,
+information provided here is intended especially for developers.
+
+=== 3.2 ===
+
+* Media plugins (core_media_player) can now define the method setup(moodle_page $page)
+  which may be used to do additional setup on the page. For example, this is useful
+  when all pages should contain some Javascript, rather than only when some players
+  where embedded.
