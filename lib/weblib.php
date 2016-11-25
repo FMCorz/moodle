@@ -1247,14 +1247,20 @@ function format_text($text, $format = FORMAT_MOODLE, $options = null, $courseidd
         $options['filter']  = false;
     }
 
-    if ($options['filter']) {
-        $filtermanager = filter_manager::instance();
-        $filtermanager->setup_page_for_filters($PAGE, $context); // Setup global stuff filters may have.
-        $filteroptions = array(
-            'originalformat' => $format,
-            'noclean' => $options['noclean'],
-        );
-    } else {
+    // Get the standard filter manager and options.
+    $filtermanager = filter_manager::instance();
+    $filteroptions = array(
+        'originalformat' => $format,
+        'noclean' => $options['noclean'],
+    );
+
+    // Set-up the page for filters when the context exists.
+    if ($context) {
+        $filtermanager->setup_page_for_filters($PAGE, $context);
+    }
+
+    // If we do not need to filter anything, revert to using the null filter.
+    if (!$options['filter']) {
         $filtermanager = new null_filter_manager();
         $filteroptions = array();
     }
@@ -1444,9 +1450,12 @@ function format_string($string, $striplinks = true, $options = null) {
     // Regular expression moved to its own method for easier unit testing.
     $string = $options['escape'] ? replace_ampersands_not_followed_by_entity($string) : $string;
 
+    // Set-up the page for filters.
+    $filtermanager = filter_manager::instance();
+    $filtermanager->setup_page_for_filters($PAGE, $options['context']);
+
+    // Filter the string if needed.
     if (!empty($CFG->filterall) && $options['filter']) {
-        $filtermanager = filter_manager::instance();
-        $filtermanager->setup_page_for_filters($PAGE, $options['context']); // Setup global stuff filters may have.
         $string = $filtermanager->filter_string($string, $options['context']);
     }
 
