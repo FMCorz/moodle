@@ -35,6 +35,7 @@ $username = required_param('username', PARAM_USERNAME);
 $password = required_param('password', PARAM_RAW);
 $serviceshortname  = required_param('service',  PARAM_ALPHANUMEXT);
 
+$PAGE->set_context(context_system::instance());
 echo $OUTPUT->header();
 
 if (!$CFG->enablewebservices) {

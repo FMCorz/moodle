@@ -41,6 +41,9 @@ try {
     $context = context_module::instance($cm->id);
     $assignment = new assign($context, null, null);
 
+    // Set the page context.
+    $PAGE->set_context($context);
+
     // Get the generated images from file API call.
     $grade = $assignment->get_user_grade($userid, false, $attemptnumber);
 

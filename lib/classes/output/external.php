@@ -77,6 +77,9 @@ class external extends external_api {
 
         $templatename = $component . '/' . $template;
 
+        // The PAGE object must be initialised to continue.
+        $PAGE->set_context(context_system::instance());
+
         // Will throw exceptions if the template does not exist.
         $filename = mustache_template_finder::get_template_filepath($templatename, $themename);
         $templatestr = file_get_contents($filename);

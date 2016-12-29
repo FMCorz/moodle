@@ -477,7 +477,7 @@ class moodle_page {
     protected function magic_get_context() {
         global $CFG;
         if (is_null($this->_context)) {
-            if (CLI_SCRIPT or NO_MOODLE_COOKIES) {
+            if (CLI_SCRIPT or (!AJAX_SCRIPT && NO_MOODLE_COOKIES)) {
                 // Cli scripts work in system context, do not annoy devs with debug info.
                 // Very few scripts do not use cookies, we can safely use system as default context there.
             } else if (AJAX_SCRIPT && $CFG->debugdeveloper) {

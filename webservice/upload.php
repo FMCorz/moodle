@@ -46,6 +46,7 @@ require_once($CFG->dirroot . '/webservice/lib.php');
 $filepath = optional_param('filepath', '/', PARAM_PATH);
 $itemid = optional_param('itemid', 0, PARAM_INT);
 
+$PAGE->set_context(context_system::instance());
 echo $OUTPUT->header();
 
 // authenticate the user

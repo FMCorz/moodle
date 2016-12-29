@@ -33,6 +33,8 @@ if (empty($CFG->enablebadges)) {
     print_error('badgesdisabled', 'badges');
 }
 
+$PAGE->set_context(context_system::instance());
+
 $hash = required_param('b', PARAM_ALPHANUM); // Issued badge unique hash for badge assertion.
 $action = optional_param('action', null, PARAM_BOOL); // Generates badge class if true.
 
