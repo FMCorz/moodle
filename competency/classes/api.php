@@ -636,17 +636,22 @@ class api {
      *
      * Requires moodle/competency:competencymanage capability at the system context.
      *
-     * @param int $id The record to delete. This will delete alot of related data - you better be sure.
+     * @param competency_framework|int $frameworkorid The framework, or its ID.
      * @return boolean
      */
-    public static function delete_framework($id) {
+    public static function delete_framework($frameworkorid) {
         global $DB;
         static::require_enabled();
-        $framework = new competency_framework($id);
+
+        $framework = $frameworkorid;
+        if (!is_object($framework)) {
+            $framework = new competency_framework($frameworkorid);
+        }
+
         require_capability('moodle/competency:competencymanage', $framework->get_context());
 
         $events = array();
-        $competenciesid = competency::get_ids_by_frameworkid($id);
+        $competenciesid = competency::get_ids_by_frameworkid($framework->get_id());
         $contextid = $framework->get_contextid();
         if (!competency::can_all_be_deleted($competenciesid)) {
             return false;
@@ -655,7 +660,7 @@ class api {
         try {
             if (!empty($competenciesid)) {
                 // Delete competencies.
-                competency::delete_by_frameworkid($id);
+                competency::delete_by_frameworkid($framework->get_id());
 
                 // Delete the related competencies.
                 related_competency::delete_multiple_relations($competenciesid);
@@ -4665,6 +4670,21 @@ class api {
                 $recommend,
                 $event->get_url()
             );
+        }
+    }
+
+    /**
+     * Action to perform when a category is deleted.
+     *
+     * Do not call this directly, this is reserved for core use.
+     *
+     * @param coursecat $category The category object.
+     * @return void
+     */
+    public static function hook_category_deleted(\coursecat $category) {
+        $frameworks = self::list_frameworks('id', 'ASC', 0, 0, $category->get_context(), 'children', false);
+        foreach ($frameworks as $framework) {
+            self::delete_framework($framework);
         }
     }
 

@@ -1696,6 +1696,9 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
             }
         }
 
+        // Notify the competency subsystem.
+        \core_competency\api::hook_category_deleted($this);
+
         // Move or delete cohorts in this context.
         cohort_delete_category($this);
 
