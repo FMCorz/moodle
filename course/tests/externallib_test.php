@@ -990,6 +990,49 @@ class core_course_externallib_testcase extends externallib_advanced_testcase {
     }
 
     /**
+     * Test duplicate_course with options.
+     */
+    public function test_duplicate_course_with_users_option() {
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+        $dg = $this->getDataGenerator();
+
+        $course = $dg->create_course();
+        $student = $dg->create_user();
+        $dg->enrol_user($student->id, $course->id, 'student');
+        $this->assertCount(1, get_enrolled_users(context_course::instance($course->id)));
+
+        // Enrol users.
+        $newcourse = [
+            'fullname' => 'Course duplicate',
+            'shortname' => 'courseduplicate',
+            'categoryid' => coursecat::get_default()->id,
+            'visible' => true,
+            'options' => [['name' => 'users', 'value' => true]]
+        ];
+        $duplicate = core_course_external::duplicate_course($course->id, $newcourse['fullname'],
+            $newcourse['shortname'], $newcourse['categoryid'], $newcourse['visible'], $newcourse['options']);
+        $duplicate = external_api::clean_returnvalue(core_course_external::duplicate_course_returns(), $duplicate);
+        $this->assertCount(1, get_enrolled_users(context_course::instance($duplicate['id'])));
+
+        // Do not enrol users.
+        $newcourse['shortname'] = 'courseduplicate2';
+        $newcourse['options'] = [['name' => 'users', 'value' => false]];
+        $duplicate = core_course_external::duplicate_course($course->id, $newcourse['fullname'],
+            $newcourse['shortname'], $newcourse['categoryid'], $newcourse['visible'], $newcourse['options']);
+        $duplicate = external_api::clean_returnvalue(core_course_external::duplicate_course_returns(), $duplicate);
+        $this->assertCount(0, get_enrolled_users(context_course::instance($duplicate['id'])));
+
+        // The default is not to enrol users.
+        $newcourse['shortname'] = 'courseduplicate3';
+        $newcourse['options'] = [];
+        $duplicate = core_course_external::duplicate_course($course->id, $newcourse['fullname'],
+            $newcourse['shortname'], $newcourse['categoryid'], $newcourse['visible'], $newcourse['options']);
+        $duplicate = external_api::clean_returnvalue(core_course_external::duplicate_course_returns(), $duplicate);
+        $this->assertCount(0, get_enrolled_users(context_course::instance($duplicate['id'])));
+    }
+
+    /**
      * Test update_courses
      */
     public function test_update_courses() {

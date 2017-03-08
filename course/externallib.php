@@ -1110,7 +1110,7 @@ class core_course_external extends external_api {
             'grade_histories' => 0
         );
 
-        $backupsettings = array();
+        $backupsettings = $backupdefaults;
         // Check for backup and restore options.
         if (!empty($params['options'])) {
             foreach ($params['options'] as $option) {
