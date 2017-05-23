@@ -15,67 +15,40 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Core container for calendar events.
- *
- * The purpose of this class is simply to wire together the various
- * implementations of calendar event components to produce a solution
- * to the problems Moodle core wants to solve.
+ * Container interface.
  *
  * @package    core_calendar
- * @copyright  2017 Cameron Ball <cameron@cameron1729.xyz>
+ * @copyright  2017 Frédéric Massart <fred@fmcorz.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace core_calendar\local\event;
-
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Core container.
- *
- * @copyright 2017 Cameron Ball <cameron@cameron1729.xyz>
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Container interface.
  */
-class container {
-
-    protected static $instance;
-
-    protected static function get_instance() {
-        if (!static::$instance) {
-            static::$instance = new container_std();
-        }
-        return static::$instance;
-    }
-
-    public static function set_instance(container_interface $instance) {
-        static::$instance = $instance;
-    }
+interface container_interface {
 
     /**
      * Gets the event factory.
      *
      * @return event_factory
      */
-    public static function get_event_factory() {
-        return self::get_instance()->get_event_factory();
-    }
+    public function get_event_factory();
 
     /**
      * Gets the event mapper.
      *
      * @return event_mapper
      */
-    public static function get_event_mapper() {
-        return self::get_instance()->get_event_mapper();
-    }
+    public function get_event_mapper();
 
     /**
      * Return an event vault.
      *
      * @return event_vault
      */
-    public static function get_event_vault() {
-        return self::get_instance()->get_event_vault();
-    }
+    public function get_event_vault();
 
 }

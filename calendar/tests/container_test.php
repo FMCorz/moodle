@@ -36,6 +36,8 @@ use core_calendar\local\event\factories\event_factory_interface;
 use core_calendar\local\event\mappers\event_mapper;
 use core_calendar\local\event\mappers\event_mapper_interface;
 
+require_once(__DIR__ . '/fixtures/test_friendly_container.php');
+
 /**
  * Core container testcase.
  *
@@ -50,6 +52,7 @@ class core_calendar_container_testcase extends advanced_testcase {
     public function setUp() {
         $this->resetAfterTest();
         $this->setAdminUser();
+        \core_calendar\local\event\container::set_instance(new core_calendar_test_friendly_container());
     }
 
     /**
@@ -60,8 +63,6 @@ class core_calendar_container_testcase extends advanced_testcase {
 
         // Test that the container is returning the right type.
         $this->assertInstanceOf(event_factory_interface::class, $factory);
-        // Test that the container is returning the right implementation.
-        $this->assertInstanceOf(event_factory::class, $factory);
 
         // Test that getting the factory a second time returns the same instance.
         $factory2 = \core_calendar\local\event\container::get_event_factory();

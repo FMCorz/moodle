@@ -42,15 +42,6 @@ use core_calendar\local\event\entities\event_interface;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class event_abstract_factory implements event_factory_interface {
-    /**
-     * @var callable $actioncallbackapplier Function to apply component action callbacks.
-     */
-    protected $actioncallbackapplier;
-
-    /**
-     * @var callable $visibilitycallbackapplier Function to apply component visibility callbacks.
-     */
-    protected $visibilitycallbackapplier;
 
     /**
      * @var array Course cache for use with get_course_cached.
@@ -61,11 +52,6 @@ abstract class event_abstract_factory implements event_factory_interface {
      * @var array Module cache reference for use with get_module_cached.
      */
     protected $modulecachereference;
-
-    /**
-     * @var callable Bail out check for create_instance.
-     */
-    protected $bailoutcheck;
 
     /**
      * Applies component actions to the event.
@@ -84,24 +70,23 @@ abstract class event_abstract_factory implements event_factory_interface {
     protected abstract function expose_event(event_interface $event);
 
     /**
+     * Whether we can bail early.
+     *
+     * @param \stdClass $dbrow The row record.
+     * @return bool
+     */
+    protected abstract function should_bail(\stdClass $dbrow);
+
+    /**
      * Constructor.
      *
-     * @param callable $actioncallbackapplier     Function to apply component action callbacks.
-     * @param callable $visibilitycallbackapplier Function to apply component visibility callbacks.
-     * @param callable $bailoutcheck              Function to test if we can return null early.
      * @param array    $coursecachereference      Cache to use with get_course_cached.
      * @param array    $modulecachereference      Cache to use with get_module_cached.
      */
     public function __construct(
-        callable $actioncallbackapplier,
-        callable $visibilitycallbackapplier,
-        callable $bailoutcheck,
         array &$coursecachereference,
         array &$modulecachereference
     ) {
-        $this->actioncallbackapplier = $actioncallbackapplier;
-        $this->visibilitycallbackapplier = $visibilitycallbackapplier;
-        $this->bailoutcheck = $bailoutcheck;
         $this->coursecachereference = &$coursecachereference;
         $this->modulecachereference = &$modulecachereference;
     }
@@ -113,16 +98,7 @@ abstract class event_abstract_factory implements event_factory_interface {
             $dbrow->courseid = $cm->course;
         }
 
-        $bailcheck = $this->bailoutcheck;
-        $bail = $bailcheck($dbrow);
-
-        if (!is_bool($bail)) {
-            throw new invalid_callback_exception(
-                'Bail check must return true or false'
-            );
-        }
-
-        if ($bail) {
+        if ($this->should_bail($dbrow)) {
             return null;
         }
 
