@@ -494,6 +494,7 @@ $cache = '.var_export($cache, true).';
         global $CFG;
 
         $types = array(
+            'addon'         => $CFG->dirroot . '/addons',
             'antivirus'     => $CFG->dirroot . '/lib/antivirus',
             'availability'  => $CFG->dirroot . '/availability/condition',
             'qtype'         => $CFG->dirroot.'/question/type',
@@ -1162,7 +1163,16 @@ $cache = '.var_export($cache, true).';
                 $plugin = new stdClass();
                 $plugin->version = null;
                 $module = $plugin;
-                include($fullplug.'/version.php');
+
+                if ($type == 'addon') {
+                    $class = '\\addon_' . $plug . '\\addon';
+                    $instance = new $class();
+                    $version = $instance->get_version();
+                    $plugin->version = $version->get_version();
+                } else {
+                    include($fullplug.'/version.php');
+                }
+
                 $versions[$type.'_'.$plug] = $plugin->version;
             }
         }
