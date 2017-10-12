@@ -2581,7 +2581,7 @@ class backup_course_completion_structure_step extends backup_structure_step {
         $cc = new backup_nested_element('course_completion');
 
         $criteria = new backup_nested_element('course_completion_criteria', array('id'), array(
-            'course', 'criteriatype', 'module', 'moduleinstance', 'courseinstanceshortname', 'enrolperiod',
+            'course', 'criteriatype', 'module', 'moduleinstance', 'modulestatus', 'courseinstanceshortname', 'enrolperiod',
             'timeend', 'gradepass', 'role', 'roleshortname'
         ));
 

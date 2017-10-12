@@ -39,6 +39,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 class completion_criteria_activity extends completion_criteria {
 
+    /** Status requiring any type of completion. */
+    const STATUS_COMPLETED = 1;
+    /** Status requiring successful completion. */
+    const STATUS_COMPLETED_PASS = 2;
+
     /* @var int Criteria [COMPLETION_CRITERIA_TYPE_ACTIVITY] */
     public $criteriatype = COMPLETION_CRITERIA_TYPE_ACTIVITY;
 
@@ -61,14 +66,18 @@ class completion_criteria_activity extends completion_criteria {
      */
     public function config_form_display(&$mform, $data = null) {
         $modnames = get_module_types_names();
-        $mform->addElement('advcheckbox',
-                'criteria_activity['.$data->id.']',
-                $modnames[self::get_mod_name($data->module)] . ' - ' . format_string($data->name),
-                null,
-                array('group' => 1));
+        $field = 'criteria_activity[' . $data->id . ']';
+        $label = $modnames[self::get_mod_name($data->module)] . ' - ' . format_string($data->name);
+
+        $choices = [];
+        $choices[0] = '--';
+        $choices[self::STATUS_COMPLETED] = get_string('activityiscompleted', 'core_completion');
+        $choices[self::STATUS_COMPLETED_PASS] = get_string('activityissuccessfullycompleted', 'core_completion');
+
+        $mform->addElement('select', $field, $label, $choices, ['group' => 1]);
 
         if ($this->id) {
-            $mform->setDefault('criteria_activity['.$data->id.']', 1);
+            $mform->setDefault($field, $this->modulestatus);
         }
     }
 
@@ -84,14 +93,15 @@ class completion_criteria_activity extends completion_criteria {
 
             $this->course = $data->id;
 
-            // Data comes from advcheckbox, so contains keys for all activities.
-            // A value of 0 is 'not checked' whereas 1 is 'checked'.
+            // Data comes from select, so contains keys for all activities.
+            // A value of 0 means not required, else it is the module's required status.
             foreach ($data->criteria_activity as $activity => $val) {
-                // Only update those which are checked.
+                // Only update those which are not zero.
                 if (!empty($val)) {
                     $module = $DB->get_record('course_modules', array('id' => $activity));
                     $this->module = self::get_mod_name($module->module);
                     $this->moduleinstance = $activity;
+                    $this->modulestatus = $val;
                     $this->id = null;
                     $this->insert();
                 }
@@ -155,8 +165,16 @@ class completion_criteria_activity extends completion_criteria {
 
         $data = $info->get_data($cm, false, $completion->userid);
 
-        // If the activity is complete
-        if (in_array($data->completionstate, array(COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS, COMPLETION_COMPLETE_FAIL))) {
+        if ($this->modulestatus == self::STATUS_COMPLETED) {
+            // Any status of completion is accepted.
+            $statesaccepted = [COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS, COMPLETION_COMPLETE_FAIL];
+
+        } else if ($this->modulestatus == self::STATUS_COMPLETED_PASS) {
+            // Successful statuses of completion are accepted.
+            $statesaccepted = [COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS];
+        }
+
+        if (in_array($data->completionstate, $statesaccepted)) {
             if ($mark) {
                 $completion->mark_complete();
             }
@@ -237,10 +255,21 @@ class completion_criteria_activity extends completion_criteria {
             AND c.enablecompletion = 1
             AND cc.id IS NULL
             AND (
-                mc.completionstate = '.COMPLETION_COMPLETE.'
-             OR mc.completionstate = '.COMPLETION_COMPLETE_PASS.'
-             OR mc.completionstate = '.COMPLETION_COMPLETE_FAIL.'
+                (cr.modulestatus = ' . self::STATUS_COMPLETED. '
+                 AND (
+                        mc.completionstate = ' . COMPLETION_COMPLETE . '
+                     OR mc.completionstate = ' . COMPLETION_COMPLETE_PASS . '
+                     OR mc.completionstate = ' . COMPLETION_COMPLETE_FAIL . '
+                    )
                 )
+                OR
+                (cr.modulestatus = ' . self::STATUS_COMPLETED_PASS . '
+                AND (
+                        mc.completionstate = ' . COMPLETION_COMPLETE .'
+                     OR mc.completionstate = ' . COMPLETION_COMPLETE_PASS  .'
+                    )
+                )
+            )
         ';
 
         // Loop through completions, and mark as complete
