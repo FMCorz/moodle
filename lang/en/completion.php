@@ -196,6 +196,7 @@ $string['select'] = 'Select';
 $string['self'] = 'Self';
 $string['selfcompletion'] = 'Self completion';
 $string['showinguser'] = 'Showing user';
+$string['togglebetweenstates'] = 'Toggle between states';
 $string['unenrolingfromcourse'] = 'Unenrolling from course';
 $string['unenrolment'] = 'Unenrolment';
 $string['unit'] = 'Unit';
