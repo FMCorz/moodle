@@ -47,11 +47,42 @@ class core_completion_criteria_activity_testcase extends advanced_testcase {
     }
 
     /**
+     * Data provider for review test.
+     *
+     * @return array
+     */
+    public static function review_provider() {
+        return [
+            [
+                [
+                    completion_criteria_activity::STATUS_COMPLETED,
+                    completion_criteria_activity::STATUS_COMPLETED,
+                    completion_criteria_activity::STATUS_COMPLETED,
+                    completion_criteria_activity::STATUS_COMPLETED,
+                ],
+                [true, true, true, true]
+            ],
+            [
+                [
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                ],
+                [true, true, true, false]
+            ],
+        ];
+    }
+
+    /**
      * Tests the review method.
      *
+     * @dataProvider review_provider
+     * @param array $statusset The status to set to the critaria.
+     * @param array $expected The expected completion after processing the criteria.
      * @return void
      */
-    public function test_review() {
+    public function test_review($statusset, $expected) {
         $this->setAdminUser();
         $dg = $this->getDataGenerator();
 
@@ -77,10 +108,10 @@ class core_completion_criteria_activity_testcase extends advanced_testcase {
         $critdata = new stdClass();
         $critdata->id = $course->id;
         $critdata->criteria_activity = [
-            $assign1->cmid => 1,
-            $assign2->cmid => 1,
-            $assign3->cmid => 1,
-            $assign4->cmid => 1
+            $assign1->cmid => $statusset[0],
+            $assign2->cmid => $statusset[1],
+            $assign3->cmid => $statusset[2],
+            $assign4->cmid => $statusset[3]
         ];
         $criterion = new completion_criteria_activity();
         $criterion->update_config($critdata);
@@ -131,32 +162,63 @@ class core_completion_criteria_activity_testcase extends advanced_testcase {
         $gi->update_final_grade($student->id, 69);
 
         // Now should be complete, but we did not mark it so it's still incomplete in the completion statuses.
-        $this->assertTrue($crit1->review($complcrit1, false));
-        $this->assertTrue($crit2->review($complcrit2, false));
-        $this->assertTrue($crit3->review($complcrit3, false));
-        $this->assertTrue($crit4->review($complcrit4, false));
+        $this->assertEquals($expected[0], $crit1->review($complcrit1, false));
+        $this->assertEquals($expected[1], $crit2->review($complcrit2, false));
+        $this->assertEquals($expected[2], $crit3->review($complcrit3, false));
+        $this->assertEquals($expected[3], $crit4->review($complcrit4, false));
         $this->assertFalse($complcrit1->is_complete());
         $this->assertFalse($complcrit2->is_complete());
         $this->assertFalse($complcrit3->is_complete());
         $this->assertFalse($complcrit4->is_complete());
 
         // Now we shoudl be writing in the completion status.
-        $this->assertTrue($crit1->review($complcrit1, true));
-        $this->assertTrue($crit2->review($complcrit2, true));
-        $this->assertTrue($crit3->review($complcrit3, true));
-        $this->assertTrue($crit4->review($complcrit4, true));
-        $this->assertTrue($complcrit1->is_complete());
-        $this->assertTrue($complcrit2->is_complete());
-        $this->assertTrue($complcrit3->is_complete());
-        $this->assertTrue($complcrit4->is_complete());
+        $this->assertEquals($expected[0], $crit1->review($complcrit1, true));
+        $this->assertEquals($expected[1], $crit2->review($complcrit2, true));
+        $this->assertEquals($expected[2], $crit3->review($complcrit3, true));
+        $this->assertEquals($expected[3], $crit4->review($complcrit4, true));
+        $this->assertEquals($expected[0], $complcrit1->is_complete());
+        $this->assertEquals($expected[1], $complcrit2->is_complete());
+        $this->assertEquals($expected[2], $complcrit3->is_complete());
+        $this->assertEquals($expected[3], $complcrit4->is_complete());
+    }
+
+    /**
+     * Data provider for review test.
+     *
+     * @return array
+     */
+    public static function cron_provider() {
+        return [
+            [
+                [
+                    completion_criteria_activity::STATUS_COMPLETED,
+                    completion_criteria_activity::STATUS_COMPLETED,
+                    completion_criteria_activity::STATUS_COMPLETED,
+                    completion_criteria_activity::STATUS_COMPLETED,
+                ],
+                [true, true, true, true]
+            ],
+            [
+                [
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                    completion_criteria_activity::STATUS_COMPLETED_PASS,
+                ],
+                [true, true, true, false]
+            ],
+        ];
     }
 
     /**
      * Tests the review method.
      *
+     * @dataProvider review_provider
+     * @param array $statusset The status to set to the critaria.
+     * @param array $expected The expected completion after processing the criteria.
      * @return void
      */
-    public function test_cron() {
+    public function test_cron($statusset, $expected) {
         $this->setAdminUser();
         $dg = $this->getDataGenerator();
 
@@ -182,10 +244,10 @@ class core_completion_criteria_activity_testcase extends advanced_testcase {
         $critdata = new stdClass();
         $critdata->id = $course->id;
         $critdata->criteria_activity = [
-            $assign1->cmid => 1,
-            $assign2->cmid => 1,
-            $assign3->cmid => 1,
-            $assign4->cmid => 1
+            $assign1->cmid => $statusset[0],
+            $assign2->cmid => $statusset[1],
+            $assign3->cmid => $statusset[2],
+            $assign4->cmid => $statusset[3]
         ];
         $criterion = new completion_criteria_activity();
         $criterion->update_config($critdata);
@@ -256,9 +318,9 @@ class core_completion_criteria_activity_testcase extends advanced_testcase {
             'course' => $course->id,
             'criteriaid' => $crit4->id,
         ]);
-        $this->assertTrue($complcrit1->is_complete());
-        $this->assertTrue($complcrit2->is_complete());
-        $this->assertTrue($complcrit3->is_complete());
-        $this->assertTrue($complcrit4->is_complete());
+        $this->assertEquals($expected[0], $complcrit1->is_complete());
+        $this->assertEquals($expected[1], $complcrit2->is_complete());
+        $this->assertEquals($expected[2], $complcrit3->is_complete());
+        $this->assertEquals($expected[3], $complcrit4->is_complete());
     }
 }
