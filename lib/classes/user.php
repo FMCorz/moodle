@@ -299,7 +299,7 @@ class core_user {
     public static function is_real_user($userid, $checkdb = false) {
         global $DB;
 
-        if ($userid < 0) {
+        if ($userid <= 0) {
             return false;
         }
         if ($checkdb) {
